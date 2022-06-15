@@ -4,6 +4,6 @@ import { Cell } from "../classes/cell.class";
 export interface Row //each row contains a bumch of cell objects
 {
     rowNumber: number;
-    cell: Cell[];
+    cells: Cell[];
 }
 

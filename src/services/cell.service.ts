@@ -6,11 +6,12 @@ export interface Range{
     stop: {x: number, y: number}
 }
 
-export function generateCellsFromCoordinates(userSelection: string)
+export function generateCellsFromCoordinates(userSelection: string, worksheet: Excel.Worksheet)
 {
     let dataTable: DataTable = new DataTable();
     let ranges = decodeRangeString(userSelection)
     console.log(ranges)
+    
 
     for(let i = 0; i < ranges.length; i++)
     {
@@ -21,11 +22,12 @@ export function generateCellsFromCoordinates(userSelection: string)
             for(let k = range.start.y; k <= range.stop.y; k++)
             {
                 //console.log(j, k)
-                dataTable.insertCell(new Cell(j, k));
+                dataTable.insertCell(new Cell(j, k, worksheet));
             }
         }
     }
-    console.log(dataTable.rows)
+    // console.log(dataTable.rows)
+    return dataTable
 }
 
 function decodeRangeString(userSelection: string): Range[]
