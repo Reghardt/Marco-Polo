@@ -1,7 +1,7 @@
-import { DataTable } from "../classes/dataTable.class";
+import { SelectionData } from "../classes/selectionData.class";
 import { generateCellsFromCoordinates } from "./cell.service"
 
-export async function loadSelection() : Promise<DataTable>
+export async function loadSelection() : Promise<SelectionData>
 {
     return Excel.run(async (context) => {
         let range = context.workbook.getSelectedRanges();
@@ -9,12 +9,12 @@ export async function loadSelection() : Promise<DataTable>
         range.load("address");
 
         await context.sync(); //This connects the add-in's process to the Office host application's process.
-        let dataTable = generateCellsFromCoordinates(range.address, sheet)
+        let selectionData = generateCellsFromCoordinates(range.address, sheet)
         //console.log(dataTable);
 
         await context.sync() 
-        dataTable.syncCellData()   
-        return dataTable;  
+        selectionData.syncCellData()   
+        return selectionData;  
     })
 
 }

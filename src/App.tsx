@@ -1,31 +1,20 @@
 
-import React, { useState } from 'react';
-import { loadSelection } from './services/worksheet.service';
+import React from 'react';
+import { Link } from 'react-router-dom';
+
 
 import './App.css';
 
-import Button from '@mui/material/Button';
-import { DataTable } from './classes/dataTable.class';
 
+import Login from './components/Login.component';
 
 
 
 
 function App() {
-  const [dataTable, setDataTable] = useState<DataTable>(null)
-
-  function loadWorksheetSelection()
-  {
-    loadSelection().then(res => {
-      console.log(res)
-      setDataTable(res)
-    })
-  }
-
   return (
     <div>
-      {/* <VerticalLinearStepper></VerticalLinearStepper> */}
-      <Button variant="contained" onClick={() => loadWorksheetSelection()} disableElevation>Press me</Button>
+      <Link to="/login">Expenses</Link>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Row } from "../interfaces/simpleInterfaces";
 import { Cell } from "./cell.class";
 
-export class DataTable //each dataTable contains an array of rows
+export class SelectionData //each dataTable contains an array of rows
 {
     rows: Row[] = [];
 

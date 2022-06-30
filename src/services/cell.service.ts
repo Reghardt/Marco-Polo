@@ -1,5 +1,5 @@
 import { Cell } from "../classes/cell.class";
-import { DataTable } from "../classes/dataTable.class";
+import { SelectionData } from "../classes/selectionData.class";
 
 export interface Range{
     start: {x: number, y: number};
@@ -8,26 +8,21 @@ export interface Range{
 
 export function generateCellsFromCoordinates(userSelection: string, worksheet: Excel.Worksheet)
 {
-    let dataTable: DataTable = new DataTable();
+    let selectionData: SelectionData = new SelectionData();
     let ranges = decodeRangeString(userSelection)
-    console.log(ranges)
     
-
     for(let i = 0; i < ranges.length; i++)
     {
         let range = ranges[i];
         for(let j = range.start.x; j <= range.stop.x; j++)
         {
-            //console.log(j)
             for(let k = range.start.y; k <= range.stop.y; k++)
             {
-                //console.log(j, k)
-                dataTable.insertCell(new Cell(j, k, worksheet));
+                selectionData.insertCell(new Cell(j, k, worksheet));
             }
         }
     }
-    // console.log(dataTable.rows)
-    return dataTable
+    return selectionData
 }
 
 function decodeRangeString(userSelection: string): Range[]

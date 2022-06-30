@@ -1,0 +1,2 @@
+Office.js nullifies browser history functions breaking history usage:
+Fixed by: https://stackoverflow.com/questions/42642863/office-js-nullifies-browser-history-functions-breaking-history-usage
