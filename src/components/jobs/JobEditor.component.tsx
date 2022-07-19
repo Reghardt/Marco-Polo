@@ -6,17 +6,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Row } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet.service"
 import Cell from "../cells/Cell.component";
-
-import { css } from '@emotion/react'
-
-
-
-
-
+import ColHeading from "./ColHeading.component";
+import { ColumnMetaData } from "./ColumnMetaData.class";
 
 export default function JobEditor()
 {
     const [userSelection, setUserSelection] = useState<Row[]>([])
+    const [columnMetaData, setColumnMetaData] = useState<ColumnMetaData[]>([])
 
     const map = useRef<google.maps.Map>()
     const directionsService = new google.maps.DirectionsService();
@@ -46,7 +42,7 @@ export default function JobEditor()
           travelMode: google.maps.TravelMode.DRIVING
         };
         directionsService.route(request, function(result, status) {
-          if (status == 'OK') {
+          if (status === 'OK') {
             directionsRenderer.setDirections(result);
           }
           else
@@ -58,56 +54,80 @@ export default function JobEditor()
 
     async function retrieveUserSelectionFromSpreadsheetAndSet()
     {
-        const retreivedSelection = (await loadSelection()).rows
+      const retreivedSelection = (await loadSelection()).rows
+      console.log(retreivedSelection)
 
-        console.log(retreivedSelection)
+      if(retreivedSelection.length > 0)
+      {
+        const nrOfColumns = retreivedSelection[0].cells.length;
+        
+        for(let i = 0; i < retreivedSelection.length; i++)
+        {
+          const row = retreivedSelection[i];
+          if(nrOfColumns !== row.cells.length)
+          {
+            console.error("Each row should have the same number of cells - test")
+            setUserSelection([])
+            return;
+          }
+        }
+        const tempColMetaData = new Array<ColumnMetaData>(nrOfColumns)
+        for(let col = 0; col < nrOfColumns; col++)
+        {
+          tempColMetaData[col] = new ColumnMetaData("C" + col);
+        }
 
+        setColumnMetaData(tempColMetaData)
         setUserSelection(retreivedSelection)
+      }  
     }
 
-    function CreateTable(local_userSelection: Row[])
+    function CreateTable(local_userSelection: Row[]) : JSX.Element[][]
     {
-      const tableData: JSX.Element[][] = [];
+      const cellTable: JSX.Element[][] = [];
       if(local_userSelection.length > 0)
       {
-        const nrOfRowElements = local_userSelection[0].cells.length;
-
+        const nrOfColumns = local_userSelection[0].cells.length; //get row length of first row. Other rows must be this length
+        const elementSize = 12 / local_userSelection[0].cells.length;
         for(let i = 0; i< local_userSelection.length; i++)
         {
-          
           const row = local_userSelection[i];
-          const elementSize = 12 / row.cells.length;
-
-          if(row.cells.length !== nrOfRowElements)
-          {
-            console.error("Each row should have the same number of cells")
-            return []
-          }
           
           for(let j = 0; j < row.cells.length; j++)
           {
-            if(tableData[i] === undefined)
+            if(cellTable[i] === undefined)
             {
-              tableData[i] = [];
+              cellTable[i] = []; //create row at index for table if the index is undefined
             }
-            // tableData[i][j] = <Grid item xs={elementSize}><Button variant="contained" style={{width: "100%", justifyContent: "flex-start"}}>{row.cells[j].data}</Button></Grid>
-            tableData[i][j] = <Grid item xs={elementSize}>
+            //add elements to table
+            cellTable[i][j] = <Grid item xs={elementSize}> 
               <Cell 
                 i={i}
                 j={j}
                 cellRef={local_userSelection[i].cells[j]}
                 testFunc = {testFunc}
-    
                 />
             </Grid>
           }
         }
-        return tableData
+
+        //create column elements and add to top of array
+        let colNameRow: JSX.Element[] = [];
+        for(let colIndex = 0; colIndex < nrOfColumns; colIndex++)
+        {
+          colNameRow.push(<Grid item xs={elementSize}>
+            <ColHeading colName={"C" + colIndex}/>
+          </Grid>)
+        }
+        cellTable.unshift(colNameRow)
+        return cellTable
       }
       else
       {
-        return [];
+        return []
       }
+
+      
     }
 
     function testFunc(i: number, j: number, updatedData: string)
@@ -140,18 +160,12 @@ export default function JobEditor()
                   return <React.Fragment key={idx}>{elem}</React.Fragment>
                 })} 
             </Grid>
+            <br/>
 
 
             <div style={{width: "100%", height: 500}} id="map"></div>
             <Button onClick={() => addMarker()}>Add Marker</Button>
             <Button onClick={() => calcRoute()}>Calc Route</Button>
-
-
-
-
-              
-
-
         </div>
     )
 }

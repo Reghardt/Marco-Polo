@@ -1,12 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import { Box, Button, Checkbox, css, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, Paper, Popper, TextField } from "@mui/material"
+import { Button, Checkbox, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, Paper, TextField } from "@mui/material"
 import React, { useRef, useState } from "react"
 import { Cell as CellClass } from "../../classes/cell.class"
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import styled from "@emotion/styled";
 import { usePopper } from "react-popper";
-import { useRecoilState } from "recoil";
-import { Row } from "../../interfaces/simpleInterfaces";
+
 
 const PopperContainer = styled.div`
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
@@ -105,7 +104,7 @@ const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
 
     return(
             <React.Fragment>
-                <Button variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
+                <Button variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
                 
                     {show && (
                     <ClickAwayListener onClickAway={()=> setShow(!show)}>
@@ -133,7 +132,6 @@ const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
                         </PopperContainer>
                     </ClickAwayListener>)}
             </React.Fragment>
-
         )
 }
 
