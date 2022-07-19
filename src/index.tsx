@@ -2,20 +2,25 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Login from './components/Login.component';
+import { RecoilRoot } from 'recoil';
+
+
+
 
 
 Office.onReady(() => {
   ReactDOM.render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/index.html" element={<App/>}/>
-      <Route path="/login" element={<Login/>}/>
-    </Routes>
-  </BrowserRouter>,
-  document.getElementById("root")
-  )
+    <React.StrictMode>
+
+        <RecoilRoot>
+        <App />
+      </RecoilRoot>
+
+      
+      
+    </React.StrictMode>,
+    document.getElementById("root")
+    )
 });
 
 
