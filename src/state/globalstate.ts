@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { Row } from "../interfaces/simpleInterfaces";
+
 
 export const workspaceID = atom({
     key: "workspaceID",
@@ -11,7 +11,4 @@ export const bearerToken = atom({
     default: ""
 })
 
-export const SelectedCells = atom<Row[]>({
-    key: "SelectedCells",
-    default: []
-})
+

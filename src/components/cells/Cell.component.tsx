@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { Box, Button, css, DialogActions, DialogContent, DialogTitle, Paper, Popper, TextField } from "@mui/material"
+import { Box, Button, Checkbox, css, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, Paper, Popper, TextField } from "@mui/material"
 import React, { useRef, useState } from "react"
 import { Cell as CellClass } from "../../classes/cell.class"
 import ClickAwayListener from '@mui/material/ClickAwayListener';
@@ -7,16 +7,14 @@ import styled from "@emotion/styled";
 import { usePopper } from "react-popper";
 import { useRecoilState } from "recoil";
 import { Row } from "../../interfaces/simpleInterfaces";
-import { SelectedCells } from "../../state/globalstate";
-
 
 const PopperContainer = styled.div`
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   border-radius: 50px;
   background-color: black;
   z-index: 1;
-  margin-left: 10px;
-  margin-right: 10px;
+  /* margin-left: 10px;
+  margin-right: 10px; */
 
 
   text-align: center;
@@ -50,21 +48,21 @@ const PopperContainer = styled.div`
 type CellProps = {
     i: number;
     j: number;
-    testFunc: (i: number) => void;
+    cellRef: CellClass;
+    testFunc: (i: number, j: number, updatedData: string) => void;
 }
 
 
 
-const Cell: React.FC<CellProps> = ({i,j, testFunc}) =>
+const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
 {
-
-    const [selectionData, setSelectionData] = useRecoilState<Row[]>(SelectedCells)
 
     const buttonRef = useRef(null);
     const popperRef = useRef(null);
     const [show, setShow] = useState(false);
 
     const [arrowRef, setArrowRef] = useState<any>(null);
+    const [cellData, setCellData] = useState(cellRef.data);
 
     const { styles, attributes } = usePopper(
         buttonRef.current,
@@ -87,10 +85,27 @@ const Cell: React.FC<CellProps> = ({i,j, testFunc}) =>
         }
       );
 
+    function captureInput(input: string)
+    {
+        setCellData(input)
+        
+    }
+
+    function saveAndClose()
+    {
+
+        testFunc(i,j, cellData)
+        setShow(!show)
+    }
+
+    function cancleAndClose()
+    {
+        setShow(!show)
+    }
 
     return(
             <React.Fragment>
-                <Button variant={"contained"} style={{width: "100%", textTransform: "none", borderRadius: 0}} ref={buttonRef} onClick={()=> setShow(!show)}>{selectionData[i].cells[j].data}</Button>
+                <Button variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
                 
                     {show && (
                     <ClickAwayListener onClickAway={()=> setShow(!show)}>
@@ -104,18 +119,19 @@ const Cell: React.FC<CellProps> = ({i,j, testFunc}) =>
                                     <DialogTitle>Cell Editor</DialogTitle>
                                     <DialogContent>
                                         <br></br>
-                                        <TextField autoFocus defaultValue={selectionData[i].cells[j].data} size="medium" label="Cell Data"></TextField>
+                                        <TextField onChange={(e)=> captureInput(e.target.value)} autoFocus defaultValue={cellRef.data} size="medium" label="Cell Data"></TextField>
+                                        <FormGroup>
+                                            <FormControlLabel control={<Checkbox/>} label="Update Spreadsheet" />
+                                        </FormGroup>
                                     </DialogContent>
 
                                     <DialogActions>
-                                        <Button onClick={() => testFunc(2)}>Save</Button>
-                                        <Button>Cancel</Button>
+                                        <Button onClick={() => saveAndClose()}>Save</Button>
+                                        <Button onClick={() => cancleAndClose()}>Cancel</Button>
                                     </DialogActions>
                                 </Paper>
                         </PopperContainer>
                     </ClickAwayListener>)}
-                
-                
             </React.Fragment>
 
         )

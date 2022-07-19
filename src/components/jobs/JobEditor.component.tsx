@@ -8,15 +8,15 @@ import {loadSelection} from "../../services/worksheet.service"
 import Cell from "../cells/Cell.component";
 
 import { css } from '@emotion/react'
-import { useRecoilState } from "recoil";
-import { SelectedCells } from "../../state/globalstate";
+
+
 
 
 
 
 export default function JobEditor()
 {
-    const [selectionData, setSelectionData] = useRecoilState<Row[]>(SelectedCells)
+    const [userSelection, setUserSelection] = useState<Row[]>([])
 
     const map = useRef<google.maps.Map>()
     const directionsService = new google.maps.DirectionsService();
@@ -49,29 +49,41 @@ export default function JobEditor()
           if (status == 'OK') {
             directionsRenderer.setDirections(result);
           }
+          else
+          {
+            console.log(status)
+          }
         });
       }
 
-    async function getSelectedCells()
+    async function retrieveUserSelectionFromSpreadsheetAndSet()
     {
-        const selectionRows = (await loadSelection()).rows
+        const retreivedSelection = (await loadSelection()).rows
 
-        console.log(selectionRows)
+        console.log(retreivedSelection)
 
-        setSelectionData(selectionRows)
-        //console.log(CreateTable(selectionRows))
+        setUserSelection(retreivedSelection)
     }
 
-    function CreateTable(selecData: Row[])
+    function CreateTable(local_userSelection: Row[])
     {
       const tableData: JSX.Element[][] = [];
-      if(selecData.length > 0)
+      if(local_userSelection.length > 0)
       {
-        
-        for(let i = 0; i< selecData.length; i++)
+        const nrOfRowElements = local_userSelection[0].cells.length;
+
+        for(let i = 0; i< local_userSelection.length; i++)
         {
-          const row = selecData[i];
-          const elementSize = 12 / row.cells.length
+          
+          const row = local_userSelection[i];
+          const elementSize = 12 / row.cells.length;
+
+          if(row.cells.length !== nrOfRowElements)
+          {
+            console.error("Each row should have the same number of cells")
+            return []
+          }
+          
           for(let j = 0; j < row.cells.length; j++)
           {
             if(tableData[i] === undefined)
@@ -81,8 +93,9 @@ export default function JobEditor()
             // tableData[i][j] = <Grid item xs={elementSize}><Button variant="contained" style={{width: "100%", justifyContent: "flex-start"}}>{row.cells[j].data}</Button></Grid>
             tableData[i][j] = <Grid item xs={elementSize}>
               <Cell 
-                i={i} 
-                j ={j}
+                i={i}
+                j={j}
+                cellRef={local_userSelection[i].cells[j]}
                 testFunc = {testFunc}
     
                 />
@@ -97,9 +110,11 @@ export default function JobEditor()
       }
     }
 
-    function testFunc(i: number)
+    function testFunc(i: number, j: number, updatedData: string)
     {
-      console.log(i)
+      const rows = userSelection.slice()
+      rows[i].cells[j].data = updatedData
+      setUserSelection(rows)
     }
 
     const Item = styled(Paper)(({ theme }) => ({
@@ -112,16 +127,16 @@ export default function JobEditor()
 
       function printRows()
       {
-        console.log(selectionData)
+        console.log(userSelection)
       }
 
     return(
         <div>
             Job editor
-            <Button onClick={() => getSelectedCells()}>Get Selection</Button>
+            <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Get Selection</Button>
             <Button onClick={() => printRows()}>Print</Button>
             <Grid container spacing={0.3}>
-              {CreateTable(selectionData).map((elem, idx) => {
+              {CreateTable(userSelection).map((elem, idx) => {
                   return <React.Fragment key={idx}>{elem}</React.Fragment>
                 })} 
             </Grid>
