@@ -1,59 +1,21 @@
-/** @jsxImportSource @emotion/react */
+
 import { Button, Checkbox, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, Paper, TextField } from "@mui/material"
 import React, { useRef, useState } from "react"
-import { Cell as CellClass } from "../../classes/cell.class"
+import { Cell } from "../../classes/cell.class"
 import ClickAwayListener from '@mui/material/ClickAwayListener';
-import styled from "@emotion/styled";
 import { usePopper } from "react-popper";
+import PopperContainer from "../common/PopperContainer.styled";
 
 
-const PopperContainer = styled.div`
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-  border-radius: 50px;
-  background-color: black;
-  z-index: 1;
-  /* margin-left: 10px;
-  margin-right: 10px; */
-
-
-  text-align: center;
-
-  .arrow {
-    position: absolute;
-    width: 10px;
-    height: 20px;
-
-    &:before {
-      content: "";
-      position: absolute;
-      top: -0.3em; // we account for the PopperContainer padding
-      left: 0;
-      transform: rotate(45deg);
-      width: 10px;
-      height: 10px;
-      background-color: white;
-      box-shadow: none;
-    }
-  }
-
-  &[data-popper-placement^='top'] > .arrow {
-    bottom: -1.25em;
-    :after {
-        border-width: 0 1em 1em 1em;
-        border-color: transparent transparent blue transparent;
-    }
-  }
-`
-type CellProps = {
+type DataCellProps = {
     i: number;
     j: number;
-    cellRef: CellClass;
-    testFunc: (i: number, j: number, updatedData: string) => void;
+    cellRef: Cell;
+    addressColIndex: number;
+    updateDataCell: (i: number, j: number, updatedData: string) => void;
 }
 
-
-
-const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
+const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, updateDataCell}) =>
 {
 
     const buttonRef = useRef(null);
@@ -62,6 +24,12 @@ const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
 
     const [arrowRef, setArrowRef] = useState<any>(null);
     const [cellData, setCellData] = useState(cellRef.data);
+
+    let buttonColor = "primary";
+    if(addressColIndex === j)
+    {
+      buttonColor = "orange";
+    }
 
     const { styles, attributes } = usePopper(
         buttonRef.current,
@@ -93,7 +61,7 @@ const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
     function saveAndClose()
     {
 
-        testFunc(i,j, cellData)
+      updateDataCell(i,j, cellData)
         setShow(!show)
     }
 
@@ -104,7 +72,7 @@ const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
 
     return(
             <React.Fragment>
-                <Button variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
+                <Button sx={{background: buttonColor}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
                 
                     {show && (
                     <ClickAwayListener onClickAway={()=> setShow(!show)}>
@@ -135,4 +103,4 @@ const Cell: React.FC<CellProps> = ({i,j,cellRef, testFunc}) =>
         )
 }
 
-export default Cell;
+export default DataCell;

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { workspaceID } from "../../state/globalstate";
 
-export default function JobCreator()
+export default function RouteCreator()
 {
     const [jobName, setJobName] = useState("")
     const workspaceIdString = useRecoilValue(workspaceID)
@@ -17,7 +17,7 @@ export default function JobCreator()
 
     return(
         <div>
-            <h1>Job Creator</h1>
+            <h1>Route Creator</h1>
             {workspaceIdString}
             
             <form onSubmit={(e) => createJob(e)}>

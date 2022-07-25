@@ -7,3 +7,9 @@ export interface Row //each row contains a bumch of cell objects
     cells: Cell[];
 }
 
+export interface GeocoderResult
+{
+    results: google.maps.GeocoderResult[];
+    status: google.maps.GeocoderStatus;
+}
+

@@ -45,6 +45,7 @@ export default function CreateWorkspace()
             </form>
 
             <p>Payment details</p>
+            
             <br/>
             
         </div>
