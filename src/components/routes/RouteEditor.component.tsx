@@ -3,12 +3,14 @@
 import { Button, FormControl, Grid, MenuItem, Paper, Select, styled, TextField } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
-import { GeocoderResult, Row } from "../../interfaces/simpleInterfaces";
+import { GeocoderResult, RouteResult, Row } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet.service"
 import AddressCell from "../cells/AddressCell.component";
 import DataCell from "../cells/DataCell.component";
 import HeadingCell from "../cells/HeadingCell.component";
+import DestinationAddress from "./DestinationAddress.component";
 import { Heading } from "./Heading.interface";
+import StartAddress from "./StartAddress.component";
 import { TableData } from "./TableData.interface";
 
 export default function RouteEditor()
@@ -23,8 +25,10 @@ export default function RouteEditor()
 
     const [addressColIndex, setAddressColIndex] = useState(-1);
 
-    const [startAddress, setStartAddress] = useState("");
-    const [destinationAddress, setDestinationAddress] = useState("");
+    const [startAddress, setStartAddress] = useState("none");
+    const [destinationAddress, setDestinationAddress] = useState("none");
+
+    const [routeResultsData, setRouteResultData] = useState<{op: {dist: number, time: number}, unOp: {dist: number, time: number}}>()
     
     //console.log("rerender")
 
@@ -46,8 +50,8 @@ export default function RouteEditor()
           });
     }
 
-    function calcRoute() {
-
+    function calcRoute()
+    {
       if(startAddress !== "" && destinationAddress !== "")
       {
         let waypoints: google.maps.DirectionsWaypoint[]  = [];
@@ -60,27 +64,94 @@ export default function RouteEditor()
             waypoints.push({location: tableData.rows[i].cells[addressColIndex].data, stopover: true})
           }
         }
-  
-          var request: google.maps.DirectionsRequest = {
-            origin: startAddress,
-            destination: destinationAddress,
-            waypoints: waypoints,
-            travelMode: google.maps.TravelMode.DRIVING,
-            optimizeWaypoints: true
-          };
-          directionsService.current.route(request, (result, status) => {
-            console.log(status)
-            if (status === 'OK') {
-              directionsRenderer.current.setDirections(result)
+
+        
+        
+        Promise.all([calcRouteOptimized(waypoints), calcRouteUnoptimized(waypoints)]).then(res => {
+          
+          if(res[0].status === "OK")
+          {
+            directionsRenderer.current.setDirections(res[0].result)
+            console.log(res[0].result.routes[0].legs)
+            let oplegs = res[0].result.routes[0].legs;
+            let opRouteDistance = 0;
+            let opRouteTime = 0;
+            for(let i = 0; i < oplegs.length; i++)
+            {
+              opRouteDistance += oplegs[i].distance.value
+              opRouteTime += oplegs[i].duration.value
+            }
+
+            if(res[1].status === "OK")
+            {
+              let unoplegs = res[1].result.routes[0].legs;
+              console.log(res[1].result.routes[0].legs)
+              let unopRouteDistance = 0;
+              let unopRouteTime = 0;
+              for(let i = 0; i < unoplegs.length; i++)
+              {
+                unopRouteDistance += unoplegs[i].distance.value
+                unopRouteTime += unoplegs[i].duration.value
+              }
+
+              
+              console.log("Fastest", opRouteDistance / 1000, opRouteTime)
+              console.log("Unop", unopRouteDistance / 1000, unopRouteTime)
+              setRouteResultData({op: {dist: opRouteDistance / 1000, time: opRouteTime }, 
+                                  unOp: {dist: unopRouteDistance / 1000, time: unopRouteTime}})
             }
             else
             {
-              console.log(status)
+              console.error("UnOp Route status not OK")
             }
-          });
-        }
+          }
+          else
+          {
+            console.error("Fastest Route status not OK")
+          }
+        })
+      }
 
 
+      
+    }
+
+    function calcRouteOptimized(waypoints: google.maps.DirectionsWaypoint[]) {
+
+      var request: google.maps.DirectionsRequest = {
+        origin: startAddress,
+        destination: destinationAddress,
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+        optimizeWaypoints: true
+      };
+
+      return new Promise<RouteResult>((resolve) => {
+        directionsService.current.route(request, (result, status) => {
+            resolve({result, status})
+        });
+      })
+
+      
+        
+    }
+
+    function calcRouteUnoptimized(waypoints: google.maps.DirectionsWaypoint[]) {
+
+      var request: google.maps.DirectionsRequest = {
+        origin: startAddress,
+        destination: destinationAddress,
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+        optimizeWaypoints: false
+      };
+      return new Promise<RouteResult>((resolve) => {
+        directionsService.current.route(request, (result, status) => {
+          resolve({result, status})
+        });
+      })
+
+        
     }
 
     async function retrieveUserSelectionFromSpreadsheetAndSet()
@@ -248,23 +319,19 @@ export default function RouteEditor()
       return geoResPromise;
     }
 
-    function handleStartAddress(addr: string)
-    {
-      setStartAddress(addr)
-    }
-
-    function handleDestinationAddress(addr: string)
-    {
-      setDestinationAddress(addr)
-    }
+    
 
     return(
         <div>
             Job editor
             <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Get Selection</Button>
-            <Button onClick={() => printRows()}>Print</Button>
 
             <br/>
+            <StartAddress startAddress={startAddress} setStartAddress={setStartAddress} geocodeAddress={geocodeAddress}/>
+            <br/>
+            <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress} geocodeAddress={geocodeAddress}/>
+            <br/>
+
             Designate Address Column:
             <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
             <Select
@@ -291,12 +358,14 @@ export default function RouteEditor()
                 })} 
             </Grid>
             
-            <br/>
-            <TextField onChange={(e) => handleStartAddress(e.target.value)} label="Start Address"></TextField>
-            <br/>
-            <TextField onChange={(e) => handleDestinationAddress(e.target.value)} label="Destination Address"></TextField>
-            <br/>
             <Button onClick={() => calcRoute()}>Calc Route</Button>
+
+            {routeResultsData && (
+              <div>
+                Given Route ------ Distance: {routeResultsData.unOp.dist}, Time: {routeResultsData.unOp.time / 60} <br/>
+                Optimized Route - Distance: {routeResultsData.op.dist}, Time: {routeResultsData.op.time / 60} <br/>
+              </div>
+            )}
           </div>
               
           )}

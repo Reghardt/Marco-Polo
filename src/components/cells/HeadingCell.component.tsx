@@ -1,4 +1,4 @@
-import { Button, ClickAwayListener, DialogActions, DialogContent, DialogTitle, Paper, TextField } from "@mui/material";
+import { Button, ClickAwayListener, DialogActions, DialogContent, DialogTitle, Paper, Tab, Tabs, TextField } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import PopperContainer from "../common/PopperContainer.styled";
@@ -81,8 +81,9 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colId, addressColIndex: addres
                         <Paper className="paper" >
                             <DialogTitle>Column Editor</DialogTitle>
                             <DialogContent>
-                                <br></br>
+                                <br/>
                                 <TextField onChange={(e)=> captureInput(e.target.value)} autoFocus defaultValue={headingDetails.headingName} size="medium" label="Cell Data"></TextField>
+
                             </DialogContent>
 
                             <DialogActions>

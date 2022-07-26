@@ -74,31 +74,31 @@ const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, update
             <React.Fragment>
                 <Button sx={{background: buttonColor}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
                 
-                    {show && (
-                    <ClickAwayListener onClickAway={()=> setShow(!show)}>
-                        <PopperContainer 
-                            ref={popperRef}
-                            style={styles.popper}
-                            {...attributes.popper}
-                            >
-                                <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
-                                <Paper className="paper" >
-                                    <DialogTitle>Cell Editor</DialogTitle>
-                                    <DialogContent>
-                                        <br></br>
-                                        <TextField onChange={(e)=> captureInput(e.target.value)} autoFocus defaultValue={cellRef.data} size="medium" label="Cell Data"></TextField>
-                                        <FormGroup>
-                                            <FormControlLabel control={<Checkbox/>} label="Update Spreadsheet" />
-                                        </FormGroup>
-                                    </DialogContent>
+                {show && (
+                <ClickAwayListener onClickAway={()=> setShow(!show)}>
+                    <PopperContainer 
+                        ref={popperRef}
+                        style={styles.popper}
+                        {...attributes.popper}
+                        >
+                            <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
+                            <Paper className="paper" >
+                                <DialogTitle>Cell Editor</DialogTitle>
+                                <DialogContent>
+                                    <br></br>
+                                    <TextField onChange={(e)=> captureInput(e.target.value)} autoFocus defaultValue={cellRef.data} size="medium" label="Cell Data"></TextField>
+                                    <FormGroup>
+                                        <FormControlLabel control={<Checkbox/>} label="Update Spreadsheet" />
+                                    </FormGroup>
+                                </DialogContent>
 
-                                    <DialogActions>
-                                        <Button onClick={() => saveAndClose()}>Save</Button>
-                                        <Button onClick={() => cancleAndClose()}>Cancel</Button>
-                                    </DialogActions>
-                                </Paper>
-                        </PopperContainer>
-                    </ClickAwayListener>)}
+                                <DialogActions>
+                                    <Button onClick={() => saveAndClose()}>Save</Button>
+                                    <Button onClick={() => cancleAndClose()}>Cancel</Button>
+                                </DialogActions>
+                            </Paper>
+                    </PopperContainer>
+                </ClickAwayListener>)}
             </React.Fragment>
         )
 }

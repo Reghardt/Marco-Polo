@@ -13,3 +13,9 @@ export interface GeocoderResult
     status: google.maps.GeocoderStatus;
 }
 
+export interface RouteResult
+{
+    result: google.maps.DirectionsResult;
+    status: google.maps.DirectionsStatus;
+}
+
