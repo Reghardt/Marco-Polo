@@ -1,7 +1,7 @@
 
 import { Button, Checkbox, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, Paper, TextField } from "@mui/material"
 import React, { useRef, useState } from "react"
-import { Cell } from "../../classes/cell.class"
+import { ICell } from "../../classes/cell.interface"
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import { usePopper } from "react-popper";
 import PopperContainer from "../common/PopperContainer.styled";
@@ -10,7 +10,7 @@ import PopperContainer from "../common/PopperContainer.styled";
 type DataCellProps = {
     i: number;
     j: number;
-    cellRef: Cell;
+    cellRef: ICell;
     addressColIndex: number;
     updateDataCell: (i: number, j: number, updatedData: string) => void;
 }

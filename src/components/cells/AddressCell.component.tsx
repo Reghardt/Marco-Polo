@@ -1,14 +1,14 @@
 import { Button, Checkbox, ClickAwayListener, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material";
 import React, { useRef, useState } from "react";
 import { usePopper } from "react-popper";
-import { Cell } from "../../classes/cell.class";
+import { ICell } from "../../classes/cell.interface";
 import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
 import PopperContainer from "../common/PopperContainer.styled";
 
 type AddressCellProps = {
     i: number;
     j: number;
-    cellRef: Cell;
+    cellRef: ICell;
     addressColIndex: number;
     geocodeAddress: (address: string) => Promise<IGeocoderResult>;
     updateAddressCell: (i: number, j: number, address: string) => void;

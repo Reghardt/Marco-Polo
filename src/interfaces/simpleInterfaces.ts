@@ -1,10 +1,10 @@
 //File Description: interfaces that are shared between multiple files
-import { Cell } from "../classes/cell.class";
+import { ICell } from "../classes/cell.interface";
 
 export interface IRow //each row contains a bumch of cell objects
 {
     rowNumber: number;
-    cells: Cell[];
+    cells: ICell[];
 }
 
 export interface IGeocoderResult
