@@ -1,12 +1,11 @@
-import { ICell } from "../classes/cell.interface";
-import { SelectionData } from "../classes/selectionData.class";
+import { SelectedCells } from "./selectedCells.class";
 
 interface Range{
     start: {x: number, y: number};
     stop: {x: number, y: number}
 }
 
-export async function loadSelection() : Promise<SelectionData>
+export async function loadSelection() : Promise<SelectedCells>
 {
     return Excel.run(async (context) => {
         let range = context.workbook.getSelectedRanges();
@@ -29,7 +28,7 @@ export async function loadSelection() : Promise<SelectionData>
 
 function generateCellsFromCoordinates(userSelection: string)
 {
-    let selectionData: SelectionData = new SelectionData();
+    let selectionData: SelectedCells = new SelectedCells();
     let ranges = decodeRangeString(userSelection)
     
     for(let i = 0; i < ranges.length; i++)

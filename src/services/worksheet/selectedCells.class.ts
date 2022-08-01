@@ -1,5 +1,5 @@
-import { IRow } from "../interfaces/simpleInterfaces";
 import { ICell } from "./cell.interface";
+import { IRow } from "./row.interface";
 
 interface ICellAndRange
 {
@@ -7,7 +7,7 @@ interface ICellAndRange
     range: Excel.Range
 }
 
-export class SelectionData //each dataTable contains an array of rows
+export class SelectedCells 
 {
     rows: IRow[] = [];
     private cellAndRange: ICellAndRange[] = [];

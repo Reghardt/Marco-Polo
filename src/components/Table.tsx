@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { SelectionData } from '../classes/selectionData.class';
+import { SelectedCells } from '../services/worksheet/selectedCells.class';
 
 type Props = {
-    data?: SelectionData,
+    data?: SelectedCells,
     children?: React.ReactNode
 }
 

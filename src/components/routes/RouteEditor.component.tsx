@@ -3,8 +3,8 @@
 import { Button, FormControl, Grid, MenuItem, Paper, Select, styled, TextField } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
-import { IGeocoderResult, IRouteResult, IRouteStatistics, IRow } from "../../interfaces/simpleInterfaces";
-import {loadSelection} from "../../services/worksheet.service"
+import { IGeocoderResult, IRouteResult, IRouteStatistics } from "../../interfaces/simpleInterfaces";
+import {loadSelection} from "../../services/worksheet/worksheet.service"
 import AddressCell from "../cells/AddressCell.component";
 import DataCell from "../cells/DataCell.component";
 import HeadingCell from "../cells/HeadingCell.component";
@@ -15,6 +15,7 @@ import { ITableData } from "./interfaces/TableData.interface";
 import RouteStatistics from "./RouteStatistics.component";
 import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
+import { IRow } from "../../services/worksheet/row.interface";
 
 export default function RouteEditor()
 {

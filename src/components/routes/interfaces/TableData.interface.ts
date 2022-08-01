@@ -1,4 +1,4 @@
-import { IRow } from "../../../interfaces/simpleInterfaces";
+import { IRow } from "../../../services/worksheet/row.interface";
 import { IHeading } from "./Heading.interface";
 
 export interface ITableData{

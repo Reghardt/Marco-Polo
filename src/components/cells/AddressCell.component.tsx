@@ -1,7 +1,7 @@
 import { Button, Checkbox, ClickAwayListener, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material";
 import React, { useRef, useState } from "react";
 import { usePopper } from "react-popper";
-import { ICell } from "../../classes/cell.interface";
+import { ICell } from "../../services/worksheet/cell.interface";
 import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
 import PopperContainer from "../common/PopperContainer.styled";
 
