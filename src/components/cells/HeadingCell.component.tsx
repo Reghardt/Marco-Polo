@@ -2,13 +2,13 @@ import { Button, ClickAwayListener, DialogActions, DialogContent, DialogTitle, P
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import PopperContainer from "../common/PopperContainer.styled";
-import { Heading } from "../routes/Heading.interface";
+import { IHeading } from "../routes/interfaces/Heading.interface";
 
 type HeadingCellProps = {
   colId: number;
   addressColIndex: number;
-  headingDetails: Heading;
-  updateHeading: (colNr: number, newHeading: Heading) => void;
+  headingDetails: IHeading;
+  updateHeading: (colNr: number, newHeading: IHeading) => void;
 }
 
 const HeadingCell: React.FC<HeadingCellProps> = ({colId, addressColIndex: addressColId, headingDetails, updateHeading: updateHeadings}) =>

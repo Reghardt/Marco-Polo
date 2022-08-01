@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { getServerUrl } from '../../services/server.service';
-import { bearerToken } from '../../state/globalstate';
+import { RBearerToken } from '../../state/globalstate';
 import WorkSpaceCard from './WorkspaceCard.component';
 
 export default function WorkSpaces()
 {
-    const [bearer, setBearer] = useRecoilState(bearerToken)
+    const [bearer, setBearer] = useRecoilState(RBearerToken)
     
     const [workspaces, setWorkspaces] = useState([])
     let navigate = useNavigate();
@@ -36,7 +36,8 @@ export default function WorkSpaces()
 
     useEffect(() => {
         console.log("fetch data")
-        getWorkspaces().then((res: any[]) => {
+        getWorkspaces()
+        .then((res: any[]) => {
             console.log(res)
             setWorkspaces(res)
         })

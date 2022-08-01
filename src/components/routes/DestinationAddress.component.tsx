@@ -3,12 +3,12 @@ import React, { useRef, useState } from "react";
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import PopperContainer from "../common/PopperContainer.styled";
 import { usePopper } from "react-popper";
-import { GeocoderResult } from "../../interfaces/simpleInterfaces";
+import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
 
 type DestinationAddressProps ={
     destinationAddress: string;
     setDestinationAddress: React.Dispatch<React.SetStateAction<string>>;
-    geocodeAddress: (address: string) => Promise<GeocoderResult>;
+    geocodeAddress: (address: string) => Promise<IGeocoderResult>;
 }
 
 const DestinationAddress: React.FC<DestinationAddressProps> = ({destinationAddress, setDestinationAddress, geocodeAddress}) =>

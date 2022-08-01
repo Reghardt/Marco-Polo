@@ -1,9 +1,9 @@
-import { Row } from "../interfaces/simpleInterfaces";
+import { IRow } from "../interfaces/simpleInterfaces";
 import { Cell } from "./cell.class";
 
 export class SelectionData //each dataTable contains an array of rows
 {
-    rows: Row[] = [];
+    rows: IRow[] = [];
 
     insertCell(cellToAdd: Cell)
     {

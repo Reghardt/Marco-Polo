@@ -4,14 +4,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { getServerUrl } from "../../services/server.service";
-import { bearerToken} from "../../state/globalstate";
+import { RBearerToken} from "../../state/globalstate";
 
 export default function CreateWorkspace()
 {
     const [companyName, setCompanyName] = useState("")
     
 
-    const [bearer, setBearer] = useRecoilState(bearerToken)
+    const [bearer, setBearer] = useRecoilState(RBearerToken)
     let navigate = useNavigate();
     
     const createNewWorkspace = (e: React.FormEvent) =>{
@@ -25,7 +25,7 @@ export default function CreateWorkspace()
         {
             headers: {authorization: bearer}
         }).then((res) => {
-            console.log("response received", res.data)
+            console.log("Workspace Created:", res.data)
             //setWorkspaceIdString(res.data)
             navigate("/workspaces", {replace: true})
         }).catch((err) => {

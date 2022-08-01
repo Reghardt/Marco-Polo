@@ -1,4 +1,4 @@
-export interface Heading
+export interface IHeading
 {
     index: number;
     headingName: string;

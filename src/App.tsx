@@ -4,12 +4,14 @@ import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import './App.css';
-import RouteCreator from './components/routes/RouteCreater.component';
+import RouteMenu from './components/routes/RouteMenu.component';
 import RouteEditor from './components/routes/RouteEditor.component';
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
 import WorkSpaces from './components/workspaces/Workspaces.component';
+
+
 
 function App() {
 
@@ -23,7 +25,7 @@ function App() {
           <Route path="/register" element={<CreateAccount/>}/>
           <Route path="/workspaces" element={<WorkSpaces/>}/>
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
-          <Route path="/jobCreator" element={<RouteCreator/>}/>
+          <Route path="/routeMenu" element={<RouteMenu/>}/>
           <Route path="/jobEditor" element={<RouteEditor/>}/>
         </Routes>
       </BrowserRouter>

@@ -2,7 +2,7 @@ import { Button, Checkbox, ClickAwayListener, DialogActions, DialogContent, Dial
 import React, { useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import { Cell } from "../../classes/cell.class";
-import { GeocoderResult } from "../../interfaces/simpleInterfaces";
+import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
 import PopperContainer from "../common/PopperContainer.styled";
 
 type AddressCellProps = {
@@ -10,7 +10,7 @@ type AddressCellProps = {
     j: number;
     cellRef: Cell;
     addressColIndex: number;
-    geocodeAddress: (address: string) => Promise<GeocoderResult>;
+    geocodeAddress: (address: string) => Promise<IGeocoderResult>;
     updateAddressCell: (i: number, j: number, address: string) => void;
   }
 

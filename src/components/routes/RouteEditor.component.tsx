@@ -3,19 +3,22 @@
 import { Button, FormControl, Grid, MenuItem, Paper, Select, styled, TextField } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
-import { GeocoderResult, RouteResult, Row } from "../../interfaces/simpleInterfaces";
+import { IGeocoderResult, IRouteResult, IRouteStatistics, IRow } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet.service"
 import AddressCell from "../cells/AddressCell.component";
 import DataCell from "../cells/DataCell.component";
 import HeadingCell from "../cells/HeadingCell.component";
 import DestinationAddress from "./DestinationAddress.component";
-import { Heading } from "./Heading.interface";
+import { IHeading } from "./interfaces/Heading.interface";
 import StartAddress from "./StartAddress.component";
-import { TableData } from "./TableData.interface";
+import { ITableData } from "./interfaces/TableData.interface";
+import RouteStatistics from "./RouteStatistics.component";
+import axios from "axios";
+import { getServerUrl } from "../../services/server.service";
 
 export default function RouteEditor()
 {
-    const [tableData, setTableData] = useState<TableData>({headings: [], rows: []})
+    const [tableData, setTableData] = useState<ITableData>({headings: [], rows: []})
 
 
     const map = useRef<google.maps.Map>()
@@ -28,7 +31,7 @@ export default function RouteEditor()
     const [startAddress, setStartAddress] = useState("none");
     const [destinationAddress, setDestinationAddress] = useState("none");
 
-    const [routeResultsData, setRouteResultData] = useState<{op: {dist: number, time: number}, unOp: {dist: number, time: number}}>()
+    const [routeStatisticsData, setRouteResultData] = useState<IRouteStatistics>()
     
     //console.log("rerender")
 
@@ -95,10 +98,10 @@ export default function RouteEditor()
               }
 
               
-              console.log("Fastest", opRouteDistance / 1000, opRouteTime)
-              console.log("Unop", unopRouteDistance / 1000, unopRouteTime)
-              setRouteResultData({op: {dist: opRouteDistance / 1000, time: opRouteTime }, 
-                                  unOp: {dist: unopRouteDistance / 1000, time: unopRouteTime}})
+              console.log("Fastest", opRouteDistance, opRouteTime)
+              console.log("Unop", unopRouteDistance, unopRouteTime)
+              setRouteResultData({optimized: {dist: opRouteDistance, time: opRouteTime }, 
+                                  origional: {dist: unopRouteDistance, time: unopRouteTime}})
             }
             else
             {
@@ -126,7 +129,7 @@ export default function RouteEditor()
         optimizeWaypoints: true
       };
 
-      return new Promise<RouteResult>((resolve) => {
+      return new Promise<IRouteResult>((resolve) => {
         directionsService.current.route(request, (result, status) => {
             resolve({result, status})
         });
@@ -145,7 +148,7 @@ export default function RouteEditor()
         travelMode: google.maps.TravelMode.DRIVING,
         optimizeWaypoints: false
       };
-      return new Promise<RouteResult>((resolve) => {
+      return new Promise<IRouteResult>((resolve) => {
         directionsService.current.route(request, (result, status) => {
           resolve({result, status})
         });
@@ -175,7 +178,7 @@ export default function RouteEditor()
         }
 
         //create data for headings
-        let tempHeadings: Heading[] = [] 
+        let tempHeadings: IHeading[] = [] 
         for(let k = 0; k < retreivedSelection[0].cells.length; k++)
         {
           tempHeadings.push({index: k ,headingName: "C" + k})
@@ -186,7 +189,7 @@ export default function RouteEditor()
       }  
     }
 
-    function CreateTableHeadings(tableData_headings: Heading[]) : JSX.Element[]
+    function CreateTableHeadings(tableData_headings: IHeading[]) : JSX.Element[]
     {
       const headingRow: JSX.Element[] = [];
       if(tableData_headings.length > 0)
@@ -205,7 +208,7 @@ export default function RouteEditor()
       return [];
     }
 
-    function CreateTableBody(tableData_rows: Row[]) : JSX.Element[][]
+    function CreateTableBody(tableData_rows: IRow[]) : JSX.Element[][]
     {
       const cellTable: JSX.Element[][] = [];
       if(tableData_rows.length > 0)
@@ -261,7 +264,7 @@ export default function RouteEditor()
       }
     }
 
-    function updateHeading(colNr: number, headingData: Heading)
+    function updateHeading(colNr: number, headingData: IHeading)
     {
       const headings = tableData.headings.slice();
       headings[colNr] = headingData;
@@ -308,9 +311,9 @@ export default function RouteEditor()
       
     }
 
-    function geocodeAddress(address: string) : Promise<GeocoderResult>
+    function geocodeAddress(address: string) : Promise<IGeocoderResult>
     {
-      let geoResPromise = new Promise<GeocoderResult>((resolve) => {
+      let geoResPromise = new Promise<IGeocoderResult>((resolve) => {
         geocoder.current.geocode({address: address, region: "ZA"},(res, status) => {
           resolve({status, results: res})
         })
@@ -319,7 +322,22 @@ export default function RouteEditor()
       return geoResPromise;
     }
 
-    
+    function saveRoute()
+    {
+      axios.post(getServerUrl() + "/job/save",
+        {
+            data: tableData,
+        },
+        {
+          //add bearer
+        }).then(res => {
+            console.log(res.data)
+        }).catch(err => {
+            console.error(err)
+        })
+    }
+
+
 
     return(
         <div>
@@ -360,12 +378,13 @@ export default function RouteEditor()
             
             <Button onClick={() => calcRoute()}>Calc Route</Button>
 
-            {routeResultsData && (
+            {routeStatisticsData && (
               <div>
-                Given Route ------ Distance: {routeResultsData.unOp.dist}, Time: {routeResultsData.unOp.time / 60} <br/>
-                Optimized Route - Distance: {routeResultsData.op.dist}, Time: {routeResultsData.op.time / 60} <br/>
+                <RouteStatistics routeStatisticsData={routeStatisticsData}/>
               </div>
             )}
+
+            <Button onClick={()=> saveRoute()}>Save</Button>
           </div>
               
           )}

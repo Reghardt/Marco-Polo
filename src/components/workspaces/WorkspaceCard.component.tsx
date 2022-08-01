@@ -2,7 +2,7 @@ import { Button, Card, CardActions, CardContent, Typography } from "@mui/materia
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import { workspaceID } from "../../state/globalstate";
+import { RWorkspaceID } from "../../state/globalstate";
 
 type CardProps = {
     name: string;
@@ -11,13 +11,13 @@ type CardProps = {
 
 export default function WorkSpaceCard({name, id}: CardProps)
 {
-    const [workspaceIdString, setWorkspaceIdString] = useRecoilState(workspaceID)
+    const [workspaceId, setWorkspaceId] = useRecoilState(RWorkspaceID)
     let navigate = useNavigate();
 
     function setSelectionAndNavigate()
     {
-        setWorkspaceIdString(id);
-        navigate("/jobCreator", {replace: true})
+        setWorkspaceId(id);
+        navigate("/routeMenu", {replace: true})
     }
     
     return(
