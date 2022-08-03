@@ -16,11 +16,14 @@ import RouteStatistics from "./RouteStatistics.component";
 import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 import { IRow } from "../../services/worksheet/row.interface";
+import { useRecoilState } from "recoil";
+import { RJobID } from "../../state/globalstate";
 
-export default function RouteEditor()
+const RouteEditor: React.FC = () =>
 {
-    const [tableData, setTableData] = useState<ITableData>({headings: [], rows: []})
 
+
+    const [tableData, setTableData] = useState<ITableData>({headings: [], rows: []})
 
     const map = useRef<google.maps.Map>()
     const geocoder = useRef<google.maps.Geocoder>()
@@ -34,7 +37,9 @@ export default function RouteEditor()
 
     const [routeStatisticsData, setRouteResultData] = useState<IRouteStatistics>()
     
-    //console.log("rerender")
+    const [jobId, setJobId] = useRecoilState(RJobID)
+
+    console.log(jobId)
 
     useEffect(() => {
         const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
@@ -45,6 +50,10 @@ export default function RouteEditor()
         directionsRenderer.current.setMap(map.current)
 
     }, [])
+
+    useEffect(() => {
+      //TODO fecth job data from server
+    })
 
     function addMarker()
     {
@@ -394,3 +403,5 @@ export default function RouteEditor()
         </div>
     )
 }
+
+export default RouteEditor

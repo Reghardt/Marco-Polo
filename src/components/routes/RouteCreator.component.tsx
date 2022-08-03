@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getServerUrl } from "../../services/server.service";
-import { RBearerToken, RWorkspaceID } from "../../state/globalstate";
+import { RBearerToken, RJobID, RWorkspaceID } from "../../state/globalstate";
 
 const RouteCreator: React.FC = () => {
 
@@ -12,6 +12,7 @@ const RouteCreator: React.FC = () => {
     const [jobName, setJobName] = useState("")
     const workspaceId = useRecoilValue(RWorkspaceID)
     const [bearer, setBearer] = useRecoilState(RBearerToken)
+    const [jobId, setJobId] = useRecoilState(RJobID)
 
     function createJob(e: React.FormEvent<HTMLFormElement>): void {
         e.preventDefault(); // prevents whole page from refreshing
@@ -24,7 +25,8 @@ const RouteCreator: React.FC = () => {
             headers: {authorization: bearer}
         }).then(res => {
             console.log(res.data)
-            navigate("/jobEditor", {replace: true})
+            setJobId(res.data)
+            navigate("/jobEditor", {replace: true, state: {}})
         }).catch(err => {
             console.error(err)
         })

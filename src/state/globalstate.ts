@@ -10,6 +10,11 @@ export const RWorkspaceID = atom({
     default: ""
 });
 
+export const RJobID = atom({
+    key: "jobId",
+    default: ""
+})
+
 
 
 

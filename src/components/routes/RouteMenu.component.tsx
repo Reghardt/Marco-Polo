@@ -1,11 +1,31 @@
-import { Box, Tab, Tabs } from "@mui/material";
-import React, { useState } from "react";
+import { Box, Button, Card, CardActions, CardContent, Tab, Tabs, Typography } from "@mui/material";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
+import { getServerUrl } from "../../services/server.service";
+import { RJobID, RWorkspaceID } from "../../state/globalstate";
 import RouteCreator from "./RouteCreator.component";
+
+interface IJobData {
+  jobName: string;
+  jobId: string
+}
 
 
 export default function RouteMenu()
 {
     const [tabIdx, setTabIdx] = useState(0);
+
+    const [workspaceId, setWorkspaceId] = useRecoilState(RWorkspaceID)
+    const [jobId, setJobId] = useRecoilState(RJobID)
+    const [listOfJobs, setListOfJobs] = useState<IJobData[]>([])
+
+    let navigate = useNavigate();
+
+    useEffect(() => {
+      getAllRoutes()
+    }, [])
 
     interface TabPanelProps {
         children?: React.ReactNode;
@@ -40,6 +60,28 @@ export default function RouteMenu()
         setTabIdx(index);
     };
 
+    function getAllRoutes()
+    {
+      axios.post(getServerUrl() + "/job/list",
+        {
+            workspaceId: workspaceId,
+        },
+        {
+          //add bearer
+        }).then(res => {
+            console.log(res.data)
+            setListOfJobs(res.data)
+        }).catch(err => {
+            console.error(err)
+        })
+    }
+
+    function openJob(id: string)
+    {
+      setJobId(id)
+      navigate("/jobEditor", {replace: true})
+    }
+
     return(
         <Box>
             <Box>
@@ -52,6 +94,21 @@ export default function RouteMenu()
             <TabPanel value={tabIdx} index={0}>
 
                 <p>List of current and active jobs -- TODO</p>
+                {
+                  listOfJobs.map((elem, idx) => {
+                    return <div style={{padding: "10px"}} key={idx}>
+                      <Card sx={{ minWidth: 275 }}>
+                          <CardContent>
+                              <Typography variant="h5" component="div">{elem.jobName}</Typography>
+                          </CardContent>
+                          <CardActions>
+                              {/* C */}
+                              <Button size="small" onClick={() => {openJob(elem.jobId)}}>Open</Button>
+                          </CardActions>
+                      </Card>
+                  </div>
+                  })
+                }
 
 
             </TabPanel>
