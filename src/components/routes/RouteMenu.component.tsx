@@ -78,7 +78,7 @@ export default function RouteMenu()
 
     function openJob(id: string)
     {
-      setJobId(id)
+      setJobId({jobId: id, shouldFetch: true})
       navigate("/jobEditor", {replace: true})
     }
 

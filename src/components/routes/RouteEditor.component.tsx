@@ -16,8 +16,8 @@ import RouteStatistics from "./RouteStatistics.component";
 import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 import { IRow } from "../../services/worksheet/row.interface";
-import { useRecoilState } from "recoil";
-import { RJobID } from "../../state/globalstate";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { RJobID, RWorkspaceID } from "../../state/globalstate";
 
 const RouteEditor: React.FC = () =>
 {
@@ -38,6 +38,7 @@ const RouteEditor: React.FC = () =>
     const [routeStatisticsData, setRouteResultData] = useState<IRouteStatistics>()
     
     const [jobId, setJobId] = useRecoilState(RJobID)
+    const workspaceId = useRecoilValue(RWorkspaceID)
 
     console.log(jobId)
 
@@ -48,12 +49,21 @@ const RouteEditor: React.FC = () =>
         directionsService.current = new google.maps.DirectionsService();
         directionsRenderer.current = new google.maps.DirectionsRenderer()
         directionsRenderer.current.setMap(map.current)
+        axios.post(getServerUrl() + "/job/load",
+        {
+            workspaceId: workspaceId,
+            jobId: jobId.jobId,
+        },
+        {
+          //add bearer
+        }).then(res => {
+            console.log(res.data)
+            setTableData({headings: res.data.job.headings, rows: res.data.job.rows})
+        }).catch(err => {
+            console.error(err)
+        })
 
     }, [])
-
-    useEffect(() => {
-      //TODO fecth job data from server
-    })
 
     function addMarker()
     {
@@ -336,6 +346,8 @@ const RouteEditor: React.FC = () =>
     {
       axios.post(getServerUrl() + "/job/save",
         {
+            workspaceId: workspaceId,
+            jobId: jobId.jobId,
             data: tableData,
         },
         {

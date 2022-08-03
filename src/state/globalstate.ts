@@ -10,9 +10,9 @@ export const RWorkspaceID = atom({
     default: ""
 });
 
-export const RJobID = atom({
+export const RJobID = atom<{jobId: string, shouldFetch: boolean}>({
     key: "jobId",
-    default: ""
+    default: {jobId: "", shouldFetch: false}
 })
 
 
