@@ -42,18 +42,22 @@ export class SelectedCells
             for(let j = 0; j < row.cells.length; j++)
             {
                 let cell = row.cells[j];
-                let cellAndRange: ICellAndRange = {cell: cell, range: worksheet.getCell(cell.y - 1, cell.x - 1)};
-                cellAndRange.range.load("values")
-                this.cellAndRange.push(cellAndRange)
+                let cellAndRange: ICellAndRange = {cell: cell, range: worksheet.getCell(cell.y - 1, cell.x - 1)}; //store cell and range object together to keep track of the realtionship
+                cellAndRange.range.load("values") //tells the range object we want to load values
+                this.cellAndRange.push(cellAndRange) //cellAndRange object is pushed to array to later be used (after sync) to extract the value from the range and assign it to the cell
             }
         }
     }
 
-    SaveCellDataFromRangeAfterSync()
+    setCellInitialStateAfterSync()
     {
         for(let i = 0; i < this.cellAndRange.length; i++)
         {
+            //set the cells data, the data field gets displayed in MP.
+            //Also set the origionalData field to keep track of what the cells value was before any changes like geocoding an address. The use may choose to use the origional or geocoded address for example.
             this.cellAndRange[i].cell.data = this.cellAndRange[i].range.values[0][0] as string;
+            this.cellAndRange[i].cell.origionalData = this.cellAndRange[i].range.values[0][0] as string;
+            this.cellAndRange[i].cell.geocodedAddressRes = null; //initialize geocodedAddressRes as null. Only cells designated as an address will be not null
         }
     }
 }

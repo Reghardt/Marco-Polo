@@ -1,9 +1,9 @@
 import { Button, Checkbox, ClickAwayListener, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material";
 import React, { useRef, useState } from "react";
 import { usePopper } from "react-popper";
-import { ICell } from "../../services/worksheet/cell.interface";
-import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
-import PopperContainer from "../common/PopperContainer.styled";
+import { ICell } from "../../../../services/worksheet/cell.interface";
+import { IGeocoderResult } from "../../../../interfaces/simpleInterfaces";
+import PopperContainer from "../../../common/PopperContainer.styled";
 
 type AddressCellProps = {
     i: number;
@@ -11,10 +11,10 @@ type AddressCellProps = {
     cellRef: ICell;
     addressColIndex: number;
     geocodeAddress: (address: string) => Promise<IGeocoderResult>;
-    updateAddressCell: (i: number, j: number, address: string) => void;
+    updateBodyCell: (i: number, j: number, cell: ICell) => void;
   }
 
-const AddressCell: React.FC<AddressCellProps> = ({i,j,cellRef, addressColIndex, geocodeAddress, updateAddressCell}) =>
+const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, addressColIndex, geocodeAddress, updateBodyCell}) =>
 {
     const buttonRef = useRef(null);
     const popperRef = useRef(null);
@@ -82,7 +82,11 @@ const AddressCell: React.FC<AddressCellProps> = ({i,j,cellRef, addressColIndex, 
 
     function saveAndClose()
     {
-      updateAddressCell(i,j, selectedAddress.formatted_address)
+      //updateAddressCell(i,j, selectedAddress.formatted_address)
+      const tempCell = JSON.parse(JSON.stringify(cellRef)) as ICell;
+      tempCell.data = selectedAddress.formatted_address;
+      tempCell.geocodedAddressRes = selectedAddress;
+      updateBodyCell(i, j, tempCell)
       setAddressSaved(true);
       setShow(!show)
     }

@@ -1,8 +1,8 @@
 import { Button, ClickAwayListener, DialogActions, DialogContent, DialogTitle, Paper, Tab, Tabs, TextField } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
-import PopperContainer from "../common/PopperContainer.styled";
-import { IHeading } from "../routes/interfaces/Heading.interface";
+import PopperContainer from "../../../common/PopperContainer.styled";
+import { IHeading } from "../../interfaces/Heading.interface";
 
 type HeadingCellProps = {
   colId: number;

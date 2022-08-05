@@ -5,7 +5,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import './App.css';
 import RouteMenu from './components/routes/RouteMenu.component';
-import RouteEditor from './components/routes/RouteEditor.component';
+import RouteFinder from './components/routes/RouteFinder.component';
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
@@ -26,7 +26,7 @@ function App() {
           <Route path="/workspaces" element={<WorkSpaces/>}/>
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
           <Route path="/routeMenu" element={<RouteMenu/>}/>
-          <Route path="/jobEditor" element={<RouteEditor/>}/>
+          <Route path="/jobEditor" element={<RouteFinder/>}/>
         </Routes>
       </BrowserRouter>
     </div>

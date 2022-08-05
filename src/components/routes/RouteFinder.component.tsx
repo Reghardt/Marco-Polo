@@ -1,29 +1,26 @@
 /** @jsxImportSource @emotion/react */
 
-import { Button, FormControl, Grid, MenuItem, Paper, Select, styled, TextField } from "@mui/material";
+import { Button, FormControl, MenuItem, Paper, Select, styled, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
 import { IGeocoderResult, IRouteResult, IRouteStatistics } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet/worksheet.service"
-import AddressCell from "../cells/AddressCell.component";
-import DataCell from "../cells/DataCell.component";
-import HeadingCell from "../cells/HeadingCell.component";
 import DestinationAddress from "./DestinationAddress.component";
 import { IHeading } from "./interfaces/Heading.interface";
 import StartAddress from "./StartAddress.component";
-import { ITableData } from "./interfaces/TableData.interface";
+import { IRawRouteTableData } from "./interfaces/RawRouteDataTable.interface";
 import RouteStatistics from "./RouteStatistics.component";
 import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
-import { IRow } from "../../services/worksheet/row.interface";
+
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RJobID, RWorkspaceID } from "../../state/globalstate";
+import ResultTable from "./ResultTable/ResultTable.component";
+import RawRouteDataTableEditor from "./RouteDataEditor/RawRouteDataTableEditor.component";
 
-const RouteEditor: React.FC = () =>
+const RouteFinder: React.FC = () =>
 {
-
-
-    const [tableData, setTableData] = useState<ITableData>({headings: [], rows: []})
+    const [rawRouteTableData, setRawRouteTableData] = useState<IRawRouteTableData>({headings: [], rows: []})
 
     const map = useRef<google.maps.Map>()
     const geocoder = useRef<google.maps.Geocoder>()
@@ -40,6 +37,8 @@ const RouteEditor: React.FC = () =>
     const [jobId, setJobId] = useRecoilState(RJobID)
     const workspaceId = useRecoilValue(RWorkspaceID)
 
+    const [waypointOrder, setWaypointOrder] = useState<number[]>([])
+
     console.log(jobId)
 
     useEffect(() => {
@@ -49,19 +48,19 @@ const RouteEditor: React.FC = () =>
         directionsService.current = new google.maps.DirectionsService();
         directionsRenderer.current = new google.maps.DirectionsRenderer()
         directionsRenderer.current.setMap(map.current)
-        axios.post(getServerUrl() + "/job/load",
-        {
-            workspaceId: workspaceId,
-            jobId: jobId.jobId,
-        },
-        {
-          //add bearer
-        }).then(res => {
-            console.log(res.data)
-            setTableData({headings: res.data.job.headings, rows: res.data.job.rows})
-        }).catch(err => {
-            console.error(err)
-        })
+        // axios.post(getServerUrl() + "/job/load",
+        // {
+        //     workspaceId: workspaceId,
+        //     jobId: jobId.jobId,
+        // },
+        // {
+        //   //add bearer
+        // }).then(res => {
+        //     console.log(res.data)
+        //     setRawRouteTableData({headings: res.data.job.headings, rows: res.data.job.rows})
+        // }).catch(err => {
+        //     console.error(err)
+        // })
 
     }, [])
 
@@ -75,27 +74,26 @@ const RouteEditor: React.FC = () =>
 
     function calcRoute()
     {
-      if(startAddress !== "" && destinationAddress !== "")
+      if(startAddress !== "" && destinationAddress !== "") //test if not "none"
       {
         let waypoints: google.maps.DirectionsWaypoint[]  = [];
         if(addressColIndex > -1)
         {
-          for(let i = 0; i < tableData.rows.length; i++)
+          for(let i = 0; i < rawRouteTableData.rows.length; i++)
           {
-            console.log(tableData.rows[i].cells[addressColIndex].data)
+            console.log(rawRouteTableData.rows[i].cells[addressColIndex].data)
             
-            waypoints.push({location: tableData.rows[i].cells[addressColIndex].data, stopover: true})
+            waypoints.push({location: rawRouteTableData.rows[i].cells[addressColIndex].data, stopover: true})
           }
         }
 
-        
-        
         Promise.all([calcRouteOptimized(waypoints), calcRouteUnoptimized(waypoints)]).then(res => {
           
           if(res[0].status === "OK")
           {
             directionsRenderer.current.setDirections(res[0].result)
-            console.log(res[0].result.routes[0].legs)
+            console.log(res[0].result)
+            setWaypointOrder(res[0].result.routes[0].waypoint_order)
             let oplegs = res[0].result.routes[0].legs;
             let opRouteDistance = 0;
             let opRouteTime = 0;
@@ -116,12 +114,12 @@ const RouteEditor: React.FC = () =>
                 unopRouteDistance += unoplegs[i].distance.value
                 unopRouteTime += unoplegs[i].duration.value
               }
-
-              
               console.log("Fastest", opRouteDistance, opRouteTime)
               console.log("Unop", unopRouteDistance, unopRouteTime)
-              setRouteResultData({optimized: {dist: opRouteDistance, time: opRouteTime }, 
-                                  origional: {dist: unopRouteDistance, time: unopRouteTime}})
+              setRouteResultData({
+                optimized: {dist: opRouteDistance, time: opRouteTime }, 
+                origional: {dist: unopRouteDistance, time: unopRouteTime}
+              })
             }
             else
             {
@@ -134,9 +132,6 @@ const RouteEditor: React.FC = () =>
           }
         })
       }
-
-
-      
     }
 
     function calcRouteOptimized(waypoints: google.maps.DirectionsWaypoint[]) {
@@ -153,10 +148,7 @@ const RouteEditor: React.FC = () =>
         directionsService.current.route(request, (result, status) => {
             resolve({result, status})
         });
-      })
-
-      
-        
+      })  
     }
 
     function calcRouteUnoptimized(waypoints: google.maps.DirectionsWaypoint[]) {
@@ -173,8 +165,6 @@ const RouteEditor: React.FC = () =>
           resolve({result, status})
         });
       })
-
-        
     }
 
     async function retrieveUserSelectionFromSpreadsheetAndSet()
@@ -192,7 +182,7 @@ const RouteEditor: React.FC = () =>
           if(nrOfColumns !== row.cells.length)
           {
             console.error("Each row should have the same number of cells - test")
-            setTableData({headings: [], rows: []})
+            setRawRouteTableData({headings: [], rows: []})
             return;
           }
         }
@@ -204,106 +194,9 @@ const RouteEditor: React.FC = () =>
           tempHeadings.push({index: k ,headingName: "C" + k})
         }
 
-        setTableData({headings: tempHeadings, rows: retreivedSelection})
+        setRawRouteTableData({headings: tempHeadings, rows: retreivedSelection})
         setAddressColIndex(-1)
       }  
-    }
-
-    function CreateTableHeadings(tableData_headings: IHeading[]) : JSX.Element[]
-    {
-      const headingRow: JSX.Element[] = [];
-      if(tableData_headings.length > 0)
-      {
-        const elementSize = 12 / tableData_headings.length;
-        for(let i = 0; i< tableData_headings.length; i++)
-        {
-          headingRow.push(
-            <Grid item xs={elementSize}>
-              <HeadingCell colId={i} addressColIndex={addressColIndex} headingDetails={tableData_headings[i]} updateHeading={updateHeading}/>
-            </Grid>
-          )
-        }
-        return headingRow;
-      }
-      return [];
-    }
-
-    function CreateTableBody(tableData_rows: IRow[]) : JSX.Element[][]
-    {
-      const cellTable: JSX.Element[][] = [];
-      if(tableData_rows.length > 0)
-      {
-        const elementSize = 12 / tableData_rows[0].cells.length;
-        
-        for(let i = 0; i< tableData_rows.length; i++)
-        {
-          const row = tableData_rows[i];
-          
-          for(let j = 0; j < row.cells.length; j++)
-          {
-            if(cellTable[i] === undefined)
-            {
-              cellTable[i] = []; //create row at index for table if the index is undefined
-            }
-            //add elements to table
-            if(j === addressColIndex)
-            {
-              cellTable[i][j] = <Grid item xs={elementSize}> 
-              <AddressCell 
-                i={i}
-                j={j}
-                addressColIndex={addressColIndex}
-                cellRef={tableData_rows[i].cells[j]}
-                geocodeAddress={geocodeAddress}
-                updateAddressCell={updateAddressCell}
-                // updateDataCell = {updateDataCell}
-                />
-              </Grid>
-            }
-            else
-            {
-              cellTable[i][j] = <Grid item xs={elementSize}> 
-              <DataCell 
-                i={i}
-                j={j}
-                addressColIndex={addressColIndex}
-                cellRef={tableData_rows[i].cells[j]}
-                updateDataCell = {updateDataCell}
-                />
-              </Grid>
-            }
-            
-          }
-        }
-
-        return cellTable
-      }
-      else
-      {
-        return []
-      }
-    }
-
-    function updateHeading(colNr: number, headingData: IHeading)
-    {
-      const headings = tableData.headings.slice();
-      headings[colNr] = headingData;
-
-      setTableData({headings: headings, rows: tableData.rows})
-    }
-
-    function updateDataCell(i: number, j: number, updatedData: string)
-    {
-      const rows = tableData.rows.slice()
-      rows[i].cells[j].data = updatedData
-      setTableData({headings: tableData.headings, rows: rows})
-    }
-
-    function updateAddressCell(i: number, j: number, address: string)
-    {
-      const rows = tableData.rows.slice()
-      rows[i].cells[j].data = address
-      setTableData({headings: tableData.headings, rows: rows})
     }
 
     const Item = styled(Paper)(({ theme }) => ({
@@ -314,10 +207,6 @@ const RouteEditor: React.FC = () =>
         color: theme.palette.text.secondary,
       }));
 
-    function printRows()
-    {
-      console.log(tableData)
-    }
   
     function handleAddressColSelector(value: number | string)
     {
@@ -348,7 +237,7 @@ const RouteEditor: React.FC = () =>
         {
             workspaceId: workspaceId,
             jobId: jobId.jobId,
-            data: tableData,
+            data: rawRouteTableData,
         },
         {
           //add bearer
@@ -363,7 +252,7 @@ const RouteEditor: React.FC = () =>
 
     return(
         <div>
-            Job editor
+            <Typography variant="h4" gutterBottom >Route Finder</Typography>
             <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Get Selection</Button>
 
             <br/>
@@ -381,39 +270,46 @@ const RouteEditor: React.FC = () =>
               inputProps={{ 'aria-label': 'Without label' }}
             >
               <MenuItem value={-1}><em>None</em></MenuItem>
-              {tableData.headings.map((elem, idx) => {
+              {rawRouteTableData.headings.map((elem, idx) => {
                     return <MenuItem value={elem.index} key={idx}>{elem.headingName}</MenuItem>
                   })}
             </Select>
 
           </FormControl>
-          {tableData.rows[0] && (
+          
+          {rawRouteTableData.rows[0] && (
             <div>
-              <Grid container spacing={0.3}>
-              {CreateTableHeadings(tableData.headings).map((elem, idx) => {
-                    return <React.Fragment key={idx}>{elem}</React.Fragment>
-                  })}
-              {CreateTableBody(tableData.rows).map((elem, idx) => {
-                  return <React.Fragment key={idx}>{elem}</React.Fragment>
-                })} 
-            </Grid>
-            
-            <Button onClick={() => calcRoute()}>Calc Route</Button>
-
-            {routeStatisticsData && (
-              <div>
-                <RouteStatistics routeStatisticsData={routeStatisticsData}/>
-              </div>
-            )}
-
-            <Button onClick={()=> saveRoute()}>Save</Button>
-          </div>
+              <RawRouteDataTableEditor 
+                rawRouteTableData={rawRouteTableData} 
+                setRawRouteTableData={setRawRouteTableData} 
+                addressColIndex={addressColIndex}
+                geocodeAddress={geocodeAddress}
+                calcRoute={calcRoute}
+              />
               
-          )}
-            <div style={{width: "100%", height: 500}} id="map"></div>
+            
+              {routeStatisticsData && (
+                <div>
+                  <RouteStatistics routeStatisticsData={routeStatisticsData}/>
+                </div>
+              )}
+              <Button onClick={()=> saveRoute()}>Save</Button>
 
+              {waypointOrder.length > 0 && (
+                <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+              )}
+
+              
+
+            </div>
+
+            
+          )}
+            
+            
+            <div style={{width: "100%", height: 500}} id="map"></div>
         </div>
     )
 }
 
-export default RouteEditor
+export default RouteFinder

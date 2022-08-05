@@ -1,10 +1,10 @@
 
 import { Button, Checkbox, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, Paper, TextField } from "@mui/material"
 import React, { useRef, useState } from "react"
-import { ICell } from "../../services/worksheet/cell.interface"
+import { ICell } from "../../../../services/worksheet/cell.interface"
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import { usePopper } from "react-popper";
-import PopperContainer from "../common/PopperContainer.styled";
+import PopperContainer from "../../../common/PopperContainer.styled";
 
 
 type DataCellProps = {
@@ -12,10 +12,10 @@ type DataCellProps = {
     j: number;
     cellRef: ICell;
     addressColIndex: number;
-    updateDataCell: (i: number, j: number, updatedData: string) => void;
+    updateBodyCell: (i: number, j: number, cell: ICell) => void;
 }
 
-const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, updateDataCell}) =>
+const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, updateBodyCell}) =>
 {
 
     const buttonRef = useRef(null);
@@ -60,9 +60,10 @@ const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, update
 
     function saveAndClose()
     {
-
-      updateDataCell(i,j, cellData)
-        setShow(!show)
+      const tempCell = JSON.parse(JSON.stringify(cellRef)) as ICell;
+      tempCell.data = cellData;
+      updateBodyCell(i, j, tempCell)
+      setShow(!show)
     }
 
     function cancleAndClose()

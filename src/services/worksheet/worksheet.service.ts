@@ -20,7 +20,7 @@ export async function loadSelection() : Promise<SelectedCells>
 
         //this sync is for loading the values from each cell
         await context.sync() 
-        selectionData.SaveCellDataFromRangeAfterSync()   
+        selectionData.setCellInitialStateAfterSync()   
         return selectionData;  
     })
 
@@ -38,7 +38,7 @@ function generateCellsFromCoordinates(userSelection: string)
         {
             for(let k = range.start.y; k <= range.stop.y; k++)
             {
-                selectionData.insertCell({x: j, y: k, data: ""});
+                selectionData.insertCell({x: j, y: k, data: "", origionalData: "", geocodedAddressRes: null});
             }
         }
     }
