@@ -1,11 +1,8 @@
+import { ICellAndRange } from "../../interfaces/simpleInterfaces";
 import { ICell } from "./cell.interface";
 import { IRow } from "./row.interface";
 
-interface ICellAndRange
-{
-    cell: ICell;
-    range: Excel.Range
-}
+
 
 export class SelectedCells 
 {

@@ -17,6 +17,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { RJobID, RWorkspaceID } from "../../state/globalstate";
 import ResultTable from "./ResultTable/ResultTable.component";
 import RawRouteDataTableEditor from "./RouteDataEditor/RawRouteDataTableEditor.component";
+import WriteBack from "./Writeback.component";
 
 const RouteFinder: React.FC = () =>
 {
@@ -296,7 +297,12 @@ const RouteFinder: React.FC = () =>
               <Button onClick={()=> saveRoute()}>Save</Button>
 
               {waypointOrder.length > 0 && (
-                <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                <React.Fragment>
+                  <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                  <WriteBack rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                </React.Fragment>
+                
+                
               )}
 
               
@@ -305,6 +311,7 @@ const RouteFinder: React.FC = () =>
 
             
           )}
+          
             
             
             <div style={{width: "100%", height: 500}} id="map"></div>
