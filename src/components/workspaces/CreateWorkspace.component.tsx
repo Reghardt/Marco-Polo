@@ -4,14 +4,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { getServerUrl } from "../../services/server.service";
-import { RBearerToken} from "../../state/globalstate";
+import { RSBearerToken} from "../../state/globalstate";
 
 export default function CreateWorkspace()
 {
     const [companyName, setCompanyName] = useState("")
     
 
-    const [bearer, setBearer] = useRecoilState(RBearerToken)
+    const [bearer, setBearer] = useRecoilState(RSBearerToken)
     let navigate = useNavigate();
     
     const createNewWorkspace = (e: React.FormEvent) =>{

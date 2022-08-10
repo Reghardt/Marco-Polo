@@ -1,8 +1,7 @@
-import { Button, DialogActions, DialogContent, DialogTitle, Modal, Paper } from "@mui/material"
+import { Button, DialogActions, DialogContent, DialogTitle, Paper } from "@mui/material"
 import React, { useEffect, useState } from "react"
-import { ICellAndRange } from "../../interfaces/simpleInterfaces";
-import { IRawRouteTableData } from "./interfaces/RawRouteDataTable.interface";
-
+import { IRawRouteTableData } from "../interfaces/RawRouteDataTable.interface";
+import ResultTable from "../ResultTable/ResultTable.component";
 
 const style = {
     position: 'absolute',
@@ -15,14 +14,15 @@ const style = {
     p: 4,
   };
 
-interface WriteBackProps{
+interface WritebackOptionsProps{
+    open: boolean;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     rawRouteTableData: IRawRouteTableData;
     waypointOrder: number[];
 }
 
-const WriteBack: React.FC<WriteBackProps> = ({rawRouteTableData, waypointOrder}) => {
+const WritebackOptions: React.FC<WritebackOptionsProps> = ({open, setOpen, rawRouteTableData, waypointOrder}) => {
 
-    const [open, setOpen] = useState(false)
     const [writebackTable, setWritebackTable] = useState<IRawRouteTableData>({headings: [], rows: []})
 
     useEffect(() => {
@@ -46,8 +46,6 @@ const WriteBack: React.FC<WriteBackProps> = ({rawRouteTableData, waypointOrder})
         setWritebackTable(tempWritebackTable)
     }
 
-    //use worksheet.getCell(x, y) to get the range of a cell
-
     async function writeBackToSpreadsheet(writebackTableParam: IRawRouteTableData)
     {
 
@@ -70,29 +68,20 @@ const WriteBack: React.FC<WriteBackProps> = ({rawRouteTableData, waypointOrder})
 
     }
 
+    return(
+    <Paper sx={style}>
+        <DialogTitle>Writeback options</DialogTitle>
+        <DialogContent>
+            <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+            <Button onClick={() => {writeBackToSpreadsheet(writebackTable)}}>Write back</Button>
+        </DialogContent>
 
-
-    return(<div>
-        <Button onClick={() => {setOpen(!open)}}>
-            Writeback
-        </Button>
-
-        <Modal open={open}>
-            <Paper sx={style}>
-                <DialogTitle>Writeback options</DialogTitle>
-                <DialogContent>
-                    Test
-                    <Button onClick={() => {writeBackToSpreadsheet(writebackTable)}}>Write back</Button>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={() => {setOpen(!open)}}>Close</Button>
-                </DialogActions>
-                
-                
-            </Paper>
-        </Modal>
-    </div>)
+        <DialogActions>
+            <Button onClick={() => {setOpen(!open)}}>Close</Button>
+        </DialogActions>
+        
+        
+    </Paper>)
 }
 
-export default WriteBack;
+export default WritebackOptions

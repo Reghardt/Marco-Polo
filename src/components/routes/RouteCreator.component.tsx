@@ -4,15 +4,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getServerUrl } from "../../services/server.service";
-import { RBearerToken, RJobID, RWorkspaceID } from "../../state/globalstate";
+import { RSBearerToken, RSJobID, RSWorkspaceID } from "../../state/globalstate";
 
 const RouteCreator: React.FC = () => {
 
     let navigate = useNavigate();
     const [jobName, setJobName] = useState("")
-    const workspaceId = useRecoilValue(RWorkspaceID)
-    const [bearer, setBearer] = useRecoilState(RBearerToken)
-    const [jobId, setJobId] = useRecoilState(RJobID)
+    const workspaceId = useRecoilValue(RSWorkspaceID)
+    const [bearer, setBearer] = useRecoilState(RSBearerToken)
+    const [jobId, setJobId] = useRecoilState(RSJobID)
 
     function createJob(e: React.FormEvent<HTMLFormElement>): void {
         e.preventDefault(); // prevents whole page from refreshing

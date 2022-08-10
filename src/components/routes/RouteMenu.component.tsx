@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { getServerUrl } from "../../services/server.service";
-import { RJobID, RWorkspaceID } from "../../state/globalstate";
+import { RSJobID, RSWorkspaceID } from "../../state/globalstate";
 import RouteCreator from "./RouteCreator.component";
 
 interface IJobData {
@@ -17,8 +17,8 @@ export default function RouteMenu()
 {
     const [tabIdx, setTabIdx] = useState(0);
 
-    const [workspaceId, setWorkspaceId] = useRecoilState(RWorkspaceID)
-    const [jobId, setJobId] = useRecoilState(RJobID)
+    const [workspaceId, setWorkspaceId] = useRecoilState(RSWorkspaceID)
+    const [jobId, setJobId] = useRecoilState(RSJobID)
     const [listOfJobs, setListOfJobs] = useState<IJobData[]>([])
 
     let navigate = useNavigate();

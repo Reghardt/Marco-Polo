@@ -78,7 +78,7 @@ const DestinationAddress: React.FC<DestinationAddressProps> = ({destinationAddre
     return(
         <React.Fragment>
             
-            Start Address:
+            End Address:
             <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}}>
                 {destinationAddress}
             </Button>

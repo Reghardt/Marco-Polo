@@ -84,8 +84,8 @@ const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrd
   if(rawRouteTableData.rows.length && waypointOrder.length)// Temporary check, the check should rather be in the parent component
   {
     return (
-      <Paper sx={{padding: "10px"}} variant="elevation" elevation={5}>
-        <Typography variant="h5" gutterBottom >Route Sequence Table</Typography>
+      <React.Fragment>
+
   
           {createTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
   
@@ -108,7 +108,7 @@ const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrd
           })}
   
   
-      </Paper>
+      </React.Fragment>
       
     );
   }

@@ -9,12 +9,11 @@ type AddressCellProps = {
     i: number;
     j: number;
     cellRef: ICell;
-    addressColIndex: number;
     geocodeAddress: (address: string) => Promise<IGeocoderResult>;
     updateBodyCell: (i: number, j: number, cell: ICell) => void;
   }
 
-const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, addressColIndex, geocodeAddress, updateBodyCell}) =>
+const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, geocodeAddress, updateBodyCell}) =>
 {
     const buttonRef = useRef(null);
     const popperRef = useRef(null);
@@ -26,11 +25,7 @@ const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, addressColIndex,
     const [selectedAddress, setSelectedAddress] = useState<google.maps.GeocoderResult>()
     const [addressSaved, setAddressSaved] = useState(false)
 
-    let buttonColor = "primary";
-    if(addressColIndex === j)
-    {
-      buttonColor = "orange";
-    }
+    let buttonColor = "orange";
     if(addressSaved)
     {
       buttonColor = "green";

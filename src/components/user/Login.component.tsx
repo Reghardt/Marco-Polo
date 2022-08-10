@@ -4,13 +4,13 @@ import { getServerUrl } from '../../services/server.service';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
-import {RBearerToken} from "../../state/globalstate"
+import {RSBearerToken} from "../../state/globalstate"
 import { Button, TextField } from '@mui/material';
 
 
 export default function Login()
 {
-  const [bearer, setBearer] = useRecoilState(RBearerToken)
+  const [bearer, setBearer] = useRecoilState(RSBearerToken)
   const [loginError, setLoginError] = useState("")
   let navigate = useNavigate();
 

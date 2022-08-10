@@ -11,11 +11,10 @@ type DataCellProps = {
     i: number;
     j: number;
     cellRef: ICell;
-    addressColIndex: number;
     updateBodyCell: (i: number, j: number, cell: ICell) => void;
 }
 
-const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, updateBodyCell}) =>
+const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, updateBodyCell}) =>
 {
 
     const buttonRef = useRef(null);
@@ -24,12 +23,6 @@ const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, update
 
     const [arrowRef, setArrowRef] = useState<any>(null);
     const [cellData, setCellData] = useState(cellRef.data);
-
-    let buttonColor = "primary";
-    if(addressColIndex === j)
-    {
-      buttonColor = "orange";
-    }
 
     const { styles, attributes } = usePopper(
         buttonRef.current,
@@ -73,7 +66,7 @@ const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, addressColIndex, update
 
     return(
             <React.Fragment>
-                <Button sx={{background: buttonColor}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
+                <Button variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
                 
                 {show && (
                 <ClickAwayListener onClickAway={()=> setShow(!show)}>

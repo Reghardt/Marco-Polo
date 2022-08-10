@@ -6,12 +6,11 @@ import { IHeading } from "../../interfaces/Heading.interface";
 
 type HeadingCellProps = {
   colId: number;
-  addressColIndex: number;
   headingDetails: IHeading;
   updateHeading: (colNr: number, newHeading: IHeading) => void;
 }
 
-const HeadingCell: React.FC<HeadingCellProps> = ({colId, addressColIndex: addressColId, headingDetails, updateHeading: updateHeadings}) =>
+const HeadingCell: React.FC<HeadingCellProps> = ({colId, headingDetails, updateHeading: updateHeadings}) =>
 {
     const buttonRef = useRef(null);
     const popperRef = useRef(null);
@@ -19,14 +18,10 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colId, addressColIndex: addres
 
     const [heading, setHeading] = useState(headingDetails);
 
-
     const [arrowRef, setArrowRef] = useState<any>(null);
 
-    let buttonColor = "orange";
-    if(addressColId > -1)
-    {
-      buttonColor = "primary";
-    }
+
+
 
     useEffect(() => {
       setHeading(headingDetails);
@@ -72,7 +67,7 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colId, addressColIndex: addres
 
     return(
         <React.Fragment>
-            <Button sx={{background: buttonColor}} variant="contained" style={{width: "100%"}} ref={buttonRef} onClick={()=> setShow(!show)}>{headingDetails.headingName}</Button>
+            <Button variant="contained" style={{width: "100%"}} ref={buttonRef} onClick={()=> setShow(!show)}>{headingDetails.headingName}</Button>
 
             {show && (
                 <ClickAwayListener onClickAway={() => close()}>

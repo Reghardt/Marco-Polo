@@ -1,18 +1,40 @@
-import { atom } from "recoil";
+import { atom, selector } from "recoil";
+import { EColumnDesignations } from "../services/ColumnDesignation.service";
 
-export const RBearerToken = atom({
+export const RSBearerToken = atom({
     key: "bearerToken",
     default: ""
 })
 
-export const RWorkspaceID = atom({
+export const RSWorkspaceID = atom({
     key: "workspaceID",
     default: ""
 });
 
-export const RJobID = atom<{jobId: string, shouldFetch: boolean}>({
+export const RSJobID = atom<{jobId: string, shouldFetch: boolean}>({
     key: "jobId",
     default: {jobId: "", shouldFetch: false}
+})
+
+export const RSColumnDesignations = atom<number[]>({
+    key: "columnDesignations",
+    default: []
+})
+
+export const RSAddesColumIndex = selector({
+    key: "addesColumIndex",
+    get: ({get}) => {
+        const columnDesignations = get(RSColumnDesignations);
+
+        for(let i = 0; i< columnDesignations.length; i++)
+        {
+            if(columnDesignations[i] === EColumnDesignations.Address)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
 })
 
 

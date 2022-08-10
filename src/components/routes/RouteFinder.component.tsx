@@ -14,10 +14,11 @@ import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RJobID, RWorkspaceID } from "../../state/globalstate";
-import ResultTable from "./ResultTable/ResultTable.component";
+import { RSColumnDesignations, RSJobID, RSWorkspaceID } from "../../state/globalstate";
 import RawRouteDataTableEditor from "./RouteDataEditor/RawRouteDataTableEditor.component";
-import WriteBack from "./Writeback.component";
+import WriteBack from "./writeback/Writeback.component";
+import RouteSequence from "../Sequence/RouteSequence.component";
+import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
 
 const RouteFinder: React.FC = () =>
 {
@@ -28,19 +29,21 @@ const RouteFinder: React.FC = () =>
     const directionsService = useRef<google.maps.DirectionsService>()
     const directionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
-    const [addressColIndex, setAddressColIndex] = useState(-1);
+    const [RcolumnDesignations, RsetColumnDesignations] = useRecoilState(RSColumnDesignations);
 
     const [startAddress, setStartAddress] = useState("none");
     const [destinationAddress, setDestinationAddress] = useState("none");
 
-    const [routeStatisticsData, setRouteResultData] = useState<IRouteStatistics>()
+    const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
     
-    const [jobId, setJobId] = useRecoilState(RJobID)
-    const workspaceId = useRecoilValue(RWorkspaceID)
+    const [jobId, setJobId] = useRecoilState(RSJobID)
+    const workspaceId = useRecoilValue(RSWorkspaceID)
 
     const [waypointOrder, setWaypointOrder] = useState<number[]>([])
 
     console.log(jobId)
+
+
 
     useEffect(() => {
         const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
@@ -65,6 +68,7 @@ const RouteFinder: React.FC = () =>
 
     }, [])
 
+
     function addMarker()
     {
         const marker = new google.maps.Marker({
@@ -75,16 +79,17 @@ const RouteFinder: React.FC = () =>
 
     function calcRoute()
     {
+      /*
       if(startAddress !== "" && destinationAddress !== "") //test if not "none"
       {
         let waypoints: google.maps.DirectionsWaypoint[]  = [];
-        if(addressColIndex > -1)
+        if(columnDesignations > -1)
         {
           for(let i = 0; i < rawRouteTableData.rows.length; i++)
           {
-            console.log(rawRouteTableData.rows[i].cells[addressColIndex].data)
+            console.log(rawRouteTableData.rows[i].cells[columnDesignations].data)
             
-            waypoints.push({location: rawRouteTableData.rows[i].cells[addressColIndex].data, stopover: true})
+            waypoints.push({location: rawRouteTableData.rows[i].cells[columnDesignations].data, stopover: true})
           }
         }
 
@@ -117,7 +122,7 @@ const RouteFinder: React.FC = () =>
               }
               console.log("Fastest", opRouteDistance, opRouteTime)
               console.log("Unop", unopRouteDistance, unopRouteTime)
-              setRouteResultData({
+              setRouteStatisticsData({
                 optimized: {dist: opRouteDistance, time: opRouteTime }, 
                 origional: {dist: unopRouteDistance, time: unopRouteTime}
               })
@@ -133,6 +138,7 @@ const RouteFinder: React.FC = () =>
           }
         })
       }
+      */
     }
 
     function calcRouteOptimized(waypoints: google.maps.DirectionsWaypoint[]) {
@@ -196,7 +202,9 @@ const RouteFinder: React.FC = () =>
         }
 
         setRawRouteTableData({headings: tempHeadings, rows: retreivedSelection})
-        setAddressColIndex(-1)
+        setRouteStatisticsData(null)
+        setWaypointOrder([])
+        RsetColumnDesignations(new Array(retreivedSelection[0].cells.length).fill(0))
       }  
     }
 
@@ -209,16 +217,16 @@ const RouteFinder: React.FC = () =>
       }));
 
   
-    function handleAddressColSelector(value: number | string)
+    function handleColumnDesignation(colIdx: number, colValue: EColumnDesignations)
     {
-      console.log(value)
-      if(typeof value === "string")
+      if(colValue === EColumnDesignations.Data)
       {
-        setAddressColIndex(parseInt(value))
-        return;
+        RsetColumnDesignations(handleSetColumnAsData(colIdx, RcolumnDesignations))
       }
-      setAddressColIndex(value)
-      
+      else if(colValue === EColumnDesignations.Address)
+      {
+        RsetColumnDesignations(handleSetColumnAsAddress(colIdx, RcolumnDesignations))
+      }
     }
 
     function geocodeAddress(address: string) : Promise<IGeocoderResult>
@@ -262,33 +270,16 @@ const RouteFinder: React.FC = () =>
             <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress} geocodeAddress={geocodeAddress}/>
             <br/>
 
-            Designate Address Column:
-            <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-            <Select
-              value={addressColIndex}
-              onChange={(e) => handleAddressColSelector(e.target.value)}
-              displayEmpty
-              inputProps={{ 'aria-label': 'Without label' }}
-            >
-              <MenuItem value={-1}><em>None</em></MenuItem>
-              {rawRouteTableData.headings.map((elem, idx) => {
-                    return <MenuItem value={elem.index} key={idx}>{elem.headingName}</MenuItem>
-                  })}
-            </Select>
-
-          </FormControl>
-          
           {rawRouteTableData.rows[0] && (
             <div>
               <RawRouteDataTableEditor 
                 rawRouteTableData={rawRouteTableData} 
                 setRawRouteTableData={setRawRouteTableData} 
-                addressColIndex={addressColIndex}
+                handleColumnDesignation={handleColumnDesignation}
                 geocodeAddress={geocodeAddress}
                 calcRoute={calcRoute}
               />
               
-            
               {routeStatisticsData && (
                 <div>
                   <RouteStatistics routeStatisticsData={routeStatisticsData}/>
@@ -298,22 +289,14 @@ const RouteFinder: React.FC = () =>
 
               {waypointOrder.length > 0 && (
                 <React.Fragment>
-                  <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                  <RouteSequence rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
                   <WriteBack rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
                 </React.Fragment>
                 
-                
               )}
-
-              
-
             </div>
 
-            
           )}
-          
-            
-            
             <div style={{width: "100%", height: 500}} id="map"></div>
         </div>
     )
