@@ -21,7 +21,7 @@ export const RSColumnDesignations = atom<number[]>({
     default: []
 })
 
-export const RSAddesColumIndex = selector({
+export const RSAddresColumIndex = selector({
     key: "addesColumIndex",
     get: ({get}) => {
         const columnDesignations = get(RSColumnDesignations);
@@ -35,6 +35,11 @@ export const RSAddesColumIndex = selector({
         }
         return -1;
     }
+})
+
+export const RSFirstRowIsColumn = atom<boolean>({
+    key: "firstRowIsColumn",
+    default: false
 })
 
 

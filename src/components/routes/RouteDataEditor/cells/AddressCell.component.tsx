@@ -15,59 +15,74 @@ type AddressCellProps = {
 
 const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, geocodeAddress, updateBodyCell}) =>
 {
-    const buttonRef = useRef(null);
-    const popperRef = useRef(null);
-    const [show, setShow] = useState(false);
+  const buttonRef = useRef(null);
+  const popperRef = useRef(null);
+  const [show, setShow] = useState(false);
+  const [shouldReopen, setShouldReopen] = useState(false)
 
-    const [arrowRef, setArrowRef] = useState<any>(null);
-    const [cellAddress, setCellAddress] = useState(cellRef.data);
-    const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>(null);
-    const [selectedAddress, setSelectedAddress] = useState<google.maps.GeocoderResult>()
-    const [addressSaved, setAddressSaved] = useState(false)
+  const [arrowRef, setArrowRef] = useState<any>(null);
+  const [cellAddress, setCellAddress] = useState(cellRef.data);
+  const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>(null);
+  const [selectedAddress, setSelectedAddress] = useState<google.maps.GeocoderResult>()
+  const [addressSaved, setAddressSaved] = useState(false)
 
-    let buttonColor = "orange";
-    if(addressSaved)
+  let buttonColor = "orange";
+  if(addressSaved)
+  {
+    buttonColor = "green";
+  }
+
+  handleShow();
+
+  const { styles, attributes } = usePopper(
+      buttonRef.current,
+      popperRef.current,
+      {
+        modifiers: [
+          {
+            name: "arrow",
+            options: {
+              element: arrowRef
+            }
+          },
+          {
+            name: "offset",
+            options: {
+              offset: [0, 1]
+            }
+          }
+        ]
+      }
+    );
+
+    function handleShow()
     {
-      buttonColor = "green";
+      if(show === false && shouldReopen === true)
+      {
+        setShow(true);
+        setShouldReopen(false);
+      }
     }
 
-    const { styles, attributes } = usePopper(
-        buttonRef.current,
-        popperRef.current,
-        {
-          modifiers: [
-            {
-              name: "arrow",
-              options: {
-                element: arrowRef
-              }
-            },
-            {
-              name: "offset",
-              options: {
-                offset: [0, 1]
-              }
-            }
-          ]
-        }
-      );
+    function captureInput(input: string)
+    {
+        setCellAddress(input)
+    }
 
-      function captureInput(input: string)
-      {
-          setCellAddress(input)
-      }
-
-      function generateGeocodeResults()
-      {
-        geocodeAddress(cellAddress).then(geocoded => {
-            console.log(geocoded.results)
-            if(geocoded.status === "OK")
-            {
-                console.log("OK")
-                setGeocodedResults(geocoded.results)
-            }
-        })
-      }
+    function generateGeocodeResults()
+    {
+      geocodeAddress(cellAddress).then(geocoded => {
+          console.log(geocoded.results)
+          if(geocoded.status === "OK")
+          {
+              console.log("OK")
+              setGeocodedResults(geocoded.results)
+          }
+          setShow(false);
+          setShouldReopen(true);
+      })
+      
+    }
 
     function handleAddressSelection(index: string)
     {
@@ -86,6 +101,11 @@ const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, geocodeAddress, 
       setShow(!show)
     }
 
+    function close()
+    {
+      setShow(!show)
+    }
+
     return(
         <React.Fragment>
         <Button sx={{background: buttonColor}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> setShow(!show)}>{cellRef.data}</Button>
@@ -98,11 +118,20 @@ const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, geocodeAddress, 
                     {...attributes.popper}
                     >
                         <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
-                        <Paper>
-                            <DialogTitle>Address Editor</DialogTitle>
-                            <DialogContent>
+                        <Paper variant="elevation" elevation={20}>
+                            <DialogTitle sx={{paddingTop: "0.5em", paddingBottom: 0}}>Address Editor</DialogTitle>
+                            <DialogContent sx={{padding: "0.8em"}}>
                                 <br></br>
-                                <TextField onChange={(e)=> captureInput(e.target.value)} autoFocus defaultValue={cellRef.data} size="medium" label="Cell Data"></TextField>
+                                <TextField 
+                                  onChange={(e)=> captureInput(e.target.value)} 
+                                  autoFocus 
+                                  defaultValue={cellRef.data} 
+                                  size="medium" 
+                                  label="Address"
+                                  sx={{width: "20em"}}
+                                />
+
+                                
                             
                                 <br/>
                                 <Button onClick={()=> generateGeocodeResults()}>Search</Button>
@@ -125,7 +154,7 @@ const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, geocodeAddress, 
 
                             <DialogActions>
                                 <Button onClick={() => saveAndClose()}>Save</Button>
-                                <Button>Cancel</Button>
+                                <Button onClick={() => close()}>Cancel</Button>
                             </DialogActions>
                         </Paper>
                 </PopperContainer>

@@ -1,4 +1,4 @@
-import { Button, DialogActions, DialogContent, DialogTitle, Paper } from "@mui/material"
+import { Button, Checkbox, DialogActions, DialogContent, DialogTitle, FormControlLabel, FormGroup, Paper, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { IRawRouteTableData } from "../interfaces/RawRouteDataTable.interface";
 import ResultTable from "../ResultTable/ResultTable.component";
@@ -63,6 +63,7 @@ const WritebackOptions: React.FC<WritebackOptionsProps> = ({open, setOpen, rawRo
             }
 
             await context.sync()
+            setOpen(!open)
         })
 
 
@@ -70,10 +71,16 @@ const WritebackOptions: React.FC<WritebackOptionsProps> = ({open, setOpen, rawRo
 
     return(
     <Paper sx={style}>
-        <DialogTitle>Writeback options</DialogTitle>
+        {/* <DialogTitle>Writeback options</DialogTitle> */}
         <DialogContent>
+        <Typography variant="h5" gutterBottom>Route Sequence Table</Typography>
+            <FormGroup>
+                <FormControlLabel control={<Checkbox defaultChecked />} label="Postal Code" />
+                <FormControlLabel control={<Checkbox defaultChecked />} label="Country" />
+            </FormGroup>
             <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
-            <Button onClick={() => {writeBackToSpreadsheet(writebackTable)}}>Write back</Button>
+            
+            <Button onClick={() => {writeBackToSpreadsheet(writebackTable)}} sx={{marginTop: "1em"}}>Write back</Button>
         </DialogContent>
 
         <DialogActions>

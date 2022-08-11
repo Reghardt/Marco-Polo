@@ -1,3 +1,4 @@
+import { IRow } from "./row.interface";
 import { SelectedCells } from "./selectedCells.class";
 
 interface Range{
@@ -5,7 +6,7 @@ interface Range{
     stop: {x: number, y: number}
 }
 
-export async function loadSelection() : Promise<SelectedCells>
+export async function loadSelection() : Promise<IRow[]>
 {
     return Excel.run(async (context) => {
         let range = context.workbook.getSelectedRanges();
@@ -21,7 +22,7 @@ export async function loadSelection() : Promise<SelectedCells>
         //this sync is for loading the values from each cell
         await context.sync() 
         selectionData.setCellInitialStateAfterSync()   
-        return selectionData;  
+        return selectionData.rows;  
     })
 
 }

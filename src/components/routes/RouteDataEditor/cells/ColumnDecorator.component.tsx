@@ -2,7 +2,7 @@ import { MenuItem, Select } from "@mui/material"
 import React from "react"
 import { useRecoilValue } from "recoil";
 import { EColumnDesignations } from "../../../../services/ColumnDesignation.service";
-import { RSAddesColumIndex, RSColumnDesignations } from "../../../../state/globalstate";
+import { RSAddresColumIndex, RSColumnDesignations } from "../../../../state/globalstate";
 
 interface ColumnDecoratorProps{
   colIdx: number;
@@ -11,7 +11,7 @@ interface ColumnDecoratorProps{
 
 const ColumnDecorator : React.FC<ColumnDecoratorProps> = ({handleColumnDesignation, colIdx}) => {
 const RcolumnDesignations = useRecoilValue(RSColumnDesignations)
-const RaddesColumIndex = useRecoilValue(RSAddesColumIndex)
+const RaddesColumIndex = useRecoilValue(RSAddresColumIndex)
 
   let bgColor = "none";
   if(RaddesColumIndex < 0)

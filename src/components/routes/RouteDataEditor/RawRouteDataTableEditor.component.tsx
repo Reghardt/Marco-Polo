@@ -1,4 +1,4 @@
-import { Button, Divider, Grid, Paper, Typography } from "@mui/material"
+import { Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, Paper, Typography } from "@mui/material"
 import React, { useRef, useState } from "react"
 import { IGeocoderResult } from "../../../interfaces/simpleInterfaces";
 import { IRow } from "../../../services/worksheet/row.interface";
@@ -10,8 +10,8 @@ import { IRawRouteTableData } from "../interfaces/RawRouteDataTable.interface";
 import { ICell } from "../../../services/worksheet/cell.interface";
 import ColumnDecorator from "./cells/ColumnDecorator.component";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
-import { useRecoilValue } from "recoil";
-import { RSColumnDesignations } from "../../../state/globalstate";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { RSColumnDesignations, RSFirstRowIsColumn } from "../../../state/globalstate";
 
 
 interface RoutedataEditorProps{
@@ -20,11 +20,22 @@ interface RoutedataEditorProps{
     handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void;
     geocodeAddress: (address: string) => Promise<IGeocoderResult>;
     calcRoute: () => void;
+    putFirstRowAsHeading: (isHeadings: boolean) => void;
 }
 
-const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableData, setRawRouteTableData, handleColumnDesignation, geocodeAddress, calcRoute}) => {
+const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableData, setRawRouteTableData, handleColumnDesignation, geocodeAddress, calcRoute, putFirstRowAsHeading}) => {
 
     const RcolumnDesignations = useRecoilValue(RSColumnDesignations)
+    const R_firstRowIsColumn = useRecoilValue(RSFirstRowIsColumn)
+
+    if(R_firstRowIsColumn === undefined)
+    {
+      console.log("is valid", R_firstRowIsColumn)
+    }
+    else
+    {
+      console.log("not valid", R_firstRowIsColumn)
+    }
 
     //Creator Functions //////////////////////////////////////////////////////
 
@@ -139,11 +150,21 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
     }
 
     ////////////////////////////////////////////////////////////////////
+
+    function handleFirstRowAsHeading(isHeadings: boolean)
+    {
+        putFirstRowAsHeading(isHeadings)
+    }
     
     return(
         <div>
             <Paper sx={{padding: "10px"}} variant="elevation" elevation={5}>
                 <Typography variant="h5" gutterBottom >Route Data Editor</Typography>
+
+                <FormGroup sx={{marginBottom: "0.7em"}}>
+                    <FormControlLabel control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {handleFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
+                </FormGroup>
+
                 <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
                   {createColumnDecorators().map((elem, idx) => {
                     return <React.Fragment key={idx}>{elem}</React.Fragment>
@@ -164,7 +185,7 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
                   })} 
                 </Grid>
                 
-                <Button onClick={() => calcRoute()}>Calc Route</Button>
+                <Button sx={{marginTop: "1em"}} onClick={() => calcRoute()}>Calc Route</Button>
                 
             </Paper>
         </div>

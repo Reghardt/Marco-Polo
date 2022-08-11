@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 
 
 const PopperContainer = styled.div`
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   border-radius: 50px;
   background-color: black;
   z-index: 2;

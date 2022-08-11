@@ -23,7 +23,7 @@ const WriteBack: React.FC<WriteBackProps> = ({rawRouteTableData, waypointOrder})
 
     return(<div>
         <Button onClick={() => {setOpen(!open)}}>
-            Writeback
+            Writeback Options
         </Button>
 
         <Modal open={open}>

@@ -14,25 +14,28 @@ import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSColumnDesignations, RSJobID, RSWorkspaceID } from "../../state/globalstate";
+import { RSAddresColumIndex, RSColumnDesignations, RSFirstRowIsColumn, RSJobID, RSWorkspaceID } from "../../state/globalstate";
 import RawRouteDataTableEditor from "./RouteDataEditor/RawRouteDataTableEditor.component";
 import WriteBack from "./writeback/Writeback.component";
 import RouteSequence from "../Sequence/RouteSequence.component";
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
+import { IRow } from "../../services/worksheet/row.interface";
 
 const RouteFinder: React.FC = () =>
 {
     const [rawRouteTableData, setRawRouteTableData] = useState<IRawRouteTableData>({headings: [], rows: []})
+    const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
 
     const map = useRef<google.maps.Map>()
     const geocoder = useRef<google.maps.Geocoder>()
     const directionsService = useRef<google.maps.DirectionsService>()
     const directionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
-    const [RcolumnDesignations, RsetColumnDesignations] = useRecoilState(RSColumnDesignations);
+    const [R_columnDesignations, R_setColumnDesignations] = useRecoilState(RSColumnDesignations);
 
     const [startAddress, setStartAddress] = useState("none");
     const [destinationAddress, setDestinationAddress] = useState("none");
+    const [, R_firstRowIsColumn] = useRecoilState(RSFirstRowIsColumn)
 
     const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
     
@@ -41,7 +44,9 @@ const RouteFinder: React.FC = () =>
 
     const [waypointOrder, setWaypointOrder] = useState<number[]>([])
 
-    console.log(jobId)
+    const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
+
+    console.log("refresh")
 
 
 
@@ -68,6 +73,68 @@ const RouteFinder: React.FC = () =>
 
     }, [])
 
+    useEffect(() => {
+      console.log("user selection changed")
+      if(userSelectionRows.length > 0)
+      {
+        const nrOfColumns = userSelectionRows[0].cells.length;
+
+        for(let i = 0; i < userSelectionRows.length; i++)
+        {
+          const row = userSelectionRows[i];
+          if(nrOfColumns !== row.cells.length)
+          {
+            console.error("Each row should have the same number of cells")
+            setRawRouteTableData({headings: [], rows: []})
+            return;
+          }
+        }
+
+        //create data for headings
+        let tempHeadings: IHeading[] = [] 
+        for(let k = 0; k < userSelectionRows[0].cells.length; k++)
+        {
+          tempHeadings.push({index: k ,headingName: "C" + k})
+        }
+
+        setRawRouteTableData({headings: tempHeadings, rows: userSelectionRows});
+        setRouteStatisticsData(null);
+        setWaypointOrder([]);
+        R_setColumnDesignations(new Array(userSelectionRows[0].cells.length).fill(0));
+      } 
+    }, [R_setColumnDesignations, userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
+
+    async function retrieveUserSelectionFromSpreadsheetAndSet()
+    {
+      setUserSelectionRows(await loadSelection())
+    }
+
+    function putFirstRowAsHeading(isHeadings: boolean)
+    {
+      if(isHeadings)
+      {
+        let tempUserSelectionRows = JSON.parse(JSON.stringify(userSelectionRows)) as IRow[];
+        let firstRow = tempUserSelectionRows[0]
+        let tempHeadings: IHeading[] = [] 
+        for(let i = 0; i< firstRow.cells.length; i++)
+        {
+          tempHeadings.push({index: i, headingName: firstRow.cells[i].data})
+        }
+        tempUserSelectionRows.shift()
+        setRawRouteTableData({headings: tempHeadings, rows: tempUserSelectionRows})
+      }
+      else
+      {
+        let tempHeadings: IHeading[] = [] 
+        for(let k = 0; k < userSelectionRows[0].cells.length; k++)
+        {
+          tempHeadings.push({index: k ,headingName: "C" + k})
+        }
+        setRawRouteTableData({headings: tempHeadings, rows: userSelectionRows});
+        
+      }
+      R_firstRowIsColumn(isHeadings)
+    }
 
     function addMarker()
     {
@@ -79,17 +146,17 @@ const RouteFinder: React.FC = () =>
 
     function calcRoute()
     {
-      /*
+      
       if(startAddress !== "" && destinationAddress !== "") //test if not "none"
       {
         let waypoints: google.maps.DirectionsWaypoint[]  = [];
-        if(columnDesignations > -1)
+        if(R_addressColumIndex > -1)
         {
           for(let i = 0; i < rawRouteTableData.rows.length; i++)
           {
-            console.log(rawRouteTableData.rows[i].cells[columnDesignations].data)
+            console.log(rawRouteTableData.rows[i].cells[R_addressColumIndex].data)
             
-            waypoints.push({location: rawRouteTableData.rows[i].cells[columnDesignations].data, stopover: true})
+            waypoints.push({location: rawRouteTableData.rows[i].cells[R_addressColumIndex].data, stopover: true})
           }
         }
 
@@ -138,7 +205,7 @@ const RouteFinder: React.FC = () =>
           }
         })
       }
-      */
+      
     }
 
     function calcRouteOptimized(waypoints: google.maps.DirectionsWaypoint[]) {
@@ -174,39 +241,7 @@ const RouteFinder: React.FC = () =>
       })
     }
 
-    async function retrieveUserSelectionFromSpreadsheetAndSet()
-    {
-      const retreivedSelection = (await loadSelection()).rows
-      console.log(retreivedSelection)
-
-      if(retreivedSelection.length > 0)
-      {
-        const nrOfColumns = retreivedSelection[0].cells.length;
-
-        for(let i = 0; i < retreivedSelection.length; i++)
-        {
-          const row = retreivedSelection[i];
-          if(nrOfColumns !== row.cells.length)
-          {
-            console.error("Each row should have the same number of cells - test")
-            setRawRouteTableData({headings: [], rows: []})
-            return;
-          }
-        }
-
-        //create data for headings
-        let tempHeadings: IHeading[] = [] 
-        for(let k = 0; k < retreivedSelection[0].cells.length; k++)
-        {
-          tempHeadings.push({index: k ,headingName: "C" + k})
-        }
-
-        setRawRouteTableData({headings: tempHeadings, rows: retreivedSelection})
-        setRouteStatisticsData(null)
-        setWaypointOrder([])
-        RsetColumnDesignations(new Array(retreivedSelection[0].cells.length).fill(0))
-      }  
-    }
+    
 
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -221,11 +256,11 @@ const RouteFinder: React.FC = () =>
     {
       if(colValue === EColumnDesignations.Data)
       {
-        RsetColumnDesignations(handleSetColumnAsData(colIdx, RcolumnDesignations))
+        R_setColumnDesignations(handleSetColumnAsData(colIdx, R_columnDesignations))
       }
       else if(colValue === EColumnDesignations.Address)
       {
-        RsetColumnDesignations(handleSetColumnAsAddress(colIdx, RcolumnDesignations))
+        R_setColumnDesignations(handleSetColumnAsAddress(colIdx, R_columnDesignations))
       }
     }
 
@@ -262,7 +297,7 @@ const RouteFinder: React.FC = () =>
     return(
         <div>
             <Typography variant="h4" gutterBottom >Route Finder</Typography>
-            <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Get Selection</Button>
+            <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Load Selection From Excel</Button>
 
             <br/>
             <StartAddress startAddress={startAddress} setStartAddress={setStartAddress} geocodeAddress={geocodeAddress}/>
@@ -278,26 +313,35 @@ const RouteFinder: React.FC = () =>
                 handleColumnDesignation={handleColumnDesignation}
                 geocodeAddress={geocodeAddress}
                 calcRoute={calcRoute}
+                putFirstRowAsHeading={putFirstRowAsHeading}
               />
+
+              <div style={{padding:"0.5em"}}/>
               
               {routeStatisticsData && (
                 <div>
                   <RouteStatistics routeStatisticsData={routeStatisticsData}/>
                 </div>
               )}
-              <Button onClick={()=> saveRoute()}>Save</Button>
+              {/* <Button onClick={()=> saveRoute()}>Save</Button> */}
+              <div style={{padding:"0.5em"}}/>
 
               {waypointOrder.length > 0 && (
                 <React.Fragment>
                   <RouteSequence rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
-                  <WriteBack rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                  
                 </React.Fragment>
                 
               )}
             </div>
+            
 
           )}
+          <div style={{padding:"0.5em"}}/>
+          <Paper>
             <div style={{width: "100%", height: 500}} id="map"></div>
+          </Paper>
+          
         </div>
     )
 }
