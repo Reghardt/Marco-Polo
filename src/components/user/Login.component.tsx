@@ -53,9 +53,9 @@ export default function Login()
   }
 
   return(
-    <React.Fragment>
-          <h1>User Account Login</h1>
+          
           <div>
+            <h1>User Account Login</h1>
               <form onSubmit={(e) => loginUser(e)}>
 
                   <TextField id="email" label="Email" variant="outlined"  value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -69,8 +69,8 @@ export default function Login()
               </form>
               <Button variant="contained" onClick={() => navigate("/register", {replace: true})}>Create New User Account</Button>
           </div>
-          {bearer}
-    </React.Fragment>
+
+
   )
 
 }

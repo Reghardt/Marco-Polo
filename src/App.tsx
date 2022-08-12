@@ -16,7 +16,7 @@ import WorkSpaces from './components/workspaces/Workspaces.component';
 function App() {
 
   return (
-    <div>
+    <div style={{height: '100%'}}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login/>}/>
