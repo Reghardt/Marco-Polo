@@ -1,17 +1,18 @@
 import * as React from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../../services/server.service';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
-import {RSBearerToken} from "../../state/globalstate"
-import { Button, TextField } from '@mui/material';
+import {RSBearerToken, RSWorkspaceID} from "../../state/globalstate"
+import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 
 
 export default function Login()
 {
   const [bearer, setBearer] = useRecoilState(RSBearerToken)
-  const [loginError, setLoginError] = useState("")
+  const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
+  const [loginError, setLoginError] = useState<string>(null)
   let navigate = useNavigate();
 
 
@@ -31,6 +32,10 @@ export default function Login()
 
       const authToken = loginRes.headers.authorization
       console.log(authToken)
+      console.log(loginRes.data)
+      console.log(loginRes.data.lastUsedWorkspaceId)
+
+
 
       if(authToken)
       {
@@ -39,7 +44,16 @@ export default function Login()
 
         
         setBearer(authToken)
-        navigate("/workspaces", {replace: true})
+        if(loginRes.data.lastUsedWorkspaceId)
+        {
+          R_setWorkspaceId(loginRes.data.lastUsedWorkspaceId)
+          navigate("/routeMenu", {replace: true})
+        }
+        else
+        {
+          navigate("/workspaces", {replace: true})
+        }
+        
       }
       else
       {
@@ -54,20 +68,37 @@ export default function Login()
 
   return(
           
-          <div>
-            <h1>User Account Login</h1>
-              <form onSubmit={(e) => loginUser(e)}>
-
-                  <TextField id="email" label="Email" variant="outlined"  value={email} onChange={(e) => setEmail(e.target.value)} />
-                  <br/>
-                  <br/>
-                  <TextField type="password" id="pass" label="Password" variant="outlined"  value={password} onChange={(e) => setPassword(e.target.value)} />
-                  <br/>
-                  {loginError}
-                  <br/>
-                  <Button variant="contained" type="submit">Submit</Button>
-              </form>
-              <Button variant="contained" onClick={() => navigate("/register", {replace: true})}>Create New User Account</Button>
+          <div style={{
+            position: 'absolute', left: '50%', top: '50%',
+            transform: 'translate(-50%, -50%)'
+        }}>
+            <Typography variant="h3" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Marco Polo</Typography>
+            <Paper sx={{width: '100%', padding: '1em'}} variant="elevation" elevation={5}>
+              <div style={{width:"100%", textAlign:'center'}}>
+                <Typography variant="h4" gutterBottom sx={{textAlign:'center'}}>Login</Typography>
+                  <Box component={"form"} onSubmit={(e) => loginUser(e)} sx={{ m: 1, width: '100%'}}>
+                      
+                      <TextField id="email" label="Email" variant="standard"  value={email} onChange={(e) => setEmail(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
+                      
+                      <TextField type="password" id="pass" label="Password" variant="standard"  value={password} onChange={(e) => setPassword(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
+                      <div style={{color: 'red', paddingBottom: '1em'}}>
+                        {loginError}
+                      </div>
+                      
+                      <div>
+                        <Button variant="contained" type="submit" sx={{width:'90%', borderRadius: 8}}>Sign In</Button>
+                      </div>
+                      
+                  </Box>
+                {/* <Button variant="contained" onClick={() => navigate("/register", {replace: true})}>Create New User Account</Button> */}
+                <div style={{textAlign:'center'}}>
+                  <NavLink to={'/register'}>Create User Account</NavLink>
+                </div>
+                
+              </div>
+              
+            </Paper>
+            
           </div>
 
 

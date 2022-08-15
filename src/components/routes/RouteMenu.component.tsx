@@ -109,6 +109,7 @@ export default function RouteMenu()
                   </div>
                   })
                 }
+                <Button onClick={() => {navigate("/workspaces", {replace: true})}}>Back</Button>
 
 
             </TabPanel>
