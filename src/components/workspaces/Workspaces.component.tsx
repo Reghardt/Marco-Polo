@@ -2,14 +2,14 @@ import { Button } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { getServerUrl } from '../../services/server.service';
 import { RSBearerToken } from '../../state/globalstate';
 import WorkSpaceCard from './WorkspaceCard.component';
 
 export default function WorkSpaces()
 {
-    const [bearer, setBearer] = useRecoilState(RSBearerToken)
+    const R_bearer = useRecoilValue(RSBearerToken)
     
     const [workspaces, setWorkspaces] = useState([])
     let navigate = useNavigate();
@@ -19,11 +19,11 @@ export default function WorkSpaces()
     
     const getWorkspaces = () =>{
         console.log("bearer test fired")
-        console.log(bearer)
+        console.log(R_bearer)
         return axios.post(getServerUrl() + "/workspace/list",
         {},
         {
-            headers: {authorization: bearer}
+            headers: {authorization: R_bearer}
         }).then((res) => {
             
             console.log("response received", res)

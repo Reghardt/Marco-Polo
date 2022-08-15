@@ -296,7 +296,7 @@ const RouteFinder: React.FC = () =>
 
     return(
         <div>
-            <Typography variant="h4" gutterBottom >Route Finder</Typography>
+            <Typography variant="h4" gutterBottom >Route Builder</Typography>
             <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Load Selection From Excel</Button>
 
             <br/>
