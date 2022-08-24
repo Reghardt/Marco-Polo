@@ -96,6 +96,7 @@ export default function Login()
                 </div>
                 
               </div>
+              <NavLink to={'/exp'}>Experiment</NavLink>
               
             </Paper>
             

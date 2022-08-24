@@ -5,4 +5,6 @@ export interface ICell
     data: string;
     origionalData: string;
     geocodedAddressRes: google.maps.GeocoderResult; 
+    geocodedResults: google.maps.GeocoderResult[];
+    selectedGeocodedAddressIndex: number;
 }

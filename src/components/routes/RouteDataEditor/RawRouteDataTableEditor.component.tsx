@@ -2,7 +2,7 @@ import { Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, Paper, Ty
 import React, { useRef, useState } from "react"
 import { IGeocoderResult } from "../../../interfaces/simpleInterfaces";
 import { IRow } from "../../../services/worksheet/row.interface";
-import AddressCell from "./cells/AddressCell.component";
+import AddressCell from "./cells/AddressCell/AddressCell.component";
 import DataCell from "./cells/DataCell.component";
 import HeadingCell from "./cells/HeadingCell.component";
 import { IHeading } from "../interfaces/Heading.interface";
@@ -18,12 +18,11 @@ interface RoutedataEditorProps{
     rawRouteTableData: IRawRouteTableData;
     setRawRouteTableData: React.Dispatch<React.SetStateAction<IRawRouteTableData>>;
     handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void;
-    geocodeAddress: (address: string) => Promise<IGeocoderResult>;
     calcRoute: () => void;
     putFirstRowAsHeading: (isHeadings: boolean) => void;
 }
 
-const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableData, setRawRouteTableData, handleColumnDesignation, geocodeAddress, calcRoute, putFirstRowAsHeading}) => {
+const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableData, setRawRouteTableData, handleColumnDesignation, calcRoute, putFirstRowAsHeading}) => {
 
     const RcolumnDesignations = useRecoilValue(RSColumnDesignations)
     const R_firstRowIsColumn = useRecoilValue(RSFirstRowIsColumn)
@@ -104,7 +103,6 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
                 i={i}
                 j={j}
                 cellRef={tableData_rows[i].cells[j]}
-                geocodeAddress={geocodeAddress}
                 updateBodyCell={updateBodyCell}
                 />
               </Grid>
@@ -161,10 +159,8 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
             <Paper sx={{padding: "10px"}} variant="elevation" elevation={5}>
                 <Typography variant="h5" gutterBottom >Route Data Editor</Typography>
 
-                <FormGroup sx={{marginBottom: "0.7em"}}>
-                    <FormControlLabel control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {handleFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
-                </FormGroup>
-
+                <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {handleFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
+                
                 <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
                   {createColumnDecorators().map((elem, idx) => {
                     return <React.Fragment key={idx}>{elem}</React.Fragment>

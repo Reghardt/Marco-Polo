@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { getServerUrl } from "../../services/server.service";
 import { RSBearerToken} from "../../state/globalstate";
+import Payment from "../payment/Payment";
+
 
 export default function CreateWorkspace()
 {
@@ -35,7 +37,7 @@ export default function CreateWorkspace()
 
     return(
         <div>
-            <h1>Create New Workspace</h1>
+            <h1>Create Company Workspace</h1>
             
             <form onSubmit={(e) => createNewWorkspace(e)}>
                 <TextField id="companyName" label="Workspace Name" variant="outlined"  value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
@@ -44,7 +46,7 @@ export default function CreateWorkspace()
                 <Button type="submit">Create</Button>
             </form>
 
-            <p>Payment details</p>
+            <Payment/>
             
             <br/>
             

@@ -4,12 +4,14 @@ import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import './App.css';
-import RouteMenu from './components/routes/RouteMenu.component';
+import RouteMenu from './components/workspaces/RouteMenu.component';
 import RouteFinder from './components/routes/RouteFinder.component';
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
 import WorkSpaces from './components/workspaces/Workspaces.component';
+import Success from './components/payment/Success';
+import PopperExperiment from './components/experiments/PopperExperiment.component';
 
 
 
@@ -27,6 +29,8 @@ function App() {
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
           <Route path="/routeMenu" element={<RouteMenu/>}/>
           <Route path="/jobEditor" element={<RouteFinder/>}/>
+          <Route path="/success" element={<Success/>}/>
+          <Route path="/exp" element={<PopperExperiment/>}/>
         </Routes>
       </BrowserRouter>
     </div>

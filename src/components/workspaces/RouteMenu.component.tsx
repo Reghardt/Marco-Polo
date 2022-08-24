@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getServerUrl } from "../../services/server.service";
 import { RSBearerToken, RSJobID, RSWorkspaceID } from "../../state/globalstate";
-import RouteCreator from "./RouteCreator.component";
+import RouteCreator from "../routes/RouteCreator.component";
 
 interface IJobData {
   jobName: string;
@@ -64,6 +64,8 @@ export default function RouteMenu()
     return(
         <RouteMenuStyle>
           <Typography variant="h4" gutterBottom sx={{color:"#1976d2"}}>Workspace: {workspaceName}</Typography>
+
+          <Button onClick={() => navigate("/workspaces", {replace: true})}>Back</Button>
 
           <Button onClick={() => createPaperRoute()} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "1em"}}>
             <Paper sx={{width: "100%", backgroundColor: "transparent", padding: "0.5em"}}>

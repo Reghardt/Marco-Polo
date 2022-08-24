@@ -16,12 +16,11 @@ export default function WorkSpaceCard({name, id}: CardProps)
     const R_bearer = useRecoilValue(RSBearerToken)
     let navigate = useNavigate();
 
-    function setSelectionAndNavigate()
+    async function setSelectionAndNavigate()
     {
         R_setWorkspaceId(id);
-        //TODO update lastUsedWorkspaceId of user in Db when they select a workspace here
         console.log("Bearer token is:", R_bearer)
-        updateLastUsedWorkspaceId(R_bearer, R_workspaceId)
+        updateLastUsedWorkspaceId(R_bearer, id)
         navigate("/routeMenu", {replace: true})
     }
     

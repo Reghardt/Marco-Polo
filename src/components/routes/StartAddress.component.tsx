@@ -4,14 +4,15 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import PopperContainer from "../common/PopperContainer.styled";
 import { usePopper } from "react-popper";
 import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
+import { geocodeAddress } from "./Route.service";
 
 type StartAddressProps ={
     startAddress: string;
     setStartAddress: React.Dispatch<React.SetStateAction<string>>;
-    geocodeAddress: (address: string) => Promise<IGeocoderResult>;
+
 }
 
-const StartAddress: React.FC<StartAddressProps> = ({startAddress, setStartAddress, geocodeAddress}) =>
+const StartAddress: React.FC<StartAddressProps> = ({startAddress, setStartAddress}) =>
 {
 
     const [show, setShow] = useState(false);

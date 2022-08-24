@@ -27,7 +27,6 @@ const RouteFinder: React.FC = () =>
     const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
 
     const map = useRef<google.maps.Map>()
-    const geocoder = useRef<google.maps.Geocoder>()
     const directionsService = useRef<google.maps.DirectionsService>()
     const directionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
@@ -53,7 +52,7 @@ const RouteFinder: React.FC = () =>
     useEffect(() => {
         const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
         map.current = new google.maps.Map(document.getElementById("map") as HTMLElement, {center, zoom: 8})
-        geocoder.current = new google.maps.Geocoder();
+        
         directionsService.current = new google.maps.DirectionsService();
         directionsRenderer.current = new google.maps.DirectionsRenderer()
         directionsRenderer.current.setMap(map.current)
@@ -264,16 +263,7 @@ const RouteFinder: React.FC = () =>
       }
     }
 
-    function geocodeAddress(address: string) : Promise<IGeocoderResult>
-    {
-      let geoResPromise = new Promise<IGeocoderResult>((resolve) => {
-        geocoder.current.geocode({address: address, region: "ZA"},(res, status) => {
-          resolve({status, results: res})
-        })
-      })
-
-      return geoResPromise;
-    }
+    
 
     function saveRoute()
     {
@@ -300,9 +290,9 @@ const RouteFinder: React.FC = () =>
             <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Load Selection From Excel</Button>
 
             <br/>
-            <StartAddress startAddress={startAddress} setStartAddress={setStartAddress} geocodeAddress={geocodeAddress}/>
+            <StartAddress startAddress={startAddress} setStartAddress={setStartAddress}/>
             <br/>
-            <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress} geocodeAddress={geocodeAddress}/>
+            <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress}/>
             <br/>
 
           {rawRouteTableData.rows[0] && (
@@ -311,7 +301,6 @@ const RouteFinder: React.FC = () =>
                 rawRouteTableData={rawRouteTableData} 
                 setRawRouteTableData={setRawRouteTableData} 
                 handleColumnDesignation={handleColumnDesignation}
-                geocodeAddress={geocodeAddress}
                 calcRoute={calcRoute}
                 putFirstRowAsHeading={putFirstRowAsHeading}
               />
