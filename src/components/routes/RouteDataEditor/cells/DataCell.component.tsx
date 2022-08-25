@@ -80,7 +80,7 @@ const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, updateBodyCell}) =>
                                 <DialogTitle>Cell Editor</DialogTitle>
                                 <DialogContent>
                                     <br></br>
-                                    <TextField onChange={(e)=> captureInput(e.target.value)} autoFocus defaultValue={cellRef.data} size="medium" label="Cell Data"></TextField>
+                                    <TextField onChange={(e)=> captureInput(e.target.value)} defaultValue={cellRef.data} size="medium" label="Cell Data"></TextField>
                                     <FormGroup>
                                         <FormControlLabel control={<Checkbox/>} label="Update Spreadsheet" />
                                     </FormGroup>

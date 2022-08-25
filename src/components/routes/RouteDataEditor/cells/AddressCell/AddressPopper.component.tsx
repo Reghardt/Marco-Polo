@@ -107,8 +107,7 @@ const AddressCellPopper: React.FC<IAddressCellPopperProps> = (
             <DialogContent sx={{padding: "0.8em"}}>
                 <br></br>
                 <TextField 
-                    onChange={(e)=> captureInput(e.target.value)} 
-                    autoFocus 
+                    onChange={(e)=> captureInput(e.target.value)}  
                     defaultValue={textboxContent} 
                     size="medium" 
                     label="Address"

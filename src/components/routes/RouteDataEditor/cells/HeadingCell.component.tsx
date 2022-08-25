@@ -77,7 +77,7 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colId, headingDetails, updateH
                             <DialogTitle>Column Editor</DialogTitle>
                             <DialogContent>
                                 <br/>
-                                <TextField onChange={(e)=> captureInput(e.target.value)} autoFocus defaultValue={headingDetails.headingName} size="medium" label="Cell Data"></TextField>
+                                <TextField onChange={(e)=> captureInput(e.target.value)} defaultValue={headingDetails.headingName} size="medium" label="Column name"></TextField>
 
                             </DialogContent>
 
