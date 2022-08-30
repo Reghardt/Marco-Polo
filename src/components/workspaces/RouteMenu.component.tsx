@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getServerUrl } from "../../services/server.service";
 import { RSBearerToken, RSJobID, RSWorkspaceID } from "../../state/globalstate";
+import StandardHeader from "../common/StandardHeader.component";
 import RouteCreator from "../routes/RouteCreator.component";
 
 interface IJobData {
@@ -37,6 +38,7 @@ export default function RouteMenu()
 
     useEffect(() => {
       getInfoAboutWorkspace()
+      console.log("Route menu useEffect fired")
     }, [])
 
     function getInfoAboutWorkspace()
@@ -63,43 +65,43 @@ export default function RouteMenu()
 
     return(
         <RouteMenuStyle>
-          <Typography variant="h4" gutterBottom sx={{color:"#1976d2"}}>Workspace: {workspaceName}</Typography>
-
-          <Button onClick={() => navigate("/workspaces", {replace: true})}>Back</Button>
-
-          <Button onClick={() => createPaperRoute()} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "1em"}}>
-            <Paper sx={{width: "100%", backgroundColor: "transparent", padding: "0.5em"}}>
-              <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Basic Route</Typography>
-              <Typography variant="body1">Click To Create Basic Route:</Typography>
-              <ul style={{paddingTop: 0, marginTop: 0}}>
-                <li><Typography variant="body2">Calculates Fastest Route</Typography></li>
-                <li><Typography variant="body2">Delivery Prioritization</Typography></li>
-                <li><Typography variant="body2">Printable</Typography></li>
-              </ul>
-            </Paper>
-          </Button>
-              
-          <Button sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "1em"}}>
-            <Paper sx={{width: "100%", backgroundColor: "transparent", padding: "0.5em"}}>
-              <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Digital Route (Work In Progress)</Typography>
-              <Typography variant="body1">Click To Create Digital Route:</Typography>
-              <ul style={{paddingTop: 0, marginTop: 0}}>
-                <li><Typography variant="body2">Calculates Fastest Route</Typography></li>
-                <li><Typography variant="body2">Delivery Prioritization</Typography></li>
-                <li><Typography variant="body2">Send to Driver's Mobile App</Typography></li>
-                <li><Typography variant="body2">Driver Tracking</Typography></li>
-                <li><Typography variant="body2">Automatic Customer Email Sending</Typography></li>
-                <ul>
-                  <li><Typography variant="body2">Dispatch email</Typography></li>
-                  <li><Typography variant="body2">Estimated Day of Delivery</Typography></li>
-                  <li><Typography variant="body2">Estimated Time Of Delivery</Typography></li>
-                  <li><Typography variant="body2">Delay notifications</Typography></li>
+          <StandardHeader title={"Workspace: " + workspaceName} backNavStr="/workspaces"/>
+          <div style={{padding: "0.5em"}}>
+            <Button onClick={() => createPaperRoute()} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "1em", marginTop: "1em"}}>
+              <Paper sx={{width: "100%", backgroundColor: "transparent", padding: "0.5em"}} variant="elevation" elevation={5}>
+                <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Basic Route</Typography>
+                <Typography variant="body1">Click To Create Basic Route:</Typography>
+                <ul style={{paddingTop: 0, marginTop: 0}}>
+                  <li><Typography variant="body2">Calculates Fastest Route</Typography></li>
+                  <li><Typography variant="body2">Delivery Prioritization</Typography></li>
+                  <li><Typography variant="body2">Printable</Typography></li>
                 </ul>
-                <li><Typography variant="body2">Digital Signoff</Typography></li>
-                <li><Typography variant="body2">Track and Trace Email</Typography></li>
-              </ul>
-            </Paper>
-          </Button>
+              </Paper>
+            </Button>
+                
+            <Button sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "1em"}}>
+              <Paper sx={{width: "100%", backgroundColor: "transparent", padding: "0.5em"}} variant="elevation" elevation={5}>
+                <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Digital Route (Work In Progress)</Typography>
+                <Typography variant="body1">Click To Create Digital Route:</Typography>
+                <ul style={{paddingTop: 0, marginTop: 0}}>
+                  <li><Typography variant="body2">Calculates Fastest Route</Typography></li>
+                  <li><Typography variant="body2">Delivery Prioritization</Typography></li>
+                  <li><Typography variant="body2">Send to Driver's Mobile App</Typography></li>
+                  <li><Typography variant="body2">Driver Tracking</Typography></li>
+                  <li><Typography variant="body2">Automatic Customer Email Sending</Typography></li>
+                  <ul>
+                    <li><Typography variant="body2">Dispatch email</Typography></li>
+                    <li><Typography variant="body2">Estimated Day of Delivery</Typography></li>
+                    <li><Typography variant="body2">Estimated Time Of Delivery</Typography></li>
+                    <li><Typography variant="body2">Delay notifications</Typography></li>
+                  </ul>
+                  <li><Typography variant="body2">Digital Signoff</Typography></li>
+                  <li><Typography variant="body2">Track and Trace Email</Typography></li>
+                </ul>
+              </Paper>
+            </Button>
+          </div>
+          
 
         </RouteMenuStyle>
     )

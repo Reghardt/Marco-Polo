@@ -26,7 +26,7 @@ export default function WorkSpaceCard({name, id}: CardProps)
     
     return(
         <div style={{padding: "10px"}}>
-            <Card sx={{ minWidth: 275 }}>
+            <Card sx={{ minWidth: 275 }} variant="elevation" elevation={5}>
                 <CardContent>
                     <Typography variant="h5" component="div">
                         {name}</Typography>

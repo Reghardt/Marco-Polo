@@ -42,6 +42,11 @@ export const RSFirstRowIsColumn = atom<boolean>({
     default: false
 })
 
+export const RSTokens = atom<number>({
+    key: "tokens",
+    default: 0
+})
+
 
 
 

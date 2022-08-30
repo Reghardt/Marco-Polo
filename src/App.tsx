@@ -3,9 +3,9 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import './App.css';
+
 import RouteMenu from './components/workspaces/RouteMenu.component';
-import RouteFinder from './components/routes/RouteFinder.component';
+import RouteBuilder from './components/routes/RouteBuilder/RouteBuilder.component';
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
@@ -18,7 +18,7 @@ import PopperExperiment from './components/experiments/PopperExperiment.componen
 function App() {
 
   return (
-    <div style={{height: '100%'}}>
+    <div style={{height: '100%', textTransform: "none"}}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login/>}/>
@@ -28,7 +28,7 @@ function App() {
           <Route path="/workspaces" element={<WorkSpaces/>}/>
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
           <Route path="/routeMenu" element={<RouteMenu/>}/>
-          <Route path="/jobEditor" element={<RouteFinder/>}/>
+          <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/success" element={<Success/>}/>
           <Route path="/exp" element={<PopperExperiment/>}/>
         </Routes>

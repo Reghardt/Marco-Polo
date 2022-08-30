@@ -1,27 +1,32 @@
 /** @jsxImportSource @emotion/react */
 
-import { Button, FormControl, MenuItem, Paper, Select, styled, Typography } from "@mui/material";
+import { Box, Button, IconButton, Paper, Stack, styled, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
-import { IGeocoderResult, IRouteResult, IRouteStatistics } from "../../interfaces/simpleInterfaces";
-import {loadSelection} from "../../services/worksheet/worksheet.service"
+import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
+import {loadSelection} from "../../../services/worksheet/worksheet.service"
 import DestinationAddress from "./DestinationAddress.component";
-import { IHeading } from "./interfaces/Heading.interface";
+import { IHeading } from "../interfaces/Heading.interface";
 import StartAddress from "./StartAddress.component";
-import { IRawRouteTableData } from "./interfaces/RawRouteDataTable.interface";
-import RouteStatistics from "./RouteStatistics.component";
+import { IRawRouteTableData } from "../interfaces/RawRouteDataTable.interface";
+import RouteStatistics from "../RouteStatistics.component";
 import axios from "axios";
-import { getServerUrl } from "../../services/server.service";
+import { getServerUrl } from "../../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSColumnDesignations, RSFirstRowIsColumn, RSJobID, RSWorkspaceID } from "../../state/globalstate";
-import RawRouteDataTableEditor from "./RouteDataEditor/RawRouteDataTableEditor.component";
-import WriteBack from "./writeback/Writeback.component";
-import RouteSequence from "../Sequence/RouteSequence.component";
-import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
-import { IRow } from "../../services/worksheet/row.interface";
+import { RSAddresColumIndex, RSColumnDesignations, RSFirstRowIsColumn, RSJobID, RSWorkspaceID } from "../../../state/globalstate";
+import RawRouteDataTableEditor from "../RouteDataEditor/RawRouteDataTableEditor.component";
+import RouteSequence from "../../Sequence/RouteSequence.component";
+import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
+import { IRow } from "../../../services/worksheet/row.interface";
 
-const RouteFinder: React.FC = () =>
+import MenuIcon from '@mui/icons-material/Menu';
+import { NavigateBefore} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import MenuDrawer from "../../MenuDrawer/MenuDrawer.component";
+import StandardHeader from "../../common/StandardHeader.component";
+
+const RouteBuilder: React.FC = () =>
 {
     const [rawRouteTableData, setRawRouteTableData] = useState<IRawRouteTableData>({headings: [], rows: []})
     const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
@@ -38,16 +43,18 @@ const RouteFinder: React.FC = () =>
 
     const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
     
-    const [jobId, setJobId] = useRecoilState(RSJobID)
+    const jobId = useRecoilValue(RSJobID)
     const workspaceId = useRecoilValue(RSWorkspaceID)
 
     const [waypointOrder, setWaypointOrder] = useState<number[]>([])
 
     const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
 
+    
+
     console.log("refresh")
 
-
+    
 
     useEffect(() => {
         const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
@@ -283,11 +290,13 @@ const RouteFinder: React.FC = () =>
     }
 
 
-
     return(
         <div>
-            <Typography variant="h4" gutterBottom >Route Builder</Typography>
-            <Button onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Load Selection From Excel</Button>
+          <StandardHeader title="Route Builder" backNavStr="/routeMenu"/>
+
+
+          <div style={{padding: "0.3em"}}>
+            <Button variant="outlined" onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
 
             <br/>
             <StartAddress startAddress={startAddress} setStartAddress={setStartAddress}/>
@@ -295,44 +304,46 @@ const RouteFinder: React.FC = () =>
             <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress}/>
             <br/>
 
-          {rawRouteTableData.rows[0] && (
-            <div>
-              <RawRouteDataTableEditor 
-                rawRouteTableData={rawRouteTableData} 
-                setRawRouteTableData={setRawRouteTableData} 
-                handleColumnDesignation={handleColumnDesignation}
-                calcRoute={calcRoute}
-                putFirstRowAsHeading={putFirstRowAsHeading}
-              />
+            {rawRouteTableData.rows[0] && (
+              <div>
+                <RawRouteDataTableEditor 
+                  rawRouteTableData={rawRouteTableData} 
+                  setRawRouteTableData={setRawRouteTableData} 
+                  handleColumnDesignation={handleColumnDesignation}
+                  calcRoute={calcRoute}
+                  putFirstRowAsHeading={putFirstRowAsHeading}
+                />
 
-              <div style={{padding:"0.5em"}}/>
-              
-              {routeStatisticsData && (
-                <div>
-                  <RouteStatistics routeStatisticsData={routeStatisticsData}/>
-                </div>
-              )}
-              {/* <Button onClick={()=> saveRoute()}>Save</Button> */}
-              <div style={{padding:"0.5em"}}/>
-
-              {waypointOrder.length > 0 && (
-                <React.Fragment>
-                  <RouteSequence rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
-                  
-                </React.Fragment>
+                <div style={{padding:"0.5em"}}/>
                 
-              )}
-            </div>
-            
+                {routeStatisticsData && (
+                  <div>
+                    <RouteStatistics routeStatisticsData={routeStatisticsData}/>
+                  </div>
+                )}
+                {/* <Button onClick={()=> saveRoute()}>Save</Button> */}
+                <div style={{padding:"0.5em"}}/>
 
-          )}
-          <div style={{padding:"0.5em"}}/>
-          <Paper>
-            <div style={{width: "100%", height: 500}} id="map"></div>
-          </Paper>
+                {waypointOrder.length > 0 && (
+                  <React.Fragment>
+                    <RouteSequence rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                    
+                  </React.Fragment>
+                  
+                )}
+              </div>
+              
+
+            )}
+            <div style={{padding:"0.5em"}}/>
+            <Paper>
+              <div style={{width: "100%", height: 500}} id="map"></div>
+            </Paper>
+          </div>
+
           
         </div>
     )
 }
 
-export default RouteFinder
+export default RouteBuilder
