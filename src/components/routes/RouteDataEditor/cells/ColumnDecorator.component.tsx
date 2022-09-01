@@ -16,7 +16,7 @@ const RaddesColumIndex = useRecoilValue(RSAddresColumIndex)
   let bgColor = "none";
   if(RaddesColumIndex < 0)
   {
-    bgColor = "orange";
+    bgColor = "#ff9800";
   }
 
   const handleChange = (type: string | number) => {

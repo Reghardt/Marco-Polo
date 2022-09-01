@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getServerUrl } from "../../services/server.service";
-import { RSBearerToken, RSJobID, RSWorkspaceID } from "../../state/globalstate";
+import { RSBearerToken, RSJobID, RSTokens, RSWorkspaceID } from "../../state/globalstate";
 import StandardHeader from "../common/StandardHeader.component";
 import RouteCreator from "../routes/RouteCreator.component";
 
@@ -30,7 +30,8 @@ const RouteMenuStyle = styled.div`
 
 export default function RouteMenu()
 {
-    const [workspaceId, setWorkspaceId] = useRecoilState(RSWorkspaceID)
+    const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
+    const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
     const [workspaceName, setWorkspaceName] = useState("")
     const R_bearer = useRecoilValue(RSBearerToken)
 
@@ -43,15 +44,26 @@ export default function RouteMenu()
 
     function getInfoAboutWorkspace()
     {
-      axios.post(getServerUrl() + "/job/info",
+      axios.post(getServerUrl() + "/workspace/info",
         {
-            workspaceId: workspaceId,
+            workspaceId: R_workspaceId,
         },
         {
           headers: {authorization: R_bearer}
         }).then(res => {
             console.log(res)
-            setWorkspaceName(res.data.workspaceName)
+            if(res.data.workspaceName)
+            {
+              console.log("has content")
+              setWorkspaceName(res.data.workspaceName)
+              R_setTokens(res.data.tokens)
+            }
+            else
+            {
+              console.log("no content")
+              navigate("/workspaces", {replace: true})
+            }
+            
         }).catch(err => {
             console.error(err)
         })
@@ -67,7 +79,10 @@ export default function RouteMenu()
         <RouteMenuStyle>
           <StandardHeader title={"Workspace: " + workspaceName} backNavStr="/workspaces"/>
           <div style={{padding: "0.5em"}}>
-            <Button onClick={() => createPaperRoute()} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "1em", marginTop: "1em"}}>
+
+            <Button variant="outlined">Route History</Button>
+
+            <Button onClick={() => createPaperRoute()} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "0.5em", marginTop: "1em"}}>
               <Paper sx={{width: "100%", backgroundColor: "transparent", padding: "0.5em"}} variant="elevation" elevation={5}>
                 <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Basic Route</Typography>
                 <Typography variant="body1">Click To Create Basic Route:</Typography>
@@ -79,7 +94,7 @@ export default function RouteMenu()
               </Paper>
             </Button>
                 
-            <Button sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "1em"}}>
+            <Button sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", padding: 0, ":hover": {backgroundColor: "lightGrey"}, marginBottom: "0.5em"}}>
               <Paper sx={{width: "100%", backgroundColor: "transparent", padding: "0.5em"}} variant="elevation" elevation={5}>
                 <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Digital Route (Work In Progress)</Typography>
                 <Typography variant="body1">Click To Create Digital Route:</Typography>
@@ -97,6 +112,8 @@ export default function RouteMenu()
                   </ul>
                   <li><Typography variant="body2">Digital Signoff</Typography></li>
                   <li><Typography variant="body2">Track and Trace Email</Typography></li>
+                  <li><Typography variant="body2">Avoid Tolls</Typography></li>
+                  <li><Typography variant="body2">Calculate Toll Fees</Typography></li>
                 </ul>
               </Paper>
             </Button>

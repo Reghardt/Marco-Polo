@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { getServerUrl } from '../../services/server.service';
 import { RSBearerToken } from '../../state/globalstate';
+import HelpTooltip from '../common/HelpTooltip.component';
 import StandardHeader, { EStandardHeaderConfig } from '../common/StandardHeader.component';
 import WorkSpaceCard from './WorkspaceCard.component';
 
@@ -22,7 +23,7 @@ export default function WorkSpaces()
     const getWorkspaces = () =>{
         console.log("bearer test fired")
         console.log(R_bearer)
-        return axios.post(getServerUrl() + "/workspace/list",
+        return axios.post(getServerUrl() + "/workspace/myWorkspaces",
         {},
         {
             headers: {authorization: R_bearer}
@@ -59,10 +60,7 @@ export default function WorkSpaces()
                         <Button onClick={() => navigate("/createWorkspace", {replace: true})} variant="outlined" sx={{m: "0.8em"}}>Create New Workspace</Button>
                     </Box>
                     <Box>
-                        <Tooltip arrow title={<p style={{textTransform: "none", margin: "0"}}>Routes are created within a workspace, multiple employees can join a workspace and create routes</p>} PopperProps={{sx: {TextTransform: "lowercase"}}}>
-                            <Help sx={{color:"gray"}}/>
-                        </Tooltip>
-
+                        <HelpTooltip title='Routes are created within a workspace, multiple employees can join a workspace and create routes'/>
                     </Box>
                 </Stack>
 

@@ -1,10 +1,11 @@
-import { Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material";
+import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material";
 import React, { useRef, useState } from "react";
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import PopperContainer from "../../common/PopperContainer.styled";
 import { usePopper } from "react-popper";
 import { IGeocoderResult } from "../../../interfaces/simpleInterfaces";
 import { geocodeAddress } from "../Route.service";
+import HelpTooltip from "../../common/HelpTooltip.component";
 
 type DestinationAddressProps ={
     destinationAddress: string;
@@ -77,55 +78,64 @@ const DestinationAddress: React.FC<DestinationAddressProps> = ({destinationAddre
     
     return(
         <React.Fragment>
+          <Stack direction={"row"} alignItems="center" spacing={1} sx={{margin: "0", padding: "0"}}>
+            <Box>
+              <Typography variant="body1">Return Address: </Typography>
+            </Box>
             
-            Return Address:
-            <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}}>
-                {destinationAddress}
-            </Button>
+            <Box>
+              <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}}>
+                  {destinationAddress}
+              </Button>
+            </Box>
 
-            {show && (
-                <ClickAwayListener onClickAway={()=> setShow(!show)}>
-                    <PopperContainer 
-                        ref={popperRef}
-                        style={styles.popper}
-                        {...attributes.popper}
-                        >
-                            <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
-                            <Paper className="paper" >
-                                <DialogTitle>Destination Address Selector</DialogTitle>
-                                <DialogContent>
-                                    <br></br>
-                                    <TextField defaultValue={destinationAddress} onChange={(e)=> captureInput(e.target.value)} autoFocus size="medium" label="Destination Address"></TextField>
-                                    <br/>
-                                    <Button onClick={()=> generateGeocodeResults()}>Search</Button>
-                                    <br/>
+            <Box>
+              <HelpTooltip title="Where the vehicle will return to once it has delivered or picked up everything on the route"/>
+            </Box>
+          </Stack>
+            
 
-                                    {geocodedResults &&  
-                                        (<FormControl>
-                                            <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
-                                            <RadioGroup
-                                                aria-labelledby="demo-radio-buttons-group-label"
-                                                defaultValue="female"
-                                                name="radio-buttons-group"
-                                                onChange={(e) => handleAddressSelection(e.target.value)}
-                                            >
-                                                {geocodedResults.map((elem, idx) => {
-                                                    return <FormControlLabel key={idx} value={idx} control={<Radio />} label={elem.formatted_address} />
-                                                    })}
-                                            </RadioGroup>
-                                        </FormControl>
-                                )}
-                                </DialogContent>
+          {show && (
+            <ClickAwayListener onClickAway={()=> setShow(!show)}>
+                <PopperContainer 
+                  ref={popperRef}
+                  style={styles.popper}
+                  {...attributes.popper}
+                >
+                  <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
+                  <Paper className="paper" >
+                      <DialogTitle>Destination Address Selector</DialogTitle>
+                      <DialogContent>
+                          <br></br>
+                          <TextField defaultValue={destinationAddress} onChange={(e)=> captureInput(e.target.value)} autoFocus size="medium" label="Destination Address"></TextField>
+                          <br/>
+                          <Button onClick={()=> generateGeocodeResults()}>Search</Button>
+                          <br/>
 
-                                
-
-                                <DialogActions>
-                                    <Button onClick={() => saveDestinationAddress()}>Save</Button>
-                                    <Button>Cancel</Button>
-                                </DialogActions>
-                            </Paper>
-                    </PopperContainer>
-                </ClickAwayListener>)}
+                          {geocodedResults &&  
+                              (<FormControl>
+                                  <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
+                                  <RadioGroup
+                                      aria-labelledby="demo-radio-buttons-group-label"
+                                      defaultValue="female"
+                                      name="radio-buttons-group"
+                                      onChange={(e) => handleAddressSelection(e.target.value)}
+                                  >
+                                      {geocodedResults.map((elem, idx) => {
+                                          return <FormControlLabel key={idx} value={idx} control={<Radio />} label={elem.formatted_address} />
+                                          })}
+                                  </RadioGroup>
+                              </FormControl>
+                      )}
+                      </DialogContent>
+                      <DialogActions>
+                          <Button onClick={() => saveDestinationAddress()}>Save</Button>
+                          <Button>Cancel</Button>
+                      </DialogActions>
+                  </Paper>
+                </PopperContainer>
+            </ClickAwayListener>
+          )}
         </React.Fragment>
     )
 }

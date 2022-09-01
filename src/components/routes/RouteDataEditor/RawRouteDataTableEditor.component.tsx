@@ -1,4 +1,4 @@
-import { Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, Paper, Typography } from "@mui/material"
+import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, Paper, Stack, Typography } from "@mui/material"
 import React, { useRef, useState } from "react"
 import { IGeocoderResult } from "../../../interfaces/simpleInterfaces";
 import { IRow } from "../../../services/worksheet/row.interface";
@@ -97,7 +97,7 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
             //add elements to table
             if(RcolumnDesignations[j] === EColumnDesignations.Address )
             {
-              cellTable[i][j] = <Grid item xs={elementSize}> {/* TODO Rename To tableBody?*/}
+              cellTable[i][j] = <Grid key={`cell-${i}-${j}`} item xs={elementSize}> {/* TODO Rename To tableBody?*/}
               {/* i and j are the positions of the cell in the cellTable, not the coordinates on the spreadsheet */}
               <AddressCell 
                 i={i}
@@ -109,7 +109,7 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
             }
             else
             {
-              cellTable[i][j] = <Grid item xs={elementSize}> 
+              cellTable[i][j] = <Grid key={`cell-${i}-${j}`} item xs={elementSize}> 
               <DataCell 
                 i={i}
                 j={j}
@@ -155,36 +155,37 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
     }
     
     return(
-        <div>
-            <Paper sx={{padding: "10px"}} variant="elevation" elevation={5}>
-                <Typography variant="h5" gutterBottom >Route Data Editor</Typography>
+      <Paper sx={{padding: "10px", marginBottom: "0.5em"}} variant="elevation" elevation={5}>
+          <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Route Data Editor</Typography>
 
-                <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {handleFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
-                
-                <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
-                  {createColumnDecorators().map((elem, idx) => {
-                    return <React.Fragment key={idx}>{elem}</React.Fragment>
-                  })}
-                </Grid>
-                <Grid container spacing={0.3}>
-                  {CreateTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
-                      return <React.Fragment key={idx}>{elem}</React.Fragment>
-                      })}
-                </Grid>
-                <div style={{padding: "5px"}}>
-                  <Divider/>
-                </div>
-                  
-                <Grid container spacing={0.3}>
-                  {CreateTableBody(rawRouteTableData.rows).map((elem, idx) => {
-                      return <React.Fragment key={idx}>{elem}</React.Fragment>
-                  })} 
-                </Grid>
-                
-                <Button sx={{marginTop: "1em"}} onClick={() => calcRoute()}>Calc Route</Button>
-                
-            </Paper>
-        </div>
+          {/* <Typography variant="body2" gutterBottom >Legends:</Typography> */}
+
+          <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {handleFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
+          
+          <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
+            {createColumnDecorators().map((elem, idx) => {
+              return <React.Fragment key={`column-decorator-${idx}`}>{elem}</React.Fragment>
+            })}
+          </Grid>
+          <Grid container spacing={0.3}>
+            {CreateTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
+                return <React.Fragment key={`heading-${idx}`}>{elem}</React.Fragment>
+                })}
+          </Grid>
+          <div style={{padding: "5px"}}>
+            <Divider/>
+          </div>
+            
+          <Grid container spacing={0.3}>
+            {CreateTableBody(rawRouteTableData.rows).map((elem, idx) => {
+                return <React.Fragment key={`body-${idx}`}>{elem}</React.Fragment>
+            })} 
+          </Grid>
+          
+          <Button sx={{marginTop: "1em"}} onClick={() => calcRoute()} variant="outlined">Find Route</Button>
+          
+      </Paper>
+
     )
 }
 

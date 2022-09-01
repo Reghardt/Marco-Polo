@@ -23,7 +23,8 @@ const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, updateBodyCell})
 
   
 
-  let buttonColor = "orange";
+  let buttonColor = "#ff9800";
+  console.log(cellRef.geocodedAddressRes)
   if(cellRef.geocodedAddressRes)
   {
     buttonColor = "green";

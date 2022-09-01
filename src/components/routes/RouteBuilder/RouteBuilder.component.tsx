@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
-import { Box, Button, IconButton, Paper, Stack, styled, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, Paper, Stack, styled, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
 import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
@@ -14,7 +14,7 @@ import axios from "axios";
 import { getServerUrl } from "../../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSColumnDesignations, RSFirstRowIsColumn, RSJobID, RSWorkspaceID } from "../../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnDesignations, RSFirstRowIsColumn, RSJobID, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
 import RawRouteDataTableEditor from "../RouteDataEditor/RawRouteDataTableEditor.component";
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
@@ -44,13 +44,18 @@ const RouteBuilder: React.FC = () =>
     const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
     
     const jobId = useRecoilValue(RSJobID)
-    const workspaceId = useRecoilValue(RSWorkspaceID)
+    const R_workspaceId = useRecoilValue(RSWorkspaceID)
 
     const [waypointOrder, setWaypointOrder] = useState<number[]>([])
 
     const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
 
-    
+    const R_bearer = useRecoilValue(RSBearerToken)
+
+    const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
+
+    const [fastestRouteResult, setFastestRouteResult] = useState<IRouteResult>(null)
+    const [originalRouteResult, setOriginalRouteResult] = useState<IRouteResult>(null)
 
     console.log("refresh")
 
@@ -150,6 +155,19 @@ const RouteBuilder: React.FC = () =>
           });
     }
 
+    function removeDirections()
+    {
+      directionsRenderer.current.setMap(null)
+      setTimeout(() => {
+        directionsRenderer.current.setMap(map.current)
+      },4000)
+    }
+
+    function getRouteDistance_Time_WaypointOrder()
+    {
+
+    }
+
     function calcRoute()
     {
       
@@ -166,12 +184,14 @@ const RouteBuilder: React.FC = () =>
           }
         }
 
-        Promise.all([calcRouteOptimized(waypoints), calcRouteUnoptimized(waypoints)]).then(res => {
+        Promise.all([createDirections(waypoints, true), createDirections(waypoints, false)]).then(res => {
           
           if(res[0].status === "OK")
           {
             directionsRenderer.current.setDirections(res[0].result)
-            console.log(res[0].result)
+            
+            //directionsRenderer.current.
+            console.log(res[0])
             setWaypointOrder(res[0].result.routes[0].waypoint_order)
             let oplegs = res[0].result.routes[0].legs;
             let opRouteDistance = 0;
@@ -184,6 +204,7 @@ const RouteBuilder: React.FC = () =>
 
             if(res[1].status === "OK")
             {
+              //directionsRenderer.current.setDirections(res[1].result)
               let unoplegs = res[1].result.routes[0].legs;
               console.log(res[1].result.routes[0].legs)
               let unopRouteDistance = 0;
@@ -195,10 +216,16 @@ const RouteBuilder: React.FC = () =>
               }
               console.log("Fastest", opRouteDistance, opRouteTime)
               console.log("Unop", unopRouteDistance, unopRouteTime)
-              setRouteStatisticsData({
-                optimized: {dist: opRouteDistance, time: opRouteTime }, 
-                origional: {dist: unopRouteDistance, time: unopRouteTime}
+
+              //TODO route cost calculation
+              makeRouteOnDB(5).then(res => {
+                console.log(res)
+                setRouteStatisticsData({
+                  optimized: {dist: opRouteDistance, time: opRouteTime }, 
+                  origional: {dist: unopRouteDistance, time: unopRouteTime}
+                })
               })
+              
             }
             else
             {
@@ -211,17 +238,38 @@ const RouteBuilder: React.FC = () =>
           }
         })
       }
-      
     }
 
-    function calcRouteOptimized(waypoints: google.maps.DirectionsWaypoint[]) {
+    async function makeRouteOnDB(routeCost: number)
+    {
+      return axios.post(getServerUrl() + "/job/makeRoute",
+        {
+          workspaceId: R_workspaceId,
+          routeCost: routeCost
+        },
+        {
+            headers: {authorization: R_bearer}
+        }).then((res) => {
+            
+            console.log("response received", res)
+            //TODO dont set and return
+            R_setTokens(res.data.tokens)
+            return res.data;
+            
+        }).catch((err) => {
+            console.error(err.response)
+            return err;
+        })
+    }
+
+    function createDirections(waypoints: google.maps.DirectionsWaypoint[], optimize: boolean) {
 
       var request: google.maps.DirectionsRequest = {
         origin: startAddress,
         destination: destinationAddress,
         waypoints: waypoints,
         travelMode: google.maps.TravelMode.DRIVING,
-        optimizeWaypoints: true
+        optimizeWaypoints: optimize
       };
 
       return new Promise<IRouteResult>((resolve) => {
@@ -230,24 +278,6 @@ const RouteBuilder: React.FC = () =>
         });
       })  
     }
-
-    function calcRouteUnoptimized(waypoints: google.maps.DirectionsWaypoint[]) {
-
-      var request: google.maps.DirectionsRequest = {
-        origin: startAddress,
-        destination: destinationAddress,
-        waypoints: waypoints,
-        travelMode: google.maps.TravelMode.DRIVING,
-        optimizeWaypoints: false
-      };
-      return new Promise<IRouteResult>((resolve) => {
-        directionsService.current.route(request, (result, status) => {
-          resolve({result, status})
-        });
-      })
-    }
-
-    
 
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -276,7 +306,7 @@ const RouteBuilder: React.FC = () =>
     {
       axios.post(getServerUrl() + "/job/save",
         {
-            workspaceId: workspaceId,
+            workspaceId: R_workspaceId,
             jobId: jobId.jobId,
             data: rawRouteTableData,
         },
@@ -298,11 +328,19 @@ const RouteBuilder: React.FC = () =>
           <div style={{padding: "0.3em"}}>
             <Button variant="outlined" onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
 
-            <br/>
-            <StartAddress startAddress={startAddress} setStartAddress={setStartAddress}/>
-            <br/>
-            <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress}/>
-            <br/>
+            <Stack spacing={0.8} sx={{marginTop: "0.5em", marginBottom: "1em"}}>
+              <Box>
+                <StartAddress startAddress={startAddress} setStartAddress={setStartAddress}/>
+              </Box>
+              <Box>
+                <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress}/>
+              </Box>
+            </Stack>
+            
+            
+            
+            
+            {/* <Button onClick={() => {makeRouteOnDB(5)}}>Make route on DB test</Button> */}
 
             {rawRouteTableData.rows[0] && (
               <div>
@@ -314,29 +352,23 @@ const RouteBuilder: React.FC = () =>
                   putFirstRowAsHeading={putFirstRowAsHeading}
                 />
 
-                <div style={{padding:"0.5em"}}/>
-                
                 {routeStatisticsData && (
-                  <div>
                     <RouteStatistics routeStatisticsData={routeStatisticsData}/>
-                  </div>
                 )}
                 {/* <Button onClick={()=> saveRoute()}>Save</Button> */}
-                <div style={{padding:"0.5em"}}/>
-
+                
                 {waypointOrder.length > 0 && (
-                  <React.Fragment>
                     <RouteSequence rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
-                    
-                  </React.Fragment>
-                  
                 )}
               </div>
               
 
             )}
-            <div style={{padding:"0.5em"}}/>
-            <Paper>
+
+            <Paper sx={{padding: "10px", color:"#1976d2"}} variant="elevation" elevation={5}>
+
+              <Button onClick={() => {removeDirections()}}>Remove</Button>
+              <Typography variant="h5" gutterBottom >Google Maps</Typography>
               <div style={{width: "100%", height: 500}} id="map"></div>
             </Paper>
           </div>

@@ -67,7 +67,7 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colId, headingDetails, updateH
 
     return(
         <React.Fragment>
-            <Button variant="contained" style={{width: "100%"}} ref={buttonRef} onClick={()=> setShow(!show)}>{headingDetails.headingName}</Button>
+            <Button variant="contained" style={{height: "100%", width: "100%"}} ref={buttonRef} onClick={()=> setShow(!show)}>{headingDetails.headingName}</Button>
 
             {show && (
                 <ClickAwayListener onClickAway={() => close()}>

@@ -1,10 +1,11 @@
-import { Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material";
+import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material";
 import React, { useRef, useState } from "react";
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import PopperContainer from "../../common/PopperContainer.styled";
 import { usePopper } from "react-popper";
 import { IGeocoderResult } from "../../../interfaces/simpleInterfaces";
 import { geocodeAddress } from "../Route.service";
+import HelpTooltip from "../../common/HelpTooltip.component";
 
 type StartAddressProps ={
     startAddress: string;
@@ -78,11 +79,27 @@ const StartAddress: React.FC<StartAddressProps> = ({startAddress, setStartAddres
     
     return(
         <React.Fragment>
+
+          <Stack direction={"row"} alignItems="center" spacing={1} sx={{margin: "0", padding: "0"}}>
+            <Box>
+              <Typography variant="body1">Start Address: </Typography>
+            </Box>
             
-            Start Address:
-            <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}}>
+            <Box>
+              <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}}>
                 {startAddress}
             </Button>
+            </Box>
+
+            <Box>
+              <HelpTooltip title="From where the vehicle will depart from initially"/>
+            </Box>
+          </Stack>
+
+            
+            
+            
+            
 
             {show && (
                 <ClickAwayListener onClickAway={()=> setShow(!show)}>
