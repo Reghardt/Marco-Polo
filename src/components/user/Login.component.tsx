@@ -5,7 +5,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import {RSBearerToken, RSWorkspaceID} from "../../state/globalstate"
-import { Box, Button, Paper, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
 
 
 export default function Login()
@@ -72,34 +72,45 @@ export default function Login()
             position: 'absolute', left: '50%', top: '50%',
             transform: 'translate(-50%, -50%)'
         }}>
-            <Typography variant="h3" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Marco Polo</Typography>
-            <Paper sx={{width: '100%', padding: '1em'}} variant="elevation" elevation={5}>
-              <div style={{width:"100%", textAlign:'center'}}>
-                <Typography variant="h4" gutterBottom sx={{textAlign:'center'}}>Login</Typography>
-                  <Box component={"form"} onSubmit={(e) => loginUser(e)} sx={{ m: 1, width: '100%'}}>
-                      
-                      <TextField id="email" label="Email" variant="standard"  value={email} onChange={(e) => setEmail(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
-                      
-                      <TextField type="password" id="pass" label="Password" variant="standard"  value={password} onChange={(e) => setPassword(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
-                      <div style={{color: 'red', paddingBottom: '1em'}}>
-                        {loginError}
-                      </div>
-                      
-                      <div>
-                        <Button variant="contained" type="submit" sx={{width:'90%', borderRadius: 8}}>Sign In</Button>
-                      </div>
-                      
-                  </Box>
-                {/* <Button variant="contained" onClick={() => navigate("/register", {replace: true})}>Create New User Account</Button> */}
-                <div style={{textAlign:'center'}}>
-                  <NavLink to={'/register'}>Create User Account</NavLink>
-                </div>
-                
-              </div>
-              <NavLink to={'/exp'}>Experiment</NavLink>
-              
-              
-            </Paper>            
+            <Stack>
+              <Box>
+                <Typography variant="h3" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Marco Polo</Typography>
+              </Box>
+              <Box>
+                <Paper sx={{width: '100%', padding: '1em'}} variant="elevation" elevation={5}>
+                  <div style={{width:"100%", textAlign:'center'}}>
+                    <Typography variant="h4" gutterBottom sx={{textAlign:'center'}}>Login</Typography>
+                      <Box component={"form"} onSubmit={(e) => loginUser(e)} sx={{ m: 1, width: '100%'}}>
+                          
+                          <TextField id="email" label="Email" variant="standard"  value={email} onChange={(e) => setEmail(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
+                          
+                          <TextField type="password" id="pass" label="Password" variant="standard"  value={password} onChange={(e) => setPassword(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
+                          <div style={{color: 'red', paddingBottom: '1em'}}>
+                            {loginError}
+                          </div>
+                          
+                          <div>
+                            <Button variant="contained" type="submit" sx={{width:'90%', borderRadius: 8}}>Sign In</Button>
+                          </div>
+                          
+                      </Box>
+                    {/* <Button variant="contained" onClick={() => navigate("/register", {replace: true})}>Create New User Account</Button> */}
+                    <div style={{textAlign:'center'}}>
+                      <NavLink to={'/register'}>Create User Account</NavLink>
+                    </div>
+                    
+                  </div>
+                  {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
+                  
+                  
+                </Paper>
+              </Box>
+              <Box sx={{marginTop: "1em"}}>
+                <Typography variant="body1" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Experimental - Beta 0.7.1</Typography>
+              </Box>
+            </Stack>
+            
+                        
           </div>
 
 
