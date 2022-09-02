@@ -49,7 +49,7 @@ const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrd
 
   function createTableBody(tableData_rows: IRow[]) : JSX.Element[][]
   {
-    if(tableData_rows.length && waypointOrder.length)
+    if(tableData_rows.length > 0 && waypointOrder.length > 0)
     {
       const elementSize = 11 / tableData_rows[0].cells.length;
       const cellTable: JSX.Element[][] = [];
@@ -81,12 +81,10 @@ const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrd
     }
   }
 
-  if(rawRouteTableData.rows.length && waypointOrder.length)// Temporary check, the check should rather be in the parent component
+  if(rawRouteTableData.rows.length > 0 && waypointOrder.length > 0)// Temporary check, the check should rather be in the parent component
   {
     return (
       <React.Fragment>
-
-  
           {createTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
   
           return [
@@ -106,16 +104,12 @@ const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrd
               </Grid>, 
               <Divider />]
           })}
-  
-  
       </React.Fragment>
-      
     );
   }
   else{
     return(<React.Fragment></React.Fragment>)
   }
-
 }
 
 export default ResultTable;

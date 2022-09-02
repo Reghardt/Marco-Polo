@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
-import { Box, Button, Divider, IconButton, Paper, Stack, styled, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, Paper, Stack, styled, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
 import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
@@ -20,11 +20,12 @@ import RouteSequence from "../../Sequence/RouteSequence.component";
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
 import { IRow } from "../../../services/worksheet/row.interface";
 
-import MenuIcon from '@mui/icons-material/Menu';
-import { NavigateBefore} from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import MenuDrawer from "../../MenuDrawer/MenuDrawer.component";
 import StandardHeader from "../../common/StandardHeader.component";
+
+enum EDisplayRoute{
+  Fastest,
+  Original
+}
 
 const RouteBuilder: React.FC = () =>
 {
@@ -33,7 +34,8 @@ const RouteBuilder: React.FC = () =>
 
     const map = useRef<google.maps.Map>()
     const directionsService = useRef<google.maps.DirectionsService>()
-    const directionsRenderer = useRef<google.maps.DirectionsRenderer>()
+    const fastestRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
+    const originalRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
     const [R_columnDesignations, R_setColumnDesignations] = useRecoilState(RSColumnDesignations);
 
@@ -57,17 +59,21 @@ const RouteBuilder: React.FC = () =>
     const [fastestRouteResult, setFastestRouteResult] = useState<IRouteResult>(null)
     const [originalRouteResult, setOriginalRouteResult] = useState<IRouteResult>(null)
 
+    const [routeToDisplay, setRouteToDisplay] = useState<EDisplayRoute>(EDisplayRoute.Fastest)
+
     console.log("refresh")
 
-    
+    //START: useEffects
 
+    //Creates map on mount
     useEffect(() => {
         const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
         map.current = new google.maps.Map(document.getElementById("map") as HTMLElement, {center, zoom: 8})
         
         directionsService.current = new google.maps.DirectionsService();
-        directionsRenderer.current = new google.maps.DirectionsRenderer()
-        directionsRenderer.current.setMap(map.current)
+        fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
+        originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
+        
         // axios.post(getServerUrl() + "/job/load",
         // {
         //     workspaceId: workspaceId,
@@ -84,8 +90,7 @@ const RouteBuilder: React.FC = () =>
 
     }, [])
 
-    useEffect(() => {
-      console.log("user selection changed")
+    useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates
       if(userSelectionRows.length > 0)
       {
         const nrOfColumns = userSelectionRows[0].cells.length;
@@ -108,6 +113,11 @@ const RouteBuilder: React.FC = () =>
           tempHeadings.push({index: k ,headingName: "C" + k})
         }
 
+        fastestRouteDirectionsRenderer.current.setMap(null)
+        originalRouteDirectionsRenderer.current.setMap(null)
+        fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
+        originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
+
         setRawRouteTableData({headings: tempHeadings, rows: userSelectionRows});
         setRouteStatisticsData(null);
         setWaypointOrder([]);
@@ -115,9 +125,43 @@ const RouteBuilder: React.FC = () =>
       } 
     }, [R_setColumnDesignations, userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
 
+    useEffect(() => {
+      if(fastestRouteResult && originalRouteResult && fastestRouteResult.status === "OK" && originalRouteResult.status === "OK")
+      {
+        const fastestRouteStats = getRouteDistance_Time_WaypointOrder(fastestRouteResult.result, 0)
+        const originalRouteStats = getRouteDistance_Time_WaypointOrder(originalRouteResult.result, 0)
+        
+        fastestRouteDirectionsRenderer.current.setDirections(fastestRouteResult.result)
+        originalRouteDirectionsRenderer.current.setDirections(originalRouteResult.result)
+        fastestRouteDirectionsRenderer.current.setMap(map.current)
+        originalRouteDirectionsRenderer.current.setMap(null)
+
+        //TODO route cost calculation
+        makeRouteOnDB(5).then(res => {
+          console.log(res)
+
+          setWaypointOrder(fastestRouteStats.order)
+          setRouteStatisticsData({
+            optimized: {dist: fastestRouteStats.totalDistance, time: fastestRouteStats.totalTime }, 
+            origional: {dist: originalRouteStats.totalDistance, time: originalRouteStats.totalTime}
+          })
+        })
+      }
+      else
+      {
+        //TODO handle errors
+      }
+    }, [fastestRouteResult, originalRouteResult])
+
+    //END useEffects
+
+    //TODO move setStates outside of func, async func setState not batched
     async function retrieveUserSelectionFromSpreadsheetAndSet()
     {
       setUserSelectionRows(await loadSelection())
+      setRouteStatisticsData(null);
+      setWaypointOrder([]);
+      fastestRouteDirectionsRenderer.current.setMap(null)
     }
 
     function putFirstRowAsHeading(isHeadings: boolean)
@@ -133,6 +177,8 @@ const RouteBuilder: React.FC = () =>
         }
         tempUserSelectionRows.shift()
         setRawRouteTableData({headings: tempHeadings, rows: tempUserSelectionRows})
+        setRouteStatisticsData(null);
+        setWaypointOrder([]);
       }
       else
       {
@@ -142,100 +188,53 @@ const RouteBuilder: React.FC = () =>
           tempHeadings.push({index: k ,headingName: "C" + k})
         }
         setRawRouteTableData({headings: tempHeadings, rows: userSelectionRows});
+        setRouteStatisticsData(null);
+        setWaypointOrder([]);
         
       }
       R_firstRowIsColumn(isHeadings)
     }
 
-    function addMarker()
-    {
-        const marker = new google.maps.Marker({
-            position: { lat: -25.344, lng: 131.031 },
-            map: map.current,
-          });
-    }
-
     function removeDirections()
     {
-      directionsRenderer.current.setMap(null)
+      fastestRouteDirectionsRenderer.current.setMap(null)
       setTimeout(() => {
-        directionsRenderer.current.setMap(map.current)
+        fastestRouteDirectionsRenderer.current.setMap(map.current)
       },4000)
     }
 
-    function getRouteDistance_Time_WaypointOrder()
+    function getRouteDistance_Time_WaypointOrder(directions: google.maps.DirectionsResult, directionsIndex: number)
     {
+      let legs = directions.routes[directionsIndex].legs;
+      let totalDistance = 0;
+      let totalTime = 0;
+      let order = directions.routes[0].waypoint_order
+      for(let i = 0; i < legs.length; i++)
+      {
+        totalDistance += legs[i].distance.value
+        totalTime += legs[i].duration.value
+      }
 
+      return {totalDistance, totalTime, order}
     }
 
     function calcRoute()
     {
-      
       if(startAddress !== "" && destinationAddress !== "") //test if not "none"
       {
         let waypoints: google.maps.DirectionsWaypoint[]  = [];
+
         if(R_addressColumIndex > -1)
         {
           for(let i = 0; i < rawRouteTableData.rows.length; i++)
           {
-            console.log(rawRouteTableData.rows[i].cells[R_addressColumIndex].data)
-            
             waypoints.push({location: rawRouteTableData.rows[i].cells[R_addressColumIndex].data, stopover: true})
           }
         }
 
         Promise.all([createDirections(waypoints, true), createDirections(waypoints, false)]).then(res => {
-          
-          if(res[0].status === "OK")
-          {
-            directionsRenderer.current.setDirections(res[0].result)
-            
-            //directionsRenderer.current.
-            console.log(res[0])
-            setWaypointOrder(res[0].result.routes[0].waypoint_order)
-            let oplegs = res[0].result.routes[0].legs;
-            let opRouteDistance = 0;
-            let opRouteTime = 0;
-            for(let i = 0; i < oplegs.length; i++)
-            {
-              opRouteDistance += oplegs[i].distance.value
-              opRouteTime += oplegs[i].duration.value
-            }
-
-            if(res[1].status === "OK")
-            {
-              //directionsRenderer.current.setDirections(res[1].result)
-              let unoplegs = res[1].result.routes[0].legs;
-              console.log(res[1].result.routes[0].legs)
-              let unopRouteDistance = 0;
-              let unopRouteTime = 0;
-              for(let i = 0; i < unoplegs.length; i++)
-              {
-                unopRouteDistance += unoplegs[i].distance.value
-                unopRouteTime += unoplegs[i].duration.value
-              }
-              console.log("Fastest", opRouteDistance, opRouteTime)
-              console.log("Unop", unopRouteDistance, unopRouteTime)
-
-              //TODO route cost calculation
-              makeRouteOnDB(5).then(res => {
-                console.log(res)
-                setRouteStatisticsData({
-                  optimized: {dist: opRouteDistance, time: opRouteTime }, 
-                  origional: {dist: unopRouteDistance, time: unopRouteTime}
-                })
-              })
-              
-            }
-            else
-            {
-              console.error("UnOp Route status not OK")
-            }
-          }
-          else
-          {
-            console.error("Fastest Route status not OK")
-          }
+          setFastestRouteResult(res[0])
+          setOriginalRouteResult(res[1])
         })
       }
     }
@@ -300,8 +299,7 @@ const RouteBuilder: React.FC = () =>
       }
     }
 
-    
-
+  
     function saveRoute()
     {
       axios.post(getServerUrl() + "/job/save",
@@ -319,6 +317,21 @@ const RouteBuilder: React.FC = () =>
         })
     }
 
+    function handleRouteToDisplay(value: EDisplayRoute)
+    {
+      if(value === EDisplayRoute.Fastest)
+      {
+        fastestRouteDirectionsRenderer.current.setMap(map.current)
+        originalRouteDirectionsRenderer.current.setMap(null)
+        setRouteToDisplay(value)
+      }
+      else if(value === EDisplayRoute.Original)
+      {
+        fastestRouteDirectionsRenderer.current.setMap(null)
+        originalRouteDirectionsRenderer.current.setMap(map.current)
+        setRouteToDisplay(value)
+      }
+    }
 
     return(
         <div>
@@ -336,11 +349,6 @@ const RouteBuilder: React.FC = () =>
                 <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress}/>
               </Box>
             </Stack>
-            
-            
-            
-            
-            {/* <Button onClick={() => {makeRouteOnDB(5)}}>Make route on DB test</Button> */}
 
             {rawRouteTableData.rows[0] && (
               <div>
@@ -361,14 +369,32 @@ const RouteBuilder: React.FC = () =>
                     <RouteSequence rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
                 )}
               </div>
-              
-
             )}
 
             <Paper sx={{padding: "10px", color:"#1976d2"}} variant="elevation" elevation={5}>
 
-              <Button onClick={() => {removeDirections()}}>Remove</Button>
+              {/* <Button onClick={() => {removeDirections()}}>Remove</Button> */}
               <Typography variant="h5" gutterBottom >Google Maps</Typography>
+
+              <Stack direction={"row"} spacing={1} alignItems="center" sx={{marginBottom: "1em"}}>
+                  <Box>
+                    <ToggleButtonGroup
+                      sx={{maxHeight:"100%", height: "100%"}}
+                      size="small"
+                      color="primary"
+                      value={routeToDisplay}
+                      exclusive
+                      onChange={(_e, v) => {handleRouteToDisplay(v)}}
+                      aria-label="Address Type"
+                      
+                      >
+                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Fastest}>Fastest Route</ToggleButton>
+                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Original}>Original Route</ToggleButton>
+                    </ToggleButtonGroup>
+                  </Box>
+                </Stack>
+
+              
               <div style={{width: "100%", height: 500}} id="map"></div>
             </Paper>
           </div>
