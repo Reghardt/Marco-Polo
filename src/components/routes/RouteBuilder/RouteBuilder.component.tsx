@@ -321,14 +321,24 @@ const RouteBuilder: React.FC = () =>
     {
       if(value === EDisplayRoute.Fastest)
       {
-        fastestRouteDirectionsRenderer.current.setMap(map.current)
+        fastestRouteDirectionsRenderer.current.setMap(null)
+        fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
+          map: map.current,
+          preserveViewport: true,
+          directions: fastestRouteResult.result
+        })
         originalRouteDirectionsRenderer.current.setMap(null)
         setRouteToDisplay(value)
       }
       else if(value === EDisplayRoute.Original)
       {
+        originalRouteDirectionsRenderer.current.setMap(null)
+        originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
+          map: map.current,
+          preserveViewport: true,
+          directions: originalRouteResult.result
+        })
         fastestRouteDirectionsRenderer.current.setMap(null)
-        originalRouteDirectionsRenderer.current.setMap(map.current)
         setRouteToDisplay(value)
       }
     }
