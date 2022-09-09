@@ -16,7 +16,7 @@ enum EAddressType{
 
 const RouteSequence: React.FC<RouteSequenceProps> = ({rawRouteTableData, waypointOrder}) => {
 
-    const [writebackTable, setWritebackTable] = useState<IRawRouteTableData>({headings: [], rows: []})
+    const [writebackTable, setWritebackTable] = useState<IRawRouteTableData>({firstRowIsHeading: false, headings: null, rows: []})
     const [addressType, setAddressType] = useState<EAddressType>(EAddressType.Original)
 
     useEffect(() => {

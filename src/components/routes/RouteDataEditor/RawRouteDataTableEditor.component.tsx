@@ -19,7 +19,7 @@ interface RoutedataEditorProps{
     setRawRouteTableData: React.Dispatch<React.SetStateAction<IRawRouteTableData>>;
     handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void;
     calcRoute: () => void;
-    putFirstRowAsHeading: (isHeadings: boolean) => void;
+    putFirstRowAsHeading: (isHeading: boolean) => void;
 }
 
 const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableData, setRawRouteTableData, handleColumnDesignation, calcRoute, putFirstRowAsHeading}) => {
@@ -56,24 +56,24 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
 
     }
 
-    function CreateTableHeadings(tableData_headings: IHeading[]) : JSX.Element[]
-    {
-      const headingRow: JSX.Element[] = [];
-      if(tableData_headings.length > 0)
-      {
-        const elementSize = 12 / tableData_headings.length;
-        for(let i = 0; i< tableData_headings.length; i++)
-        {
-          headingRow.push(
-            <Grid item xs={elementSize}>
-              <HeadingCell colId={i} headingDetails={tableData_headings[i]} updateHeading={updateHeading}/>
-            </Grid>
-          )
-        }
-        return headingRow;
-      }
-      return [];
-    }
+    // function CreateTableHeadings(tableData_headings: IHeading[]) : JSX.Element[]
+    // {
+    //   const headingRow: JSX.Element[] = [];
+    //   if(tableData_headings.length > 0)
+    //   {
+    //     const elementSize = 12 / tableData_headings.length;
+    //     for(let i = 0; i< tableData_headings.length; i++)
+    //     {
+    //       headingRow.push(
+    //         <Grid item xs={elementSize}>
+    //           <HeadingCell colId={i} headingDetails={tableData_headings[i]} updateHeading={updateHeading}/>
+    //         </Grid>
+    //       )
+    //     }
+    //     return headingRow;
+    //   }
+    //   return [];
+    // }
 
 
 
@@ -132,13 +132,13 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
 
     // Update Functions /////////////////////////////////////////////
 
-    function updateHeading(colNr: number, headingData: IHeading)
-    {
-      const headings = rawRouteTableData.headings.slice();
-      headings[colNr] = headingData;
+    // function updateHeading(colNr: number, headingData: IHeading)
+    // {
+    //   const headings = rawRouteTableData.headings.slice();
+    //   headings[colNr] = headingData;
 
-      setRawRouteTableData({headings: headings, rows: rawRouteTableData.rows})
-    }
+    //   setRawRouteTableData({headings: headings, rows: rawRouteTableData.rows})
+    // }
 
     function updateBodyCell(i: number, j: number, cell: ICell)
     {
@@ -149,10 +149,7 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
 
     ////////////////////////////////////////////////////////////////////
 
-    function handleFirstRowAsHeading(isHeadings: boolean)
-    {
-        putFirstRowAsHeading(isHeadings)
-    }
+  
     
     return(
       <Paper sx={{padding: "10px", marginBottom: "0.5em"}} variant="elevation" elevation={5}>
@@ -160,18 +157,18 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
 
           {/* <Typography variant="body2" gutterBottom >Legends:</Typography> */}
 
-          <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {handleFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
+          <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {putFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
           
           <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
             {createColumnDecorators().map((elem, idx) => {
               return <React.Fragment key={`column-decorator-${idx}`}>{elem}</React.Fragment>
             })}
           </Grid>
-          <Grid container spacing={0.3}>
+          {/* <Grid container spacing={0.3}>
             {CreateTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
                 return <React.Fragment key={`heading-${idx}`}>{elem}</React.Fragment>
                 })}
-          </Grid>
+          </Grid> */}
           <div style={{padding: "5px"}}>
             <Divider/>
           </div>

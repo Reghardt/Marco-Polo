@@ -13,20 +13,20 @@ export class SelectedCells
     {
         if(!this.rows.length)
         {
-            this.rows.push({rowNumber: cellToAdd.y, cells: [cellToAdd]})
+            this.rows.push({cells: [cellToAdd]})
         }
         else
         {
             for(let i = 0; i < this.rows.length; i++)
             {
                 let row = this.rows[i];
-                if(row.rowNumber === cellToAdd.y)
+                if(row.cells[0].y === cellToAdd.y) //reads first cell in row and compares y coordinate
                 {
                     row.cells.push(cellToAdd)
                     return;
                 }
             }
-            this.rows.push({rowNumber: cellToAdd.y, cells: [cellToAdd]}) //else add new row
+            this.rows.push({cells: [cellToAdd]}) //else add new row
         }
     }
 

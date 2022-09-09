@@ -85,14 +85,14 @@ const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrd
   {
     return (
       <React.Fragment>
-          {createTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
+          {/* {createTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
   
           return [
             <Grid container spacing={0.3}>
               <React.Fragment key={idx}>{elem}</React.Fragment>
             </Grid>,
             <Divider sx={{ borderBottomWidth: 1.8 }}/>]
-          })}
+          })} */}
           
           {createTableBody(rawRouteTableData.rows).map((elem, idx) => {
   

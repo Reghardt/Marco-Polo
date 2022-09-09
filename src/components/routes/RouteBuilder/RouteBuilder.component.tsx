@@ -21,6 +21,7 @@ import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } 
 import { IRow } from "../../../services/worksheet/row.interface";
 
 import StandardHeader from "../../common/StandardHeader.component";
+import { createBasicHeadingCell } from "../Route.service";
 
 enum EDisplayRoute{
   Fastest,
@@ -29,7 +30,7 @@ enum EDisplayRoute{
 
 const RouteBuilder: React.FC = () =>
 {
-    const [rawRouteTableData, setRawRouteTableData] = useState<IRawRouteTableData>({headings: [], rows: []})
+    const [rawRouteTableData, setRawRouteTableData] = useState<IRawRouteTableData>({firstRowIsHeading: false, headings: null, rows: []})
     const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
 
     const map = useRef<google.maps.Map>()
@@ -101,16 +102,16 @@ const RouteBuilder: React.FC = () =>
           if(nrOfColumns !== row.cells.length)
           {
             console.error("Each row should have the same number of cells")
-            setRawRouteTableData({headings: [], rows: []})
+            setRawRouteTableData({firstRowIsHeading: false, headings: null, rows: []})
             return;
           }
         }
 
         //create data for headings
-        let tempHeadings: IHeading[] = [] 
+        let tempHeadings: IRow = {cells: []}
         for(let k = 0; k < userSelectionRows[0].cells.length; k++)
         {
-          tempHeadings.push({index: k ,headingName: "C" + k})
+          tempHeadings.cells.push(createBasicHeadingCell(k, "C" + k ))
         }
 
         fastestRouteDirectionsRenderer.current.setMap(null)
@@ -118,7 +119,7 @@ const RouteBuilder: React.FC = () =>
         fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
         originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
 
-        setRawRouteTableData({headings: tempHeadings, rows: userSelectionRows});
+        setRawRouteTableData({firstRowIsHeading: false, headings: tempHeadings, rows: userSelectionRows});
         setRouteStatisticsData(null);
         setWaypointOrder([]);
         R_setColumnDesignations(new Array(userSelectionRows[0].cells.length).fill(0));
@@ -155,6 +156,11 @@ const RouteBuilder: React.FC = () =>
 
     //END useEffects
 
+    function putFirstRowAsHeading(isHeading: boolean)
+    {
+      isHeading = isHeading;
+    }
+
     //TODO move setStates outside of func, async func setState not batched
     async function retrieveUserSelectionFromSpreadsheetAndSet()
     {
@@ -164,36 +170,6 @@ const RouteBuilder: React.FC = () =>
       fastestRouteDirectionsRenderer.current.setMap(null)
     }
 
-    function putFirstRowAsHeading(isHeadings: boolean)
-    {
-      if(isHeadings)
-      {
-        let tempUserSelectionRows = JSON.parse(JSON.stringify(userSelectionRows)) as IRow[];
-        let firstRow = tempUserSelectionRows[0]
-        let tempHeadings: IHeading[] = [] 
-        for(let i = 0; i< firstRow.cells.length; i++)
-        {
-          tempHeadings.push({index: i, headingName: firstRow.cells[i].data})
-        }
-        tempUserSelectionRows.shift()
-        setRawRouteTableData({headings: tempHeadings, rows: tempUserSelectionRows})
-        setRouteStatisticsData(null);
-        setWaypointOrder([]);
-      }
-      else
-      {
-        let tempHeadings: IHeading[] = [] 
-        for(let k = 0; k < userSelectionRows[0].cells.length; k++)
-        {
-          tempHeadings.push({index: k ,headingName: "C" + k})
-        }
-        setRawRouteTableData({headings: tempHeadings, rows: userSelectionRows});
-        setRouteStatisticsData(null);
-        setWaypointOrder([]);
-        
-      }
-      R_firstRowIsColumn(isHeadings)
-    }
 
     function removeDirections()
     {
