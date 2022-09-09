@@ -22,6 +22,7 @@ import { IRow } from "../../../services/worksheet/row.interface";
 
 import StandardHeader from "../../common/StandardHeader.component";
 import { createBasicHeadingCell } from "../Route.service";
+import { createBasicHeadingRow } from "../../workspaces/workspace.service";
 
 enum EDisplayRoute{
   Fastest,
@@ -158,7 +159,23 @@ const RouteBuilder: React.FC = () =>
 
     function putFirstRowAsHeading(isHeading: boolean)
     {
-      isHeading = isHeading;
+      console.log(isHeading)
+      setRawRouteTableData((currentData) => {
+        let tempData: IRawRouteTableData = {...currentData} //create new object
+        if(isHeading)
+        {
+          tempData.headings = tempData.rows.shift()
+          tempData.firstRowIsHeading = true
+          return tempData
+        }
+        else
+        {
+          tempData.rows.unshift(tempData.headings)
+          tempData.headings = createBasicHeadingRow(tempData.headings.cells.length)
+          tempData.firstRowIsHeading = false
+          return tempData
+        }
+      })
     }
 
     //TODO move setStates outside of func, async func setState not batched

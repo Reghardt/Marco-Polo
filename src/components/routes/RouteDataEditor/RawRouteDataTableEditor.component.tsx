@@ -75,6 +75,23 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
     //   return [];
     // }
 
+    function CreateTableHeadingElements(tableData: IRawRouteTableData)
+    {
+      let tempHeadingsRow: JSX.Element[] = [];
+      const elementSize = 12 / tableData.headings.cells.length
+      for(let i = 0; i < tableData.headings.cells.length; i++)
+      {
+        tempHeadingsRow.push(
+          <Grid item xs={elementSize}>
+            <DataCell
+              cellRef={tableData.headings.cells[i]}
+              updateBodyCell={updateBodyCell}/>
+          </Grid>
+        )
+      }
+      return tempHeadingsRow
+    }
+
 
 
     function CreateTableBody(tableData_rows: IRow[]) : JSX.Element[][]
@@ -100,8 +117,6 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
               cellTable[i][j] = <Grid key={`cell-${i}-${j}`} item xs={elementSize}> {/* TODO Rename To tableBody?*/}
               {/* i and j are the positions of the cell in the cellTable, not the coordinates on the spreadsheet */}
               <AddressCell 
-                i={i}
-                j={j}
                 cellRef={tableData_rows[i].cells[j]}
                 updateBodyCell={updateBodyCell}
                 />
@@ -111,8 +126,6 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
             {
               cellTable[i][j] = <Grid key={`cell-${i}-${j}`} item xs={elementSize}> 
               <DataCell 
-                i={i}
-                j={j}
                 cellRef={tableData_rows[i].cells[j]}
                 updateBodyCell={updateBodyCell}
                 />
@@ -140,11 +153,31 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
     //   setRawRouteTableData({headings: headings, rows: rawRouteTableData.rows})
     // }
 
-    function updateBodyCell(i: number, j: number, cell: ICell)
+    function updateBodyCell(cell: ICell)
     {
-      const tempRawRouteTableData = JSON.parse(JSON.stringify(rawRouteTableData)) as IRawRouteTableData;
-      tempRawRouteTableData.rows[i].cells[j] = cell;
-      setRawRouteTableData(tempRawRouteTableData);
+      setRawRouteTableData((tableData) => {
+        let tempTableData: IRawRouteTableData = {...tableData} //creates new copy of table data
+        for(let i = 0; i < tempTableData.rows.length; i++) //loops over rows
+        {
+          let row = tempTableData.rows[i]
+          if(row.cells[0].y === cell.y) //if the row of the desired cell is found, loop over row until the desired cell is found
+          {
+
+            for(let j = 0; j < row.cells.length; j++) //loops over cells
+            {
+              let cellInRow = row.cells[j]
+              if(cellInRow.x === cell.x) //if x coordinate of cell matches, cell is found
+              {
+                console.log("cell found")
+                tempTableData.rows[i].cells[j] = cell
+                return tempTableData
+              }
+            }
+          }
+        }
+        console.error("cell not found")
+        return tempTableData
+      });
     }
 
     ////////////////////////////////////////////////////////////////////
@@ -157,18 +190,18 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
 
           {/* <Typography variant="body2" gutterBottom >Legends:</Typography> */}
 
-          <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={R_firstRowIsColumn} onChange={(e) => {putFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
+          <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={rawRouteTableData.firstRowIsHeading} onChange={(e) => {putFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
           
           <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
             {createColumnDecorators().map((elem, idx) => {
               return <React.Fragment key={`column-decorator-${idx}`}>{elem}</React.Fragment>
             })}
           </Grid>
-          {/* <Grid container spacing={0.3}>
-            {CreateTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
+          <Grid container spacing={0.3}>
+            {CreateTableHeadingElements(rawRouteTableData).map((elem, idx) => {
                 return <React.Fragment key={`heading-${idx}`}>{elem}</React.Fragment>
                 })}
-          </Grid> */}
+          </Grid>
           <div style={{padding: "5px"}}>
             <Divider/>
           </div>

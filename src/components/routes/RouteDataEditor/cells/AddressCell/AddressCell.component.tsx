@@ -6,13 +6,11 @@ import PopperContainer from "../../../../common/PopperContainer.styled";
 import AddressCellPopper from "./AddressPopper.component";
 
 type AddressCellProps = {
-    i: number;
-    j: number;
     cellRef: ICell;
-    updateBodyCell: (i: number, j: number, cell: ICell) => void;
+    updateBodyCell: (cell: ICell) => void;
   }
 
-const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, updateBodyCell}) =>
+const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
 {
   const buttonRef = useRef(null);
   const popperRef = useRef(null);
@@ -72,7 +70,7 @@ const AddressCell: React.FC<AddressCellProps> = ({i, j,cellRef, updateBodyCell})
 
     function saveAndClose(cell: ICell)
     {
-      updateBodyCell(i, j, cell)
+      updateBodyCell(cell)
       setShow(!show)
     }
 

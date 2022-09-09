@@ -8,13 +8,11 @@ import PopperContainer from "../../../common/PopperContainer.styled";
 
 
 type DataCellProps = {
-    i: number;
-    j: number;
     cellRef: ICell;
-    updateBodyCell: (i: number, j: number, cell: ICell) => void;
+    updateBodyCell: (cell: ICell) => void;
 }
 
-const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, updateBodyCell}) =>
+const DataCell: React.FC<DataCellProps> = ({cellRef, updateBodyCell}) =>
 {
 
     const buttonRef = useRef(null);
@@ -55,7 +53,7 @@ const DataCell: React.FC<DataCellProps> = ({i,j,cellRef, updateBodyCell}) =>
     {
       const tempCell = JSON.parse(JSON.stringify(cellRef)) as ICell;
       tempCell.data = cellData;
-      updateBodyCell(i, j, tempCell)
+      updateBodyCell(tempCell)
       setShow(!show)
     }
 
