@@ -56,25 +56,6 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
 
     }
 
-    // function CreateTableHeadings(tableData_headings: IHeading[]) : JSX.Element[]
-    // {
-    //   const headingRow: JSX.Element[] = [];
-    //   if(tableData_headings.length > 0)
-    //   {
-    //     const elementSize = 12 / tableData_headings.length;
-    //     for(let i = 0; i< tableData_headings.length; i++)
-    //     {
-    //       headingRow.push(
-    //         <Grid item xs={elementSize}>
-    //           <HeadingCell colId={i} headingDetails={tableData_headings[i]} updateHeading={updateHeading}/>
-    //         </Grid>
-    //       )
-    //     }
-    //     return headingRow;
-    //   }
-    //   return [];
-    // }
-
     function CreateTableHeadingElements(tableData: IRawRouteTableData)
     {
       let tempHeadingsRow: JSX.Element[] = [];
@@ -145,13 +126,7 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({rawRouteTableD
 
     // Update Functions /////////////////////////////////////////////
 
-    // function updateHeading(colNr: number, headingData: IHeading)
-    // {
-    //   const headings = rawRouteTableData.headings.slice();
-    //   headings[colNr] = headingData;
-
-    //   setRawRouteTableData({headings: headings, rows: rawRouteTableData.rows})
-    // }
+    //TODO create update function for headings
 
     function updateBodyCell(cell: ICell)
     {

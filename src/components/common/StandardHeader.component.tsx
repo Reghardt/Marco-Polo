@@ -23,7 +23,8 @@ export enum EStandardHeaderConfig{
 
 const StandardHeader: React.FC<StandardHeaderProps> = (
         {
-            title, backNavStr = "", 
+            title, 
+            backNavStr = "", 
             tokenCountConfig = EStandardHeaderConfig.Visible,
             tokenStoreConfig = EStandardHeaderConfig.Visible,
             adminPanelConfig = EStandardHeaderConfig.Visible,
@@ -47,7 +48,7 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
                     <Stack direction={"row"} spacing={1}>
                         {backNavStr.length > 0 && (
                             <Box>
-                                <IconButton onClick={() => navigate(backNavStr, {replace: true})}>
+                                <IconButton onClick={() => {navigate(backNavStr, {replace: true})}}>
                                     <NavigateBefore sx={{color: "white"}}/>
                                 </IconButton>
                             </Box>

@@ -1,6 +1,7 @@
 import { MeetingRoom, Settings, Store, SupervisorAccount, Work } from "@mui/icons-material"
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip, Typography } from "@mui/material"
 import React from "react"
+import { useNavigate } from "react-router-dom";
 import { EStandardHeaderConfig } from "../common/StandardHeader.component";
 
 interface IMenuDrawerProps{
@@ -14,7 +15,7 @@ interface IMenuDrawerProps{
 
 const MenuDrawer: React.FC<IMenuDrawerProps> = ({drawerState, handleDrawerState, tokenStoreConfig=EStandardHeaderConfig.Visible, adminPanelConfig=EStandardHeaderConfig.Visible}) => {
 
-    
+    let navigate = useNavigate();
 
     return(
         <Drawer anchor="right" open={drawerState} onClose={ () => handleDrawerState()}>
@@ -77,7 +78,7 @@ const MenuDrawer: React.FC<IMenuDrawerProps> = ({drawerState, handleDrawerState,
 
                 {adminPanelConfig === 2 && (
                     <ListItem disablePadding>
-                        <ListItemButton onClick={() => {console.log("pressed")}}>
+                        <ListItemButton onClick={() => {navigate("/admin", {replace: true})}}>
                         <ListItemIcon>
                             <SupervisorAccount sx={{color:"#1976d2"}}/>
                         </ListItemIcon>
