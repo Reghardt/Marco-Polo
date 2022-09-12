@@ -1,8 +1,8 @@
 import { MenuItem, Select } from "@mui/material"
 import React from "react"
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { EColumnDesignations } from "../../../../services/ColumnDesignation.service";
-import { RSAddresColumIndex, RSColumnDesignations } from "../../../../state/globalstate";
+import { RSAddresColumIndex, RSJobColumnDesignations } from "../../../../state/globalstate";
 
 interface ColumnDecoratorProps{
   colIdx: number;
@@ -10,16 +10,18 @@ interface ColumnDecoratorProps{
 }
 
 const ColumnDecorator : React.FC<ColumnDecoratorProps> = ({handleColumnDesignation, colIdx}) => {
-const RcolumnDesignations = useRecoilValue(RSColumnDesignations)
-const RaddesColumIndex = useRecoilValue(RSAddresColumIndex)
+
+  const R_jobColumnDesignations = useRecoilValue(RSJobColumnDesignations)
+  const R_addesColumIndex = useRecoilValue(RSAddresColumIndex)
 
   let bgColor = "none";
-  if(RaddesColumIndex < 0)
+  if(R_addesColumIndex < 0)
   {
     bgColor = "#ff9800";
   }
 
   const handleChange = (type: string | number) => {
+    console.log(type)
     if(typeof type == "string")
     {
       const typeValue = parseInt(type)
@@ -30,7 +32,7 @@ const RaddesColumIndex = useRecoilValue(RSAddresColumIndex)
       handleColumnDesignation(colIdx,type)
     }
   };
-  if(RcolumnDesignations[colIdx] === undefined)
+  if(R_jobColumnDesignations[colIdx] === undefined)
   {
     return(<div>
       <Select
@@ -53,7 +55,7 @@ const RaddesColumIndex = useRecoilValue(RSAddresColumIndex)
           size="small"
           labelId="demo-select-small"
           id="demo-select-small"
-          value={RcolumnDesignations[colIdx]}
+          value={R_jobColumnDesignations[colIdx]}
           onChange={e => handleChange(e.target.value)}
           sx={{width:"100%", backgroundColor: bgColor}}
       >

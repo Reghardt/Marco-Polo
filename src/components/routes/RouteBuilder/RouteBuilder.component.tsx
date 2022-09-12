@@ -14,7 +14,7 @@ import axios from "axios";
 import { getServerUrl } from "../../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnDesignations, RSFirstRowIsColumn, RSJobID, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeaing, RSJobHeadings, RSJobID, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
 import RawRouteDataTableEditor from "../RouteDataEditor/RawRouteDataTableEditor.component";
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
@@ -31,7 +31,12 @@ enum EDisplayRoute{
 
 const RouteBuilder: React.FC = () =>
 {
-    const [rawRouteTableData, setRawRouteTableData] = useState<IRawRouteTableData>({firstRowIsHeading: false, headings: null, rows: []})
+    const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
+    const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
+    const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeaing)
+    const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+    
+
     const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
 
     const map = useRef<google.maps.Map>()
@@ -39,12 +44,9 @@ const RouteBuilder: React.FC = () =>
     const fastestRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
     const originalRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
-    const [R_columnDesignations, R_setColumnDesignations] = useRecoilState(RSColumnDesignations);
-
     const [startAddress, setStartAddress] = useState("none");
     const [destinationAddress, setDestinationAddress] = useState("none");
-    const [, R_firstRowIsColumn] = useRecoilState(RSFirstRowIsColumn)
-
+  
     const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
     
     const jobId = useRecoilValue(RSJobID)
@@ -103,16 +105,21 @@ const RouteBuilder: React.FC = () =>
           if(nrOfColumns !== row.cells.length)
           {
             console.error("Each row should have the same number of cells")
-            setRawRouteTableData({firstRowIsHeading: false, headings: null, rows: []})
+            R_setJobColumnDesignations([])
+            R_setJobHeadings(null)
+            R_setJobFirstRowIsHeading(false)
+            R_setJobBody([])
             return;
           }
         }
 
-        //create data for headings
+        //create data for headings nad column designations
         let tempHeadings: IRow = {cells: []}
+        let tempColumnDesignations: number[] = []
         for(let k = 0; k < userSelectionRows[0].cells.length; k++)
         {
           tempHeadings.cells.push(createBasicHeadingCell(k, "C" + k ))
+          tempColumnDesignations.push(0) 
         }
 
         fastestRouteDirectionsRenderer.current.setMap(null)
@@ -120,12 +127,16 @@ const RouteBuilder: React.FC = () =>
         fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
         originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
 
-        setRawRouteTableData({firstRowIsHeading: false, headings: tempHeadings, rows: userSelectionRows});
+
+        R_setJobColumnDesignations(tempColumnDesignations)
+        R_setJobHeadings(tempHeadings)
+        R_setJobFirstRowIsHeading(false)
+        R_setJobBody(userSelectionRows)
+
         setRouteStatisticsData(null);
         setWaypointOrder([]);
-        R_setColumnDesignations(new Array(userSelectionRows[0].cells.length).fill(0));
       } 
-    }, [R_setColumnDesignations, userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
+    }, [userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
 
     useEffect(() => {
       if(fastestRouteResult && originalRouteResult && fastestRouteResult.status === "OK" && originalRouteResult.status === "OK")
@@ -158,25 +169,26 @@ const RouteBuilder: React.FC = () =>
     //END useEffects
 
     function putFirstRowAsHeading(isHeading: boolean)
-    {
-      console.log(isHeading)
-      setRawRouteTableData((currentData) => {
-        let tempData: IRawRouteTableData = {...currentData} //create new object
-        if(isHeading)
-        {
-          tempData.headings = tempData.rows.shift()
-          tempData.firstRowIsHeading = true
-          return tempData
-        }
-        else
-        {
-          tempData.rows.unshift(tempData.headings)
-          tempData.headings = createBasicHeadingRow(tempData.headings.cells.length)
-          tempData.firstRowIsHeading = false
-          return tempData
-        }
-      })
+    {      
+      let tempJobBody: IRow[] =  JSON.parse(JSON.stringify(R_jobBody))
+      if(isHeading)
+      {
+        let bodyRowToColumnRow = tempJobBody.shift()
+        R_setJobHeadings(bodyRowToColumnRow)
+        R_setJobFirstRowIsHeading(true)
+        R_setJobBody(tempJobBody)
+
+      }
+      else
+      {
+        tempJobBody.unshift(R_jobHeadings)
+        R_setJobHeadings(createBasicHeadingRow(R_jobHeadings.cells.length))
+        R_setJobFirstRowIsHeading(false)
+        R_setJobBody(tempJobBody)
+
+      }
     }
+    
 
     //TODO move setStates outside of func, async func setState not batched
     async function retrieveUserSelectionFromSpreadsheetAndSet()
@@ -219,9 +231,9 @@ const RouteBuilder: React.FC = () =>
 
         if(R_addressColumIndex > -1)
         {
-          for(let i = 0; i < rawRouteTableData.rows.length; i++)
+          for(let i = 0; i < R_jobBody.length; i++)
           {
-            waypoints.push({location: rawRouteTableData.rows[i].cells[R_addressColumIndex].data, stopover: true})
+            waypoints.push({location: R_jobBody[i].cells[R_addressColumIndex].data, stopover: true})
           }
         }
 
@@ -282,33 +294,39 @@ const RouteBuilder: React.FC = () =>
   
     function handleColumnDesignation(colIdx: number, colValue: EColumnDesignations)
     {
-      if(colValue === EColumnDesignations.Data)
-      {
-        R_setColumnDesignations(handleSetColumnAsData(colIdx, R_columnDesignations))
-      }
-      else if(colValue === EColumnDesignations.Address)
-      {
-        R_setColumnDesignations(handleSetColumnAsAddress(colIdx, R_columnDesignations))
-      }
+      R_setJobColumnDesignations((currentDesignations) => {
+        if(colValue === EColumnDesignations.Data)
+        {
+          return handleSetColumnAsData(colIdx, currentDesignations)
+        }
+        else if(colValue === EColumnDesignations.Address)
+        {
+          return handleSetColumnAsAddress(colIdx, currentDesignations)
+        }
+        else
+        {
+          return currentDesignations
+        }
+      })
     }
 
   
-    function saveRoute()
-    {
-      axios.post(getServerUrl() + "/job/save",
-        {
-            workspaceId: R_workspaceId,
-            jobId: jobId.jobId,
-            data: rawRouteTableData,
-        },
-        {
-          //add bearer
-        }).then(res => {
-            console.log(res.data)
-        }).catch(err => {
-            console.error(err)
-        })
-    }
+    // function saveRoute()
+    // {
+    //   axios.post(getServerUrl() + "/job/save",
+    //     {
+    //         workspaceId: R_workspaceId,
+    //         jobId: jobId.jobId,
+    //         data: R_rawRouteTableData,
+    //     },
+    //     {
+    //       //add bearer
+    //     }).then(res => {
+    //         console.log(res.data)
+    //     }).catch(err => {
+    //         console.error(err)
+    //     })
+    // }
 
     function handleRouteToDisplay(value: EDisplayRoute)
     {
@@ -353,11 +371,9 @@ const RouteBuilder: React.FC = () =>
               </Box>
             </Stack>
 
-            {rawRouteTableData.rows[0] && (
+            {R_jobBody.length > 0 && (
               <div>
                 <RawRouteDataTableEditor 
-                  rawRouteTableData={rawRouteTableData} 
-                  setRawRouteTableData={setRawRouteTableData} 
                   handleColumnDesignation={handleColumnDesignation}
                   calcRoute={calcRoute}
                   putFirstRowAsHeading={putFirstRowAsHeading}
@@ -369,7 +385,7 @@ const RouteBuilder: React.FC = () =>
                 {/* <Button onClick={()=> saveRoute()}>Save</Button> */}
                 
                 {waypointOrder.length > 0 && (
-                    <RouteSequence rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                    <RouteSequence waypointOrder={waypointOrder}/>
                 )}
               </div>
             )}

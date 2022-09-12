@@ -1,11 +1,13 @@
 import { Box, Button, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react"
+import { useRecoilState } from "recoil";
+import { IRow } from "../../services/worksheet/row.interface";
+import { RSJobBody, RSJobHeadings } from "../../state/globalstate";
 import HelpTooltip from "../common/HelpTooltip.component";
 import { IRawRouteTableData } from "../routes/interfaces/RawRouteDataTable.interface";
 import ResultTable from "../routes/ResultTable/ResultTable.component";
 
 interface RouteSequenceProps{
-    rawRouteTableData: IRawRouteTableData;
     waypointOrder: number[];
   }
 
@@ -14,30 +16,36 @@ enum EAddressType{
     Google
 }
 
-const RouteSequence: React.FC<RouteSequenceProps> = ({rawRouteTableData, waypointOrder}) => {
+const RouteSequence: React.FC<RouteSequenceProps> = ({waypointOrder}) => {
 
-    const [writebackTable, setWritebackTable] = useState<IRawRouteTableData>({firstRowIsHeading: false, headings: null, rows: []})
+    //const [writebackTable, setWritebackTable] = useState<IRawRouteTableData>({columnDesignations: [], firstRowIsHeading: false, headings: null, rows: []})
     const [addressType, setAddressType] = useState<EAddressType>(EAddressType.Original)
 
+    const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
+    const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+
     useEffect(() => {
-        createWritebackTable(rawRouteTableData, waypointOrder)
+        createWritebackTable(R_jobHeadings, R_jobBody, waypointOrder)
     },[])
 
-    function createWritebackTable(rawRouteTableDataRef: IRawRouteTableData, waypointOrder: number[])
+    function createWritebackTable(jobHeadings: IRow, jobBody: IRow[], waypointOrder: number[])
     {
-        let tempWritebackTable = JSON.parse(JSON.stringify(rawRouteTableData)) as IRawRouteTableData;
-        for(let i = 0; i< waypointOrder.length; i++)
-        {
-            const writebackRow = tempWritebackTable.rows[waypointOrder[i]];
-            const referencekRow = rawRouteTableDataRef.rows[i];
-            for(let j = 0; j < writebackRow.cells.length; j++)
-            {
-                writebackRow.cells[j].x = referencekRow.cells[j].x
-                writebackRow.cells[j].y = referencekRow.cells[j].y
-                console.log(writebackRow.cells[j])
-            }
-        }
-        setWritebackTable(tempWritebackTable)
+
+        // for(let i = 0; i< waypointOrder.length; i++)
+        // {
+        //     const writebackRow = tempWritebackTable.rows[waypointOrder[i]];
+        //     const referencekRow = rawRouteTableDataRef.rows[i];
+        //     for(let j = 0; j < writebackRow.cells.length; j++)
+        //     {
+        //         writebackRow.cells[j].x = referencekRow.cells[j].x
+        //         writebackRow.cells[j].y = referencekRow.cells[j].y
+        //         console.log(writebackRow.cells[j])
+        //     }
+        // }
+        // setWritebackTable(tempWritebackTable)
+        jobHeadings = jobHeadings
+        jobBody = jobBody
+        waypointOrder = waypointOrder
     }
 
     async function writeBackToSpreadsheet(writebackTableParam: IRawRouteTableData)
@@ -87,12 +95,11 @@ const RouteSequence: React.FC<RouteSequenceProps> = ({rawRouteTableData, waypoin
                     </Box>
                 </Stack>
                 
-                <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                {/* <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
                 <div style={{marginTop: "1em"}}>
-                    {/* <WriteBack rawRouteTableData={writebackTable} waypointOrder={waypointOrder}/> */}
                     <Button onClick={() => {writeBackToSpreadsheet(writebackTable)}}>Write back</Button>
                     <Button>Reset Spreadsheet</Button>
-                </div>
+                </div> */}
                 
             </Paper>
         </div>)

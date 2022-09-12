@@ -1,7 +1,7 @@
 import { IRow } from "../../../services/worksheet/row.interface";
-import { IHeading } from "./Heading.interface";
 
 export interface IRawRouteTableData{
+    columnDesignations: number[];
     firstRowIsHeading: boolean;
     headings: IRow;
     rows: IRow[];
