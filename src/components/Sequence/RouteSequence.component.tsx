@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react"
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { IRow } from "../../services/worksheet/row.interface";
 import { RSJobBody, RSJobHeadings } from "../../state/globalstate";
 import HelpTooltip from "../common/HelpTooltip.component";
@@ -23,7 +23,7 @@ const RouteSequence: React.FC<IRouteSequenceProps> = ({waypointOrder}) => {
     const [addressType, setAddressType] = useState<EAddressType>(EAddressType.Original)
 
     
-    const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+    const R_jobBody = useRecoilValue(RSJobBody)
 
     const [inSequenceJobBody, setInSequenceJobBody] = useState<IRow[]>([])
 

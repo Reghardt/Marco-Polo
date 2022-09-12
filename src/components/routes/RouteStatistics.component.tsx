@@ -19,6 +19,8 @@ const RouteStatistics: React.FC<RouteStatisticsProps> = ({routeStatisticsData}) 
     const [additionalCost, setAdditionalCost] = useState("")
     const [additionalCostType, setAdditionalCostType] = useState<EAdditionalCostType>(EAdditionalCostType.R_hr)
 
+    const [statusText, setStatusText] = useState("")
+
     function unixTimeToHMFormat(unixTime: number)
     {
       //TODO check if longer than a day
@@ -40,7 +42,7 @@ const RouteStatistics: React.FC<RouteStatisticsProps> = ({routeStatisticsData}) 
     {
         let dif = routeStatisticsData.origional.dist - routeStatisticsData.optimized.dist
         let percent = dif / routeStatisticsData.origional.dist;
-        return (percent * 100).toFixed(2);
+        return (percent * 100)
     }
 
     function isFloat(val: string)
@@ -153,7 +155,7 @@ const RouteStatistics: React.FC<RouteStatisticsProps> = ({routeStatisticsData}) 
 
             <Typography variant="h6">Result:</Typography>
             <Typography variant="body1" gutterBottom>
-                Distance Reduction: {metersToKM(routeStatisticsData.origional.dist - routeStatisticsData.optimized.dist)}km - {distanceReductionPercentage()}% <br/>
+                Distance Reduction: {metersToKM(routeStatisticsData.origional.dist - routeStatisticsData.optimized.dist)}km - {distanceReductionPercentage().toFixed(2)}% <br/>
                 Estimated Time Saved: {unixTimeToHMFormat(routeStatisticsData.origional.time - routeStatisticsData.optimized.time)}
             </Typography>
 
@@ -234,7 +236,11 @@ const RouteStatistics: React.FC<RouteStatisticsProps> = ({routeStatisticsData}) 
                 <Typography variant="body1" gutterBottom>
                     Given Route Cost: R{calcOriginalRouteCost().toFixed(2)} <br/>
                     Optimised Route Cost: R{calcOptimizedRouteCost().toFixed(2)} <br/>
-                    Savings: R{calculateVehicleSavings()}
+                    Savings: R{calculateVehicleSavings()} <br/>
+
+                    {distanceReductionPercentage() < 7 && (
+                        <div style={{color: "green"}}>Distance reduction less than 7% - Route Calculation is Free</div>
+                    )}
                 </Typography>
             </Stack>
 
