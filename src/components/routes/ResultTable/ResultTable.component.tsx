@@ -5,41 +5,45 @@ import { IRow } from '../../../services/worksheet/row.interface';
 import BodyEntry from './BodyEntry.component';
 import { IHeading } from '../interfaces/Heading.interface';
 import HeadingEntry from './HeadingEntry.component';
+import { useRecoilValue } from 'recoil';
+import { RSJobHeadings } from '../../../state/globalstate';
 
-interface ResultTableProps{
-  rawRouteTableData: IRawRouteTableData;
+interface IResultTableProps{
+  inSequenceJobBody: IRow[];
   waypointOrder: number[];
 }
 
 
 
-const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrder}) => {
+const ResultTable: React.FC<IResultTableProps> = ({inSequenceJobBody, waypointOrder}) => {
 
-  function createTableHeadings(tableData_headings: IHeading[]): JSX.Element[][]
+  const R_jobHeadings = useRecoilValue(RSJobHeadings)
+
+  function createTableHeadings(headings: IRow): JSX.Element[][]
   {
     
 
-    if(tableData_headings.length)
+    if(headings.cells.length)
     {
-      const elementSize = 11 / tableData_headings.length;
-      const headings: JSX.Element[][] = [];
+      const elementSize = 11 / headings.cells.length;
+      const heaingElements: JSX.Element[][] = [];
 
-      if(headings[0] === undefined)
+      if(heaingElements[0] === undefined)
         {
-          headings[0] = []
+          heaingElements[0] = []
         }
 
-      headings[0].push(<Grid item xs={1}>
+      heaingElements[0].push(<Grid item xs={1}>
         <HeadingEntry content={("").toString()}/>
       </Grid>)
-      for(let i = 0; i < tableData_headings.length; i++)
+      for(let i = 0; i < headings.cells.length; i++)
       {
-        headings[0].push(<Grid item xs={elementSize}>
-          <HeadingEntry content={tableData_headings[i].headingName}/>
+        heaingElements[0].push(<Grid item xs={elementSize}>
+          <HeadingEntry content={headings.cells[i].data}/>
         </Grid>)
 
       }
-      return headings
+      return heaingElements
     }
     else
     {
@@ -81,20 +85,20 @@ const ResultTable: React.FC<ResultTableProps> = ({rawRouteTableData, waypointOrd
     }
   }
 
-  if(rawRouteTableData.rows.length > 0 && waypointOrder.length > 0)// Temporary check, the check should rather be in the parent component
+  if(inSequenceJobBody.length > 0 && waypointOrder.length > 0)// Temporary check, the check should rather be in the parent component
   {
     return (
       <React.Fragment>
-          {/* {createTableHeadings(rawRouteTableData.headings).map((elem, idx) => {
+          {createTableHeadings(R_jobHeadings).map((elem, idx) => {
   
           return [
             <Grid container spacing={0.3}>
               <React.Fragment key={idx}>{elem}</React.Fragment>
             </Grid>,
             <Divider sx={{ borderBottomWidth: 1.8 }}/>]
-          })} */}
+          })}
           
-          {createTableBody(rawRouteTableData.rows).map((elem, idx) => {
+          {createTableBody(inSequenceJobBody).map((elem, idx) => {
   
             return [
             <Grid container spacing={0.3}>

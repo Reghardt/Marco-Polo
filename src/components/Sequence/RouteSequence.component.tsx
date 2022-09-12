@@ -7,7 +7,7 @@ import HelpTooltip from "../common/HelpTooltip.component";
 import { IRawRouteTableData } from "../routes/interfaces/RawRouteDataTable.interface";
 import ResultTable from "../routes/ResultTable/ResultTable.component";
 
-interface RouteSequenceProps{
+interface IRouteSequenceProps{
     waypointOrder: number[];
   }
 
@@ -16,46 +16,46 @@ enum EAddressType{
     Google
 }
 
-const RouteSequence: React.FC<RouteSequenceProps> = ({waypointOrder}) => {
+const RouteSequence: React.FC<IRouteSequenceProps> = ({waypointOrder}) => {
 
     //const [writebackTable, setWritebackTable] = useState<IRawRouteTableData>({columnDesignations: [], firstRowIsHeading: false, headings: null, rows: []})
+    
     const [addressType, setAddressType] = useState<EAddressType>(EAddressType.Original)
 
-    const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
+    
     const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
 
+    const [inSequenceJobBody, setInSequenceJobBody] = useState<IRow[]>([])
+
     useEffect(() => {
-        createWritebackTable(R_jobHeadings, R_jobBody, waypointOrder)
+        createInSequenceJobBody(R_jobBody, waypointOrder)
     },[])
 
-    function createWritebackTable(jobHeadings: IRow, jobBody: IRow[], waypointOrder: number[])
+    function createInSequenceJobBody(jobBody: IRow[], waypointOrder: number[])
     {
-
-        // for(let i = 0; i< waypointOrder.length; i++)
-        // {
-        //     const writebackRow = tempWritebackTable.rows[waypointOrder[i]];
-        //     const referencekRow = rawRouteTableDataRef.rows[i];
-        //     for(let j = 0; j < writebackRow.cells.length; j++)
-        //     {
-        //         writebackRow.cells[j].x = referencekRow.cells[j].x
-        //         writebackRow.cells[j].y = referencekRow.cells[j].y
-        //         console.log(writebackRow.cells[j])
-        //     }
-        // }
-        // setWritebackTable(tempWritebackTable)
-        jobHeadings = jobHeadings
-        jobBody = jobBody
-        waypointOrder = waypointOrder
+        let jobBodyCopy = JSON.parse(JSON.stringify(jobBody)) 
+        for(let i = 0; i< waypointOrder.length; i++)
+        {
+            const writebackRow = jobBodyCopy[waypointOrder[i]];
+            const referenceRow = jobBody[i];
+            for(let j = 0; j < writebackRow.cells.length; j++)
+            {
+                writebackRow.cells[j].x = referenceRow.cells[j].x
+                writebackRow.cells[j].y = referenceRow.cells[j].y
+                console.log(writebackRow.cells[j])
+            }
+        }
+        setInSequenceJobBody(jobBodyCopy)
     }
 
-    async function writeBackToSpreadsheet(writebackTableParam: IRawRouteTableData)
+    async function writeBackToSpreadsheet(body: IRow[])
     {
 
         Excel.run(async (context) => {
             let sheet = context.workbook.worksheets.getActiveWorksheet()
-            for(let i = 0; i< writebackTableParam.rows.length; i++)
+            for(let i = 0; i< body.length; i++)
             {
-                const row = writebackTableParam.rows[i];
+                const row = body[i];
                 for(let j = 0; j < row.cells.length; j++)
                 {
                     let range = sheet.getCell(row.cells[j].y - 1, row.cells[j].x - 1)
@@ -95,11 +95,11 @@ const RouteSequence: React.FC<RouteSequenceProps> = ({waypointOrder}) => {
                     </Box>
                 </Stack>
                 
-                {/* <ResultTable rawRouteTableData={rawRouteTableData} waypointOrder={waypointOrder}/>
+                <ResultTable inSequenceJobBody={inSequenceJobBody} waypointOrder={waypointOrder}/>
                 <div style={{marginTop: "1em"}}>
-                    <Button onClick={() => {writeBackToSpreadsheet(writebackTable)}}>Write back</Button>
+                    <Button onClick={() => {writeBackToSpreadsheet(inSequenceJobBody)}}>Write back</Button>
                     <Button>Reset Spreadsheet</Button>
-                </div> */}
+                </div>
                 
             </Paper>
         </div>)
