@@ -12,10 +12,10 @@ interface ColumnDecoratorProps{
 const ColumnDecorator : React.FC<ColumnDecoratorProps> = ({handleColumnDesignation, colIdx}) => {
 
   const R_jobColumnDesignations = useRecoilValue(RSJobColumnDesignations)
-  const R_addesColumIndex = useRecoilValue(RSAddresColumIndex)
+  const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
 
   let bgColor = "none";
-  if(R_addesColumIndex < 0)
+  if(R_addresColumIndex < 0)
   {
     bgColor = "#ff9800";
   }

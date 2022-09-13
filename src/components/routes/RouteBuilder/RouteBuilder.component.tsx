@@ -14,15 +14,15 @@ import axios from "axios";
 import { getServerUrl } from "../../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeaing, RSJobHeadings, RSJobID, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
 import RawRouteDataTableEditor from "../RouteDataEditor/RawRouteDataTableEditor.component";
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
 import { IRow } from "../../../services/worksheet/row.interface";
 
 import StandardHeader from "../../common/StandardHeader.component";
-import { createBasicHeadingCell } from "../Route.service";
-import { createBasicHeadingRow } from "../../workspaces/workspace.service";
+//import { createBasicHeadingCell } from "../Route.service";
+import { createBasicHeadingCell, createBasicHeadingRow } from "../../workspaces/workspace.service";
 
 enum EDisplayRoute{
   Fastest,
@@ -33,8 +33,10 @@ const RouteBuilder: React.FC = () =>
 {
     const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
     const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
-    const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeaing)
+    const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
     const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+
+    const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
     
 
     const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
@@ -77,26 +79,12 @@ const RouteBuilder: React.FC = () =>
         directionsService.current = new google.maps.DirectionsService();
         fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
         originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
-        
-        // axios.post(getServerUrl() + "/job/load",
-        // {
-        //     workspaceId: workspaceId,
-        //     jobId: jobId.jobId,
-        // },
-        // {
-        //   //add bearer
-        // }).then(res => {
-        //     console.log(res.data)
-        //     setRawRouteTableData({headings: res.data.job.headings, rows: res.data.job.rows})
-        // }).catch(err => {
-        //     console.error(err)
-        // })
-
     }, [])
 
     useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates
       if(userSelectionRows.length > 0)
       {
+        
         const nrOfColumns = userSelectionRows[0].cells.length;
 
         for(let i = 0; i < userSelectionRows.length; i++)
@@ -114,11 +102,11 @@ const RouteBuilder: React.FC = () =>
         }
 
         //create data for headings nad column designations
-        let tempHeadings: IRow = {cells: []}
+        let tempHeadings: IRow = {cells: [], children: []}
         let tempColumnDesignations: number[] = []
         for(let k = 0; k < userSelectionRows[0].cells.length; k++)
         {
-          tempHeadings.cells.push(createBasicHeadingCell(k, "C" + k ))
+          tempHeadings.cells.push(createBasicHeadingCell("C" + k, k ))
           tempColumnDesignations.push(0) 
         }
 
@@ -165,6 +153,55 @@ const RouteBuilder: React.FC = () =>
         //TODO handle errors
       }
     }, [fastestRouteResult, originalRouteResult])
+
+    useEffect(() => {
+      if(R_addresColumIndex === -1)
+      {
+        let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_jobBody))
+        console.log("reset parent- children")
+        let childlessJobBody: IRow[] = [];
+        for(let i = 0; i < jobBodyState.length; i++)
+        {
+          childlessJobBody.push(jobBodyState[i])
+          let children = jobBodyState[i].children
+          
+          for(let j = 0; j < children.length; j++)
+          {
+            childlessJobBody.push(children[j])
+          }
+          jobBodyState[i].children = []
+        }
+        R_setJobBody(childlessJobBody)
+      }
+      else
+      {
+        console.log("make parent- children")
+        let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_jobBody))
+        let parentsBody: IRow[] = [];
+        for(let i = 0; i < jobBodyState.length; i++)
+        {
+          if(jobBodyState[i].cells[R_addresColumIndex].data !== "")
+          {
+            parentsBody.push(jobBodyState[i])
+          }
+          else
+          {
+            if(parentsBody.length > 0 && parentsBody[parentsBody.length - 1].cells[R_addresColumIndex].data !== "")
+            {
+              let lastParent = parentsBody[parentsBody.length - 1]
+              lastParent.children.push(jobBodyState[i])
+            }
+            else
+            {
+              parentsBody.push(jobBodyState[i])
+            }
+            
+          }
+        }
+        R_setJobBody(parentsBody)
+      }
+
+    }, [R_addresColumIndex])
 
     //END useEffects
 

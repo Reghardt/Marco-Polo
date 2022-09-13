@@ -13,7 +13,7 @@ export class SelectedCells
     {
         if(!this.rows.length)
         {
-            this.rows.push({cells: [cellToAdd]})
+            this.rows.push({cells: [cellToAdd], children: []})
         }
         else
         {
@@ -26,7 +26,7 @@ export class SelectedCells
                     return;
                 }
             }
-            this.rows.push({cells: [cellToAdd]}) //else add new row
+            this.rows.push({cells: [cellToAdd], children: []}) //else add new row
         }
     }
 

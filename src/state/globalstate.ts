@@ -1,5 +1,4 @@
 import { atom, selector } from "recoil";
-import { IRawRouteTableData } from "../components/routes/interfaces/RawRouteDataTable.interface";
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
 import { IRow } from "../services/worksheet/row.interface";
 
@@ -28,7 +27,7 @@ export const RSJobHeadings = atom<IRow>({
     default: null
 })
 
-export const RSJobFirstRowIsHeaing = atom<boolean>({
+export const RSJobFirstRowIsHeading = atom<boolean>({
     key: "jobFirstRowIsHeaing",
     default: false
 })
@@ -44,14 +43,18 @@ export const RSAddresColumIndex = selector({
     get: ({get}) => {
         const columnDesignations = get(RSJobColumnDesignations);
 
+        let colIdx = -1;
+
         for(let i = 0; i< columnDesignations.length; i++)
         {
             if(columnDesignations[i] === EColumnDesignations.Address)
             {
-                return i;
+                colIdx = i;
+                break;
             }
         }
-        return -1;
+        
+        return colIdx;
     }
 })
 

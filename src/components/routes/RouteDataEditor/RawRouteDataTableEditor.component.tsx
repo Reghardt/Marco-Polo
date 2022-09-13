@@ -11,7 +11,7 @@ import { ICell } from "../../../services/worksheet/cell.interface";
 import ColumnDecorator from "./cells/ColumnDecorator.component";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeaing, RSJobHeadings } from "../../../state/globalstate";
+import { RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
 
 
 interface RoutedataEditorProps{
@@ -23,7 +23,7 @@ interface RoutedataEditorProps{
 const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, calcRoute, putFirstRowAsHeading}) => {
 
   const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
-  const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeaing)
+  const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
   const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
   const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
   
@@ -124,6 +124,7 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({handleColumnDe
     {
       R_setJobBody((bodyData) => {
         let tempBodyData = JSON.parse(JSON.stringify(bodyData))
+        cell.data = cell.data.trim();
         for(let i = 0; i < tempBodyData.length; i++) //loops over rows
         {
           let row = tempBodyData[i]

@@ -26,7 +26,7 @@ export function createBasicHeadingCell(name: string, x: number)
 
 export function createBasicHeadingRow(leng: number)
 {
-    let tempHeadings: IRow = {cells: []}
+    let tempHeadings: IRow = {cells: [], children: []}
     for(let i = 0; i < leng; i++)
     {
         tempHeadings.cells.push(createBasicHeadingCell("C" + i, i))
