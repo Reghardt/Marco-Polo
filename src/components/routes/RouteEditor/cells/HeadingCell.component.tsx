@@ -2,30 +2,29 @@ import { Button, ClickAwayListener, DialogActions, DialogContent, DialogTitle, P
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import PopperContainer from "../../../common/PopperContainer.styled";
-import { IHeading } from "../../interfaces/Heading.interface";
 
 type HeadingCellProps = {
   colId: number;
-  headingDetails: IHeading;
-  updateHeading: (colNr: number, newHeading: IHeading) => void;
+
+  updateHeading: (colNr: number) => void;
 }
 
-const HeadingCell: React.FC<HeadingCellProps> = ({colId, headingDetails, updateHeading: updateHeadings}) =>
+const HeadingCell: React.FC<HeadingCellProps> = ({}) =>
 {
     const buttonRef = useRef(null);
     const popperRef = useRef(null);
     const [show, setShow] = useState(false);
 
-    const [heading, setHeading] = useState(headingDetails);
+    const [heading, setHeading] = useState("");
 
     const [arrowRef, setArrowRef] = useState<any>(null);
 
 
 
 
-    useEffect(() => {
-      setHeading(headingDetails);
-    }, [headingDetails])
+    // useEffect(() => {
+    //   setHeading(headingDetails);
+    // }, [headingDetails])
 
     const { styles, attributes } = usePopper(
         buttonRef.current,
@@ -50,24 +49,25 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colId, headingDetails, updateH
 
       function captureInput(input: string)
       {
-          setHeading({index: heading.index ,headingName: input})
+        input = input
+          //setHeading({index: heading.index ,headingName: input})
       }
 
       function saveAndClose()
       {
-        updateHeadings(colId, heading)
+        //updateHeadings(colId, heading)
         setShow(!show)
       }
 
       function close()
       {
-        setHeading(headingDetails)
+        //setHeading(headingDetails)
         setShow(!show)
       }
 
     return(
         <React.Fragment>
-            <Button variant="contained" style={{height: "100%", width: "100%"}} ref={buttonRef} onClick={()=> setShow(!show)}>{headingDetails.headingName}</Button>
+            <Button variant="contained" style={{height: "100%", width: "100%"}} ref={buttonRef} onClick={()=> setShow(!show)}>{"dummy"}</Button>
 
             {show && (
                 <ClickAwayListener onClickAway={() => close()}>
@@ -77,7 +77,7 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colId, headingDetails, updateH
                             <DialogTitle>Column Editor</DialogTitle>
                             <DialogContent>
                                 <br/>
-                                <TextField onChange={(e)=> captureInput(e.target.value)} defaultValue={headingDetails.headingName} size="medium" label="Column name"></TextField>
+                                <TextField onChange={(e)=> captureInput(e.target.value)} defaultValue={"dummy"} size="medium" label="Column name"></TextField>
 
                             </DialogContent>
 

@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { IRawRouteTableData } from '../interfaces/RawRouteDataTable.interface';
+
 import { Box, Divider, Grid, Paper, Typography } from '@mui/material';
 import { IRow } from '../../../services/worksheet/row.interface';
 import BodyEntry from './BodyEntry.component';
-import { IHeading } from '../interfaces/Heading.interface';
+
 import HeadingEntry from './HeadingEntry.component';
 import { useRecoilValue } from 'recoil';
 import { RSJobHeadings } from '../../../state/globalstate';
+import { createEntryTypeElementsFromRow } from './ResultTable.service';
 
 interface IResultTableProps{
   inSequenceJobBody: IRow[];
@@ -51,32 +52,14 @@ const ResultTable: React.FC<IResultTableProps> = ({inSequenceJobBody, waypointOr
     }
   }
 
-  function createTableBody(tableData_rows: IRow[]) : JSX.Element[][]
+  function createTableBody(rows: IRow[]) : JSX.Element[][]
   {
-    if(tableData_rows.length > 0 && waypointOrder.length > 0)
+    if(rows.length > 0 && waypointOrder.length > 0)
     {
-      const elementSize = 11 / tableData_rows[0].cells.length;
       const cellTable: JSX.Element[][] = [];
       for(let i = 0; i < waypointOrder.length; i++)
       {
-        const accessElementIndex = waypointOrder[i]
-        if(cellTable[i] === undefined)
-        {
-          cellTable[i] = []
-        }
-
-        cellTable[i].push(<Grid item xs={1}>
-          <BodyEntry content={(i+1).toString()}/>
-        </Grid>)
-        
-        const row = tableData_rows[accessElementIndex]
-        for(let j = 0; j < row.cells.length; j++)
-        {
-          
-          cellTable[i].push(<Grid item xs={elementSize}>
-            <BodyEntry content={row.cells[j].data}/>
-          </Grid>)
-        }
+        cellTable.push(...createEntryTypeElementsFromRow(rows[i], (i + 1).toString(), false))
       }
       return cellTable
     }

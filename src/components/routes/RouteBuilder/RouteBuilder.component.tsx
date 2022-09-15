@@ -6,16 +6,16 @@ import React, { useEffect, useRef, useState } from "react";
 import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../../services/worksheet/worksheet.service"
 import DestinationAddress from "./DestinationAddress.component";
-import { IHeading } from "../interfaces/Heading.interface";
+
 import StartAddress from "./StartAddress.component";
-import { IRawRouteTableData } from "../interfaces/RawRouteDataTable.interface";
+
 import RouteStatistics from "../RouteStatistics.component";
 import axios from "axios";
 import { getServerUrl } from "../../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSAddresColumIndex, RSBearerToken, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
-import RawRouteDataTableEditor from "../RouteDataEditor/RawRouteDataTableEditor.component";
+
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
 import { IRow } from "../../../services/worksheet/row.interface";
@@ -23,6 +23,8 @@ import { IRow } from "../../../services/worksheet/row.interface";
 import StandardHeader from "../../common/StandardHeader.component";
 //import { createBasicHeadingCell } from "../Route.service";
 import { createBasicHeadingCell, createBasicHeadingRow } from "../../workspaces/workspace.service";
+import RouteEditor from "../RouteEditor/RouteEditor";
+import { makeRowParentChildRelations, removeRowParentChildRelations } from "./RouteBuilder.service";
 
 enum EDisplayRoute{
   Fastest,
@@ -155,50 +157,17 @@ const RouteBuilder: React.FC = () =>
     }, [fastestRouteResult, originalRouteResult])
 
     useEffect(() => {
+      let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_jobBody))
       if(R_addresColumIndex === -1)
       {
-        let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_jobBody))
-        console.log("reset parent- children")
-        let childlessJobBody: IRow[] = [];
-        for(let i = 0; i < jobBodyState.length; i++)
-        {
-          childlessJobBody.push(jobBodyState[i])
-          let children = jobBodyState[i].children
-          
-          for(let j = 0; j < children.length; j++)
-          {
-            childlessJobBody.push(children[j])
-          }
-          jobBodyState[i].children = []
-        }
-        R_setJobBody(childlessJobBody)
+        let removedRelationsRows = removeRowParentChildRelations(jobBodyState)
+        R_setJobBody(removedRelationsRows)
       }
       else
       {
-        console.log("make parent- children")
-        let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_jobBody))
-        let parentsBody: IRow[] = [];
-        for(let i = 0; i < jobBodyState.length; i++)
-        {
-          if(jobBodyState[i].cells[R_addresColumIndex].data !== "")
-          {
-            parentsBody.push(jobBodyState[i])
-          }
-          else
-          {
-            if(parentsBody.length > 0 && parentsBody[parentsBody.length - 1].cells[R_addresColumIndex].data !== "")
-            {
-              let lastParent = parentsBody[parentsBody.length - 1]
-              lastParent.children.push(jobBodyState[i])
-            }
-            else
-            {
-              parentsBody.push(jobBodyState[i])
-            }
-            
-          }
-        }
-        R_setJobBody(parentsBody)
+        let removedRelationsRows = removeRowParentChildRelations(jobBodyState) //remove relations as address column may have changed
+        let parentWithChildrenRows = makeRowParentChildRelations(removedRelationsRows, R_addresColumIndex) //re-add relations as per new address col
+        R_setJobBody(parentWithChildrenRows)
       }
 
     }, [R_addresColumIndex])
@@ -410,7 +379,7 @@ const RouteBuilder: React.FC = () =>
 
             {R_jobBody.length > 0 && (
               <div>
-                <RawRouteDataTableEditor 
+                <RouteEditor 
                   handleColumnDesignation={handleColumnDesignation}
                   calcRoute={calcRoute}
                   putFirstRowAsHeading={putFirstRowAsHeading}

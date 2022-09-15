@@ -9,7 +9,6 @@ interface IAddressCellPopperProps{
     closePopper : () => void;
     saveAndClose: (cell: ICell) => void;
     cellRef: ICell;
-    update: () => Promise<Partial<State>>
 }
 
 const AddressCellPopper: React.FC<IAddressCellPopperProps> = (
@@ -18,21 +17,7 @@ const AddressCellPopper: React.FC<IAddressCellPopperProps> = (
         closePopper, 
         saveAndClose, 
         cellRef,
-        update
     }) => {
-
-        if(update)
-        {
-            console.log("update valid")
-        }
-    useEffect(() => {
-        console.log("firs")
-        if(update)
-        {
-            console.log("valid in effect")
-            update()
-        }
-    }, [update])
 
     const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>([]);
     const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(-1)
@@ -101,9 +86,10 @@ const AddressCellPopper: React.FC<IAddressCellPopperProps> = (
         
     }
 
+    //TODO delete button to remove address. View on map option to preview location
     return(
         <Paper variant="elevation" elevation={20}>
-            <DialogTitle sx={{paddingTop: "0.5em", paddingBottom: 0}}>Address Editor</DialogTitle>
+            <DialogTitle sx={{paddingTop: "0.5em", paddingBottom: 0}}>Address Checker</DialogTitle>
             <DialogContent sx={{padding: "0.8em"}}>
                 <br></br>
                 <TextField 

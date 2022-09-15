@@ -4,7 +4,7 @@ import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 
-import RouteMenu from './components/workspaces/RouteMenu.component';
+import RouteTypeSelection from './components/workspaces/RouteTypeSelection.component';
 import RouteBuilder from './components/routes/RouteBuilder/RouteBuilder.component';
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
@@ -28,7 +28,7 @@ function App() {
           <Route path="/register" element={<CreateAccount/>}/>
           <Route path="/workspaces" element={<WorkSpaces/>}/>
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
-          <Route path="/routeMenu" element={<RouteMenu/>}/>
+          <Route path="/routeMenu" element={<RouteTypeSelection/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/success" element={<Success/>}/>
           <Route path="/exp" element={<PopperExperiment/>}/>

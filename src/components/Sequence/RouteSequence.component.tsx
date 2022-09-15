@@ -2,10 +2,11 @@ import { Box, Button, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography 
 import React, { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { IRow } from "../../services/worksheet/row.interface";
-import { RSJobBody, RSJobHeadings } from "../../state/globalstate";
+import { RSJobBody } from "../../state/globalstate";
 import HelpTooltip from "../common/HelpTooltip.component";
-import { IRawRouteTableData } from "../routes/interfaces/RawRouteDataTable.interface";
-import ResultTable from "../routes/ResultTable/ResultTable.component";
+
+import ResultTable from "./ResultTable/ResultTable.component";
+import { preSyncRowDataForWriteBack } from "./RouteSequence.service";
 
 interface IRouteSequenceProps{
     waypointOrder: number[];
@@ -33,19 +34,22 @@ const RouteSequence: React.FC<IRouteSequenceProps> = ({waypointOrder}) => {
 
     function createInSequenceJobBody(jobBody: IRow[], waypointOrder: number[])
     {
-        let jobBodyCopy = JSON.parse(JSON.stringify(jobBody)) 
+        //TODO rework to use leftmost top cell as ankor and use length and width to assign coordinates
+        let inSequenceBody: IRow[] = []
         for(let i = 0; i< waypointOrder.length; i++)
         {
-            const writebackRow = jobBodyCopy[waypointOrder[i]];
+            const writebackRow: IRow = JSON.parse(JSON.stringify(jobBody[waypointOrder[i]])) as IRow
             const referenceRow = jobBody[i];
             for(let j = 0; j < writebackRow.cells.length; j++)
             {
                 writebackRow.cells[j].x = referenceRow.cells[j].x
                 writebackRow.cells[j].y = referenceRow.cells[j].y
                 console.log(writebackRow.cells[j])
+                
             }
+            inSequenceBody.push(writebackRow)
         }
-        setInSequenceJobBody(jobBodyCopy)
+        setInSequenceJobBody(inSequenceBody)
     }
 
     async function writeBackToSpreadsheet(body: IRow[])
@@ -53,16 +57,11 @@ const RouteSequence: React.FC<IRouteSequenceProps> = ({waypointOrder}) => {
 
         Excel.run(async (context) => {
             let sheet = context.workbook.worksheets.getActiveWorksheet()
-            for(let i = 0; i< body.length; i++)
+            for(let i = 0; i < body.length; i++)
             {
-                const row = body[i];
-                for(let j = 0; j < row.cells.length; j++)
-                {
-                    let range = sheet.getCell(row.cells[j].y - 1, row.cells[j].x - 1)
-                    range.values = [[row.cells[j].data]]
-                    range.format.autofitColumns();
-                }
+                preSyncRowDataForWriteBack(body[i], sheet)
             }
+            
 
             await context.sync()
         })

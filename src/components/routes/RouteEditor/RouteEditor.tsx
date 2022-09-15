@@ -1,17 +1,15 @@
 import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, Paper, Stack, Typography } from "@mui/material"
 import React, { useRef, useState } from "react"
-import { IGeocoderResult } from "../../../interfaces/simpleInterfaces";
 import { IRow } from "../../../services/worksheet/row.interface";
 import AddressCell from "./cells/AddressCell/AddressCell.component";
 import DataCell from "./cells/DataCell.component";
 import HeadingCell from "./cells/HeadingCell.component";
-import { IHeading } from "../interfaces/Heading.interface";
-import { IRawRouteTableData } from "../interfaces/RawRouteDataTable.interface";
 import { ICell } from "../../../services/worksheet/cell.interface";
 import ColumnDecorator from "./cells/ColumnDecorator.component";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
+import { createCellTypeElementsFromRow } from "./RouteEditor.service";
 
 
 interface RoutedataEditorProps{
@@ -20,7 +18,7 @@ interface RoutedataEditorProps{
     putFirstRowAsHeading: (isHeading: boolean) => void;
 }
 
-const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, calcRoute, putFirstRowAsHeading}) => {
+const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, calcRoute, putFirstRowAsHeading}) => {
 
   const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
   const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
@@ -65,46 +63,18 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({handleColumnDe
       return tempHeadingsRow
     }
 
-
+    
 
     function CreateTableBody(jobBody: IRow[]) : JSX.Element[][]
     {
+      console.log()
       const cellTable: JSX.Element[][] = [];
       if(jobBody.length > 0)
       {
-        const elementSize = 12 / jobBody[0].cells.length;
-        
-        for(let i = 0; i< jobBody.length; i++)
+        for(let i = 0; i< jobBody.length; i++) //loop through rows
         {
           const row = jobBody[i];
-          
-          for(let j = 0; j < row.cells.length; j++)
-          {
-            if(cellTable[i] === undefined)
-            {
-              cellTable[i] = []; //create row at index for table if the index is undefined
-            }
-            //add elements to table
-            if(R_jobColumnDesignations[j] === EColumnDesignations.Address )
-            {
-              cellTable[i][j] = <Grid key={`cell-${i}-${j}`} item xs={elementSize}> {/* TODO Rename To tableBody?*/}
-              {/* i and j are the positions of the cell in the cellTable, not the coordinates on the spreadsheet */}
-              <AddressCell 
-                cellRef={jobBody[i].cells[j]}
-                updateBodyCell={updateBodyCell}
-                />
-              </Grid>
-            }
-            else
-            {
-              cellTable[i][j] = <Grid key={`cell-${i}-${j}`} item xs={elementSize}> 
-              <DataCell 
-                cellRef={jobBody[i].cells[j]}
-                updateBodyCell={updateBodyCell}
-                />
-              </Grid>
-            }
-          }
+          cellTable.push(...createCellTypeElementsFromRow(row, R_jobColumnDesignations, updateBodyCell)) //create jsx elemets for each row's cells as an array         
         }
         return cellTable
       }
@@ -158,7 +128,16 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({handleColumnDe
 
           {/* <Typography variant="body2" gutterBottom >Legends:</Typography> */}
 
-          <FormControlLabel sx={{marginBottom: "0.7em"}} control={<Checkbox checked={R_jobFirstRowIsHeading} onChange={(e) => {putFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
+          <Stack spacing={0} sx={{marginBottom:"1em"}}>
+            <Box>
+              <FormControlLabel control={<Checkbox checked={R_jobFirstRowIsHeading} onChange={(e) => {putFirstRowAsHeading(e.target.checked)}}/>} label="Use first row as heading" />
+            </Box>
+            <Box>
+              <Button variant="outlined">Fetch Spreadsheet Updates</Button>
+            </Box>
+          </Stack>
+
+          
           
           <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
             {createColumnDecorators().map((elem, idx) => {
@@ -174,7 +153,7 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({handleColumnDe
             <Divider/>
           </div>
             
-          <Grid container spacing={0.3}>
+          <Grid container spacing={0.3} justifyContent="flex-end">
             {CreateTableBody(R_jobBody).map((elem, idx) => {
                 return <React.Fragment key={`body-${idx}`}>{elem}</React.Fragment>
             })} 
@@ -187,4 +166,4 @@ const RawRouteDataTableEditor: React.FC<RoutedataEditorProps> = ({handleColumnDe
     )
 }
 
-export default RawRouteDataTableEditor
+export default RouteEditor

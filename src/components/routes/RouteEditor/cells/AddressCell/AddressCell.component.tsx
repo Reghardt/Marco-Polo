@@ -1,9 +1,16 @@
-import { Button, Checkbox, ClickAwayListener, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material";
+import { Button, ClickAwayListener } from "@mui/material";
+import { stat } from "fs";
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import { ICell } from "../../../../../services/worksheet/cell.interface";
 import PopperContainer from "../../../../common/PopperContainer.styled";
 import AddressCellPopper from "./AddressPopper.component";
+
+enum ESolveState{
+  unsolved,
+  solved,
+  
+}
 
 type AddressCellProps = {
     cellRef: ICell;
@@ -19,16 +26,50 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
   const [shouldReopen, setShouldReopen] = useState(false)
   const [arrowRef, setArrowRef] = useState<any>(null);
 
-  
+  const [solveState, setSolveState] = useState<ESolveState>(ESolveState.unsolved)
 
-  let buttonColor = "#ff9800";
-  //console.log(cellRef.geocodedAddressRes)
-  if(cellRef.geocodedAddressRes)
+  
+  function getStateColor(state: ESolveState, hoverColor: boolean = false)
   {
-    buttonColor = "green";
+    if(state === ESolveState.unsolved)
+    {
+      if(hoverColor)
+      {
+        return "#ca7900"; //hover color is darker
+        
+      } 
+      else
+      {
+        return "#ff9800";
+      }
+    }
+    else
+    {
+      if(hoverColor)
+      {
+        return "#006e09";
+      } 
+      else
+      {
+        return "green";
+      }
+    }
   }
 
-  handleShow();
+ 
+
+  useEffect(() => {
+    if(cellRef.geocodedAddressRes)
+    {
+      setSolveState(ESolveState.solved)
+    }
+    else
+    {
+      setSolveState(ESolveState.unsolved)
+    }
+  }, [cellRef])
+
+
 
   const { styles, attributes, update } = usePopper(
       buttonRef.current,
@@ -58,16 +99,6 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
     );
 
 
-
-    function handleShow()
-    {
-      if(show === false && shouldReopen === true)
-      {
-        setShow(true);
-        setShouldReopen(false);
-      }
-    }
-
     function saveAndClose(cell: ICell)
     {
       updateBodyCell(cell)
@@ -81,7 +112,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
 
     return(
         <React.Fragment>
-        <Button sx={{background: buttonColor}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> closePopper()}>{cellRef.data}</Button>
+        <Button sx={{background: getStateColor(solveState), ":hover": {backgroundColor: getStateColor(solveState, true)}}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> closePopper()}>{cellRef.data}</Button>
         
             {show && (
             <ClickAwayListener onClickAway={()=> closePopper()}>
@@ -96,7 +127,6 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
                         closePopper={closePopper} 
                         saveAndClose={saveAndClose} 
                         cellRef={cellRef}
-                        update={update}
                         />
                 </PopperContainer>
             </ClickAwayListener>)}

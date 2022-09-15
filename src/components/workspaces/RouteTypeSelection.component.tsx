@@ -28,7 +28,7 @@ const RouteMenuStyle = styled.div`
 `
 
 
-export default function RouteMenu()
+export default function RouteTypeSelection()
 {
     const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
     const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
