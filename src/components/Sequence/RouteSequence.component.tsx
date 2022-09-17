@@ -2,11 +2,11 @@ import { Box, Button, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography 
 import React, { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { IRow } from "../../services/worksheet/row.interface";
-import { RSJobBody } from "../../state/globalstate";
+import { RSAddresColumIndex, RSJobBody } from "../../state/globalstate";
 import HelpTooltip from "../common/HelpTooltip.component";
 
 import ResultTable from "./ResultTable/ResultTable.component";
-import { preSyncRowDataForWriteBack } from "./RouteSequence.service";
+import { createInSequenceJobBody, preSyncRowDataForWriteBack } from "./RouteSequence.service";
 
 interface IRouteSequenceProps{
     waypointOrder: number[];
@@ -25,32 +25,16 @@ const RouteSequence: React.FC<IRouteSequenceProps> = ({waypointOrder}) => {
 
     
     const R_jobBody = useRecoilValue(RSJobBody)
+    const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
 
     const [inSequenceJobBody, setInSequenceJobBody] = useState<IRow[]>([])
 
     useEffect(() => {
-        createInSequenceJobBody(R_jobBody, waypointOrder)
+        setInSequenceJobBody(createInSequenceJobBody(R_jobBody, waypointOrder, R_addresColumIndex))
+        
     },[])
 
-    function createInSequenceJobBody(jobBody: IRow[], waypointOrder: number[])
-    {
-        //TODO rework to use leftmost top cell as ankor and use length and width to assign coordinates
-        let inSequenceBody: IRow[] = []
-        for(let i = 0; i< waypointOrder.length; i++)
-        {
-            const writebackRow: IRow = JSON.parse(JSON.stringify(jobBody[waypointOrder[i]])) as IRow
-            const referenceRow = jobBody[i];
-            for(let j = 0; j < writebackRow.cells.length; j++)
-            {
-                writebackRow.cells[j].x = referenceRow.cells[j].x
-                writebackRow.cells[j].y = referenceRow.cells[j].y
-                console.log(writebackRow.cells[j])
-                
-            }
-            inSequenceBody.push(writebackRow)
-        }
-        setInSequenceJobBody(inSequenceBody)
-    }
+    
 
     async function writeBackToSpreadsheet(body: IRow[])
     {

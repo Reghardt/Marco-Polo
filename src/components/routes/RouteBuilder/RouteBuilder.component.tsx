@@ -14,7 +14,7 @@ import axios from "axios";
 import { getServerUrl } from "../../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
 
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
@@ -25,6 +25,7 @@ import StandardHeader from "../../common/StandardHeader.component";
 import { createBasicHeadingCell, createBasicHeadingRow } from "../../workspaces/workspace.service";
 import RouteEditor from "../RouteEditor/RouteEditor";
 import { makeRowParentChildRelations, removeRowParentChildRelations } from "./RouteBuilder.service";
+import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 enum EDisplayRoute{
   Fastest,
@@ -39,6 +40,8 @@ const RouteBuilder: React.FC = () =>
     const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
 
     const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
+
+    const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
     
 
     const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
@@ -48,8 +51,8 @@ const RouteBuilder: React.FC = () =>
     const fastestRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
     const originalRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
-    const [startAddress, setStartAddress] = useState("none");
-    const [destinationAddress, setDestinationAddress] = useState("none");
+    const R_departureAddress = useRecoilValue(RSDepartureAddress);
+    const R_returnAddress = useRecoilValue(RSReturnAddress);
   
     const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
     
@@ -99,6 +102,7 @@ const RouteBuilder: React.FC = () =>
             R_setJobHeadings(null)
             R_setJobFirstRowIsHeading(false)
             R_setJobBody([])
+            R_setColumnVisibility([])
             return;
           }
         }
@@ -122,6 +126,14 @@ const RouteBuilder: React.FC = () =>
         R_setJobHeadings(tempHeadings)
         R_setJobFirstRowIsHeading(false)
         R_setJobBody(userSelectionRows)
+        R_setColumnVisibility(() => {
+          let colVisibility: boolean[] = []
+          for(let i = 0; i< tempHeadings.cells.length; i++)
+          {
+            colVisibility.push(true)
+          }
+          return colVisibility
+        })
 
         setRouteStatisticsData(null);
         setWaypointOrder([]);
@@ -206,14 +218,6 @@ const RouteBuilder: React.FC = () =>
     }
 
 
-    function removeDirections()
-    {
-      fastestRouteDirectionsRenderer.current.setMap(null)
-      setTimeout(() => {
-        fastestRouteDirectionsRenderer.current.setMap(map.current)
-      },4000)
-    }
-
     function getRouteDistance_Time_WaypointOrder(directions: google.maps.DirectionsResult, directionsIndex: number)
     {
       let legs = directions.routes[directionsIndex].legs;
@@ -231,7 +235,7 @@ const RouteBuilder: React.FC = () =>
 
     function calcRoute()
     {
-      if(startAddress !== "" && destinationAddress !== "") //test if not "none"
+      if(R_departureAddress !== "" && R_returnAddress !== "") //test if not "none"
       {
         let waypoints: google.maps.DirectionsWaypoint[]  = [];
 
@@ -275,8 +279,8 @@ const RouteBuilder: React.FC = () =>
     function createDirections(waypoints: google.maps.DirectionsWaypoint[], optimize: boolean) {
 
       var request: google.maps.DirectionsRequest = {
-        origin: startAddress,
-        destination: destinationAddress,
+        origin: R_departureAddress,
+        destination: R_returnAddress,
         waypoints: waypoints,
         travelMode: google.maps.TravelMode.DRIVING,
         optimizeWaypoints: optimize
@@ -364,18 +368,10 @@ const RouteBuilder: React.FC = () =>
         <div>
           <StandardHeader title="Route Builder" backNavStr="/routeMenu"/>
 
-
           <div style={{padding: "0.3em"}}>
             <Button variant="outlined" onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
 
-            <Stack spacing={0.8} sx={{marginTop: "0.5em", marginBottom: "1em"}}>
-              <Box>
-                <StartAddress startAddress={startAddress} setStartAddress={setStartAddress}/>
-              </Box>
-              <Box>
-                <DestinationAddress destinationAddress={destinationAddress} setDestinationAddress={setDestinationAddress}/>
-              </Box>
-            </Stack>
+            <DepartureReturn/>
 
             {R_jobBody.length > 0 && (
               <div>
@@ -388,7 +384,7 @@ const RouteBuilder: React.FC = () =>
                 {routeStatisticsData && (
                     <RouteStatistics routeStatisticsData={routeStatisticsData}/>
                 )}
-                {/* <Button onClick={()=> saveRoute()}>Save</Button> */}
+
                 
                 {waypointOrder.length > 0 && (
                     <RouteSequence waypointOrder={waypointOrder}/>
@@ -398,7 +394,6 @@ const RouteBuilder: React.FC = () =>
 
             <Paper sx={{padding: "10px", color:"#1976d2"}} variant="elevation" elevation={5}>
 
-              {/* <Button onClick={() => {removeDirections()}}>Remove</Button> */}
               <Typography variant="h5" gutterBottom >Google Maps</Typography>
 
               <Stack direction={"row"} spacing={1} alignItems="center" sx={{marginBottom: "1em"}}>
@@ -411,20 +406,15 @@ const RouteBuilder: React.FC = () =>
                       exclusive
                       onChange={(_e, v) => {handleRouteToDisplay(v)}}
                       aria-label="Address Type"
-                      
                       >
                         <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Fastest}>Fastest Route</ToggleButton>
                         <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Original}>Original Route</ToggleButton>
                     </ToggleButtonGroup>
                   </Box>
                 </Stack>
-
-              
               <div style={{width: "100%", height: 500}} id="map"></div>
             </Paper>
           </div>
-
-          
         </div>
     )
 }

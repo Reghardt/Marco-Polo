@@ -1,4 +1,5 @@
 import { atom, selector } from "recoil";
+import { EDepartReturn } from "../components/routes/RouteBuilder/DepartureReturn/DepartureReturn.component";
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
 import { IRow } from "../services/worksheet/row.interface";
 
@@ -15,6 +16,21 @@ export const RSWorkspaceID = atom({
 export const RSJobID = atom<{jobId: string, shouldFetch: boolean}>({
     key: "jobId",
     default: {jobId: "", shouldFetch: false}
+})
+
+export const RSDepartureAddress = atom<string>({
+    key: "departureAddress",
+    default: ""
+})
+
+export const RSReturnAddress = atom<string>({
+    key: "returnAddress",
+    default: ""
+})
+
+export const RSDepartReturnState = atom<EDepartReturn>({
+    key: "departReturnState",
+    default: EDepartReturn.return
 })
 
 export const RSJobColumnDesignations = atom<EColumnDesignations[]>({
@@ -56,6 +72,11 @@ export const RSAddresColumIndex = selector({
         
         return colIdx;
     }
+})
+
+export const RSColumnVisibility = atom<boolean[]>({
+    key: "columnVisibility",
+    default: []
 })
 
 // export const RSFirstRowIsColumn = atom<boolean>({

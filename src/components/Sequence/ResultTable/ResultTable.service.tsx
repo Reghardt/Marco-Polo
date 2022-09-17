@@ -41,5 +41,6 @@ export function createEntryTypeElementsFromRow(row: Readonly<IRow>, nr: string, 
     {
         parentRowElementsWithChildRowElements.push(...createEntryTypeElementsFromRow(row.children[i], nr, true))
     }
+    
     return parentRowElementsWithChildRowElements
 }
