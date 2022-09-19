@@ -1,4 +1,4 @@
-import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup } from "@mui/material"
+import { Box, Divider, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useRecoilState } from "recoil"
 import { RSDepartReturnState, RSDepartureAddress, RSReturnAddress } from "../../../../state/globalstate"
@@ -27,6 +27,7 @@ const DepartureReturn: React.FC = () => {
 
     return(
         <div style={{marginTop: "1em"}}>
+            <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Trip Type</Typography>
             <Stack direction={"row"} alignItems="center" spacing={1} sx={{marginBottom: "1em"}}>
                 <Box>
                     <ToggleButtonGroup
@@ -64,6 +65,7 @@ const DepartureReturn: React.FC = () => {
                     <AddressSelector address={R_returnAddress} addressSetter={R_setReturnAddress} title={"Return Address"}/>
                 </React.Fragment>
             )}
+            
             
         </div>
     )

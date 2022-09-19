@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
-import { Box, Button, Divider, IconButton, Paper, Stack, styled, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, Button, Divider, IconButton, Paper, Stack, styled, Tab, Tabs, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
 import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
@@ -24,7 +24,7 @@ import StandardHeader from "../../common/StandardHeader.component";
 //import { createBasicHeadingCell } from "../Route.service";
 import { createBasicHeadingCell, createBasicHeadingRow } from "../../workspaces/workspace.service";
 import RouteEditor from "../RouteEditor/RouteEditor";
-import { makeRowParentChildRelations, removeRowParentChildRelations } from "./RouteBuilder.service";
+import { makeRowParentChildRelations, removeRowParentChildRelations, TabPanel, tabProps } from "./RouteBuilder.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 enum EDisplayRoute{
@@ -34,6 +34,8 @@ enum EDisplayRoute{
 
 const RouteBuilder: React.FC = () =>
 {
+  const [tabValue, setTabValue] = useState(0);
+
     const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
     const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
     const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
@@ -205,12 +207,15 @@ const RouteBuilder: React.FC = () =>
     
 
     //TODO move setStates outside of func, async func setState not batched
-    async function retrieveUserSelectionFromSpreadsheetAndSet()
+    function retrieveUserSelectionFromSpreadsheetAndSet()
     {
-      setUserSelectionRows(await loadSelection())
-      setRouteStatisticsData(null);
-      setWaypointOrder([]);
-      fastestRouteDirectionsRenderer.current.setMap(null)
+      loadSelection().then((selection) => {
+        setUserSelectionRows(selection)
+        setRouteStatisticsData(null);
+        setWaypointOrder([]);
+        fastestRouteDirectionsRenderer.current.setMap(null)
+      })
+     
     }
 
 
@@ -362,35 +367,48 @@ const RouteBuilder: React.FC = () =>
 
     return(
         <div>
-          <StandardHeader title="Route Builder" backNavStr="/routeMenu"/>
+          <StandardHeader title="Trip Builder" backNavStr="/routeMenu"/> {/*Trip? Job? Route?*/}
 
-          <div style={{padding: "0.3em"}}>
-            <Button variant="outlined" onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
+          <Paper elevation={10}>
+            <Tabs value={tabValue} onChange={(_e, v) => (setTabValue(v))}>
+              <Tab label="Edit" {...tabProps(0)}/>
+              <Tab label="Finalize" {...tabProps(1)}/>
+            </Tabs>
 
-            <DepartureReturn/>
+            <Box sx={{padding: "0.3em"}}>
+              <TabPanel value={tabValue} index={0}>
 
-            {R_jobBody.length > 0 && (
-              <div>
-                <RouteEditor 
-                  handleColumnDesignation={handleColumnDesignation}
-                  calcRoute={calcRoute}
-                  putFirstRowAsHeading={putFirstRowAsHeading}
+              <DepartureReturn/>
+              
+              <Divider sx={{marginTop: "0.5em", marginBottom: "0.5em"}}/>
+
+              <RouteEditor 
+                retrieveUserSelectionFromSpreadsheetAndSet={retrieveUserSelectionFromSpreadsheetAndSet}
+                handleColumnDesignation={handleColumnDesignation}
+                calcRoute={calcRoute}
+                putFirstRowAsHeading={putFirstRowAsHeading}
                 />
 
-                {routeStatisticsData && (
-                    <RouteStatistics routeStatisticsData={routeStatisticsData}/>
-                )}
+              </TabPanel>
 
-                
-                {waypointOrder.length > 0 && (
-                    <RouteSequence waypointOrder={waypointOrder}/>
-                )}
-              </div>
-            )}
+              <TabPanel value={tabValue} index={1}>
 
-            <Paper sx={{padding: "10px", color:"#1976d2"}} variant="elevation" elevation={5}>
+                <RouteStatistics routeStatisticsData={routeStatisticsData}/>
 
-              <Typography variant="h5" gutterBottom >Google Maps</Typography>
+                <Divider sx={{marginTop: "0.8em", marginBottom: "0.8em"}}/>
+
+                <RouteSequence waypointOrder={waypointOrder}/>
+
+              </TabPanel>
+            </Box>
+            
+          </Paper>
+
+
+
+            <Paper sx={{padding: "0.3em", marginTop: "0.3em"}} variant="elevation" elevation={5}>
+
+              <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}} >Google Maps</Typography>
 
               <Stack direction={"row"} spacing={1} alignItems="center" sx={{marginBottom: "1em"}}>
                   <Box>
@@ -408,9 +426,9 @@ const RouteBuilder: React.FC = () =>
                     </ToggleButtonGroup>
                   </Box>
                 </Stack>
-              <div style={{width: "100%", height: 500}} id="map"></div>
+              <Paper style={{width: "100%", height: 500}} id="map"></Paper>
             </Paper>
-          </div>
+
         </div>
     )
 }

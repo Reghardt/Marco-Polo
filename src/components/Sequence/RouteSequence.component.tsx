@@ -30,9 +30,13 @@ const RouteSequence: React.FC<IRouteSequenceProps> = ({waypointOrder}) => {
     const [inSequenceJobBody, setInSequenceJobBody] = useState<IRow[]>([])
 
     useEffect(() => {
-        setInSequenceJobBody(createInSequenceJobBody(R_jobBody, waypointOrder, R_addresColumIndex))
+        if(waypointOrder.length > 0)
+        {
+            setInSequenceJobBody(createInSequenceJobBody(R_jobBody, waypointOrder, R_addresColumIndex))
+        }
         
-    },[])
+        
+    },[waypointOrder])
 
     
 
@@ -54,38 +58,48 @@ const RouteSequence: React.FC<IRouteSequenceProps> = ({waypointOrder}) => {
     }
 
     return(
-        <div>
-            <Paper sx={{padding: "10px", marginBottom: "0.5em"}} variant="elevation" elevation={5}>
+
+            <Box>
                 <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Route Sequence Table</Typography>
 
-                <Stack direction={"row"} spacing={1} alignItems="center">
-                    <Box>
-                        <ToggleButtonGroup
-                            sx={{maxHeight:"100%", height: "100%"}}
-                            size="small"
-                            color="primary"
-                            value={addressType}
-                            exclusive
-                            onChange={(_e, v) => {setAddressType(v)}}
-                            aria-label="Address Type"
-                            >
-                                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EAddressType.Original}>Original Addresses</ToggleButton>
-                                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EAddressType.Google}>Google Maps Addresses</ToggleButton>
-                        </ToggleButtonGroup>
-                    </Box>
-                    <Box>
-                        <HelpTooltip title="Swap between the given addresses and the corresponding addresses found on google maps. The address type selected will be written back to the spreadsheet as shown in the table below."/>
-                    </Box>
-                </Stack>
+                {waypointOrder.length > 0 && (
+                    <div>
+                        <Stack direction={"row"} spacing={1} alignItems="center">
+                            <Box>
+                                <ToggleButtonGroup
+                                    sx={{maxHeight:"100%", height: "100%"}}
+                                    size="small"
+                                    color="primary"
+                                    value={addressType}
+                                    exclusive
+                                    onChange={(_e, v) => {setAddressType(v)}}
+                                    aria-label="Address Type"
+                                    >
+                                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EAddressType.Original}>Original Addresses</ToggleButton>
+                                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EAddressType.Google}>Google Maps Addresses</ToggleButton>
+                                </ToggleButtonGroup>
+                            </Box>
+                            <Box>
+                                <HelpTooltip title="Swap between the given addresses and the corresponding addresses found on google maps. The address type selected will be written back to the spreadsheet as shown in the table below."/>
+                            </Box>
+                        </Stack>
+                        
+                        <ResultTable inSequenceJobBody={inSequenceJobBody} waypointOrder={waypointOrder}/>
+                        <div style={{marginTop: "1em"}}>
+                            <Button onClick={() => {writeBackToSpreadsheet(inSequenceJobBody)}}>Write back</Button>
+                            <Button>Reset Spreadsheet</Button>
+                        </div>
+                    </div>
+                )}
+
+                {waypointOrder.length === 0 && (
+                    <Typography variant="body1" gutterBottom>Once a trip has been generated the addresses and corresponding data will be displayed here in order of the shortest route. The data may then also be written back to Excel in that order.</Typography>
+                )}
+
                 
-                <ResultTable inSequenceJobBody={inSequenceJobBody} waypointOrder={waypointOrder}/>
-                <div style={{marginTop: "1em"}}>
-                    <Button onClick={() => {writeBackToSpreadsheet(inSequenceJobBody)}}>Write back</Button>
-                    <Button>Reset Spreadsheet</Button>
-                </div>
                 
-            </Paper>
-        </div>)
+            </Box>
+        )
 }
 
 export default RouteSequence
