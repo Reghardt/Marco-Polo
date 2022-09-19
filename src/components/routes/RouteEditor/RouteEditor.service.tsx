@@ -5,16 +5,79 @@ import { ICell } from "../../../services/worksheet/cell.interface";
 import { IRow } from "../../../services/worksheet/row.interface";
 import BodyEntry from "../../Sequence/ResultTable/BodyEntry.component";
 import AddressCell from "./cells/AddressCell/AddressCell.component";
+import ColumnDecorator from "./cells/ColumnDecorator.component";
 import DataCell from "./cells/DataCell.component";
 
-export function createCellTypeElementsFromRow(row: Readonly<IRow>, columnDesignations: Readonly<EColumnDesignations[]>, updateBodyCell: (cell: ICell) => void, isChild: boolean = false) : JSX.Element[][]
+function numberOfVisibleColumns(columnVisibility: boolean[]): number
+{
+    let num = 0
+    for(let i = 0; i < columnVisibility.length; i++)
     {
-        const rowLength = row.cells.length;
-        const elementSize = 12 / rowLength;
+        if(columnVisibility[i] === true)
+        {
+            num++
+        }
+    }
+    return num
+}
+
+export function createColumnDecorators(jobHeadings: IRow, columnVisibility: boolean[], handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void) : JSX.Element[]
+{
+    const decorators: JSX.Element[] = [];
+
+    const elementSize = 12 / numberOfVisibleColumns(columnVisibility)
+    for(let i = 0; i < jobHeadings.cells.length; i++)
+    {
+        if(columnVisibility[i] === false)
+        {
+            continue; //if column is not visible, dont create an element for it.
+        }
+
+        decorators.push(<Grid item xs={elementSize}>
+        <ColumnDecorator colIdx={i} handleColumnDesignation={handleColumnDesignation}/>
+        </Grid>)
+    }
+    return decorators
+
+
+}
+
+export function CreateTableHeadingElements(jobHeadings: IRow, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[])
+    {
+      let tempHeadingsRow: JSX.Element[] = [];
+      const elementSize = 12 / numberOfVisibleColumns(columnVisibility)
+      for(let i = 0; i < jobHeadings.cells.length; i++)
+      {
+        if(columnVisibility[i] === false)
+        {
+            continue; //if column is not visible, dont create an element for it.
+        }
+
+        tempHeadingsRow.push(
+          <Grid item xs={elementSize}>
+            <DataCell
+              cellRef={jobHeadings.cells[i]}
+              updateBodyCell={updateBodyCell}/>
+          </Grid>
+        )
+      }
+      return tempHeadingsRow
+    }
+
+export function createCellTypeElementsFromRow(row: Readonly<IRow>, columnDesignations: Readonly<EColumnDesignations[]>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[], isChild: boolean = false) : JSX.Element[][]
+    {
+
+        const rowLength = columnDesignations.length
+        const elementSize = 12 / numberOfVisibleColumns(columnVisibility);
         let parentRowElements: JSX.Element[] = [];
         let parentRowElementsWithChildRowElements: JSX.Element[][] = [];
         for(let i = 0; i < rowLength; i++)
         {
+            if(columnVisibility[i] === false)
+            {
+                continue; //if column is not visible, dont create an element for it.
+            }
+
             let tempElementSize = elementSize
             if(isChild && i === 0)
             {
@@ -65,7 +128,7 @@ export function createCellTypeElementsFromRow(row: Readonly<IRow>, columnDesigna
 
         for(let i = 0; i < row.children.length; i++)
         {
-            parentRowElementsWithChildRowElements.push(...createCellTypeElementsFromRow(row.children[i], columnDesignations, updateBodyCell, true))
+            parentRowElementsWithChildRowElements.push(...createCellTypeElementsFromRow(row.children[i], columnDesignations, updateBodyCell, columnVisibility, true))
         }
         
         return parentRowElementsWithChildRowElements;

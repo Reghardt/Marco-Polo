@@ -110,10 +110,12 @@ const RouteBuilder: React.FC = () =>
         //create data for headings nad column designations
         let tempHeadings: IRow = {cells: [], children: []}
         let tempColumnDesignations: number[] = []
+        let colVisibility: boolean[] = []
         for(let k = 0; k < userSelectionRows[0].cells.length; k++)
         {
           tempHeadings.cells.push(createBasicHeadingCell("C" + k, k ))
           tempColumnDesignations.push(0) 
+          colVisibility.push(true)
         }
 
         fastestRouteDirectionsRenderer.current.setMap(null)
@@ -126,14 +128,8 @@ const RouteBuilder: React.FC = () =>
         R_setJobHeadings(tempHeadings)
         R_setJobFirstRowIsHeading(false)
         R_setJobBody(userSelectionRows)
-        R_setColumnVisibility(() => {
-          let colVisibility: boolean[] = []
-          for(let i = 0; i< tempHeadings.cells.length; i++)
-          {
-            colVisibility.push(true)
-          }
-          return colVisibility
-        })
+        R_setColumnVisibility(colVisibility)
+        console.log(colVisibility)
 
         setRouteStatisticsData(null);
         setWaypointOrder([]);

@@ -1,5 +1,6 @@
 import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
 import { ICell } from "../../services/worksheet/cell.interface";
+import { IRow } from "../../services/worksheet/row.interface";
 
 export function geocodeAddress(address: string) : Promise<IGeocoderResult>
     {
@@ -12,4 +13,6 @@ export function geocodeAddress(address: string) : Promise<IGeocoderResult>
 
       return geoResPromise;
     }
+
+
 

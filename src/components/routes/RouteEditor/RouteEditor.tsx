@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, Paper, Stack, Typography } from "@mui/material"
+import { Box, Button, Checkbox, Divider, FormControlLabel, Grid, Paper, Stack, Typography } from "@mui/material"
 import React, { useRef, useState } from "react"
 import { IRow } from "../../../services/worksheet/row.interface";
 import AddressCell from "./cells/AddressCell/AddressCell.component";
@@ -8,8 +8,8 @@ import { ICell } from "../../../services/worksheet/cell.interface";
 import ColumnDecorator from "./cells/ColumnDecorator.component";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
-import { createCellTypeElementsFromRow } from "./RouteEditor.service";
+import { RSColumnVisibility, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
+import { createCellTypeElementsFromRow, createColumnDecorators, CreateTableHeadingElements } from "./RouteEditor.service";
 
 
 interface RoutedataEditorProps{
@@ -25,43 +25,13 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
   const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
   const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
   
+  const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
 
     //Creator Functions //////////////////////////////////////////////////////
 
-    function createColumnDecorators() : JSX.Element[]
-    {
-      const decorators: JSX.Element[] = [];
-      if( R_jobBody.length > 0)
-      {
-        const elementSize = 12 / R_jobBody[0].cells.length;
-        for(let i = 0; i < R_jobBody[0].cells.length; i++)
-        {
-          decorators.push(<Grid item xs={elementSize}>
-            <ColumnDecorator colIdx={i} handleColumnDesignation={handleColumnDesignation}/>
-          </Grid>)
-        }
-        return decorators
-      }
-      return [];
 
-    }
 
-    function CreateTableHeadingElements(jobHeadings: IRow)
-    {
-      let tempHeadingsRow: JSX.Element[] = [];
-      const elementSize = 12 / jobHeadings.cells.length
-      for(let i = 0; i < jobHeadings.cells.length; i++)
-      {
-        tempHeadingsRow.push(
-          <Grid item xs={elementSize}>
-            <DataCell
-              cellRef={jobHeadings.cells[i]}
-              updateBodyCell={updateBodyCell}/>
-          </Grid>
-        )
-      }
-      return tempHeadingsRow
-    }
+    
 
     
 
@@ -74,7 +44,7 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
         for(let i = 0; i< jobBody.length; i++) //loop through rows
         {
           const row = jobBody[i];
-          cellTable.push(...createCellTypeElementsFromRow(row, R_jobColumnDesignations, updateBodyCell)) //create jsx elemets for each row's cells as an array         
+          cellTable.push(...createCellTypeElementsFromRow(row, R_jobColumnDesignations, updateBodyCell, R_columnVisibility)) //create jsx elemets for each row's cells as an array         
         }
         return cellTable
       }
@@ -120,7 +90,26 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
 
     ////////////////////////////////////////////////////////////////////
 
-  
+    function createColumnVisibilityOptions(columnNames: IRow, columnVisibility: boolean[])
+    {
+      console.log("initial col vis", columnVisibility)
+      let visibilityElements = 
+        <Grid container>
+          {columnNames.cells.map((elem, idx) => {
+            return  <Grid item xs="auto">
+                      <FormControlLabel control={<Checkbox checked={columnVisibility[idx]} 
+                        onChange={(_e) => {R_setColumnVisibility((visibility) => {
+                          let newVisibility = [...visibility]
+                          newVisibility[idx] = _e.target.checked
+                          return newVisibility
+                        })}}/>} label={elem.data} />
+                    </Grid>
+          })}
+        </Grid>
+
+      return visibilityElements
+    }
+
     
     return(
       <Paper sx={{padding: "10px", marginBottom: "0.5em"}} variant="elevation" elevation={5}>
@@ -137,15 +126,15 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
             </Box>
           </Stack>
 
-          
+          {createColumnVisibilityOptions(R_jobHeadings, R_columnVisibility)}
           
           <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
-            {createColumnDecorators().map((elem, idx) => {
+            {createColumnDecorators(R_jobHeadings, R_columnVisibility, handleColumnDesignation).map((elem, idx) => {
               return <React.Fragment key={`column-decorator-${idx}`}>{elem}</React.Fragment>
             })}
           </Grid>
           <Grid container spacing={0.3}>
-            {CreateTableHeadingElements(R_jobHeadings).map((elem, idx) => {
+            {CreateTableHeadingElements(R_jobHeadings, updateBodyCell, R_columnVisibility).map((elem, idx) => {
                 return <React.Fragment key={`heading-${idx}`}>{elem}</React.Fragment>
                 })}
           </Grid>
