@@ -100,7 +100,7 @@ export default function Login()
                     </div>
                     
                   </div>
-                  {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
+                  <NavLink to={'/exp'}>Experiment</NavLink>
                   
                   
                 </Paper>
