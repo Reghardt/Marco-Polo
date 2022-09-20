@@ -25,11 +25,17 @@ export function removeRowParentChildRelations(rows: IRow[])
     return noRelationRows
 }
 
-export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: number)
+export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: number): IRow[]
 {
     console.log("make parent- children")
     console.log(rows, addressColumnIndex)
     let parentWithChildrenRows: IRow[] = [];
+
+    if(addressColumnIndex < 0)
+    {
+      return rows
+    }
+
     for(let i = 0; i < rows.length; i++)
     {
         if(rows[i].cells[addressColumnIndex].data !== "")

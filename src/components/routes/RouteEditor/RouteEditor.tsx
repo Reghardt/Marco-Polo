@@ -7,8 +7,6 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { RSColumnVisibility, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
 import { createCellTypeElementsFromRow, createColumnDecorators, CreateTableHeadingElements } from "./RouteEditor.service";
 
-
-
 interface RoutedataEditorProps{
     retrieveUserSelectionFromSpreadsheetAndSet: () => void;
     handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void;
@@ -26,12 +24,6 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({retrieveUserSelectionFromS
   const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
 
     //Creator Functions //////////////////////////////////////////////////////
-
-
-
-    
-
-    
 
     function CreateTableBody(jobBody: IRow[]) : JSX.Element[][]
     {

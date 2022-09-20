@@ -5,9 +5,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../../services/worksheet/worksheet.service"
-import DestinationAddress from "./DestinationAddress.component";
-
-import StartAddress from "./StartAddress.component";
 
 import RouteStatistics from "../RouteStatistics.component";
 import axios from "axios";
@@ -21,16 +18,14 @@ import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } 
 import { IRow } from "../../../services/worksheet/row.interface";
 
 import StandardHeader from "../../common/StandardHeader.component";
-//import { createBasicHeadingCell } from "../Route.service";
 import { createBasicHeadingCell, createBasicHeadingRow } from "../../workspaces/workspace.service";
 import RouteEditor from "../RouteEditor/RouteEditor";
 import { makeRowParentChildRelations, removeRowParentChildRelations, TabPanel, tabProps } from "./RouteBuilder.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
+import { EDisplayRoute } from "./Maps/GMap.service";
+import GMap from "./Maps/GMap.component";
 
-enum EDisplayRoute{
-  Fastest,
-  Original
-}
+
 
 const RouteBuilder: React.FC = () =>
 {
@@ -48,10 +43,7 @@ const RouteBuilder: React.FC = () =>
 
     const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
 
-    const map = useRef<google.maps.Map>()
-    const directionsService = useRef<google.maps.DirectionsService>()
-    const fastestRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
-    const originalRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
+    
 
     const R_departureAddress = useRecoilValue(RSDepartureAddress);
     const R_returnAddress = useRecoilValue(RSReturnAddress);
@@ -72,21 +64,13 @@ const RouteBuilder: React.FC = () =>
     const [fastestRouteResult, setFastestRouteResult] = useState<IRouteResult>(null)
     const [originalRouteResult, setOriginalRouteResult] = useState<IRouteResult>(null)
 
-    const [routeToDisplay, setRouteToDisplay] = useState<EDisplayRoute>(EDisplayRoute.Fastest)
+    
 
     console.log("refresh")
 
     //START: useEffects
 
-    //Creates map on mount
-    useEffect(() => {
-        const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
-        map.current = new google.maps.Map(document.getElementById("map") as HTMLElement, {center, zoom: 8})
-        
-        directionsService.current = new google.maps.DirectionsService();
-        fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
-        originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
-    }, [])
+
 
     useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates
       if(userSelectionRows.length > 0)
@@ -120,11 +104,6 @@ const RouteBuilder: React.FC = () =>
           colVisibility.push(true)
         }
 
-        fastestRouteDirectionsRenderer.current.setMap(null)
-        originalRouteDirectionsRenderer.current.setMap(null)
-        fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
-        originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer()
-
 
         R_setJobColumnDesignations(tempColumnDesignations)
         R_setJobHeadings(tempHeadings)
@@ -138,33 +117,7 @@ const RouteBuilder: React.FC = () =>
       } 
     }, [userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
 
-    useEffect(() => {
-      if(fastestRouteResult && originalRouteResult && fastestRouteResult.status === "OK" && originalRouteResult.status === "OK")
-      {
-        const fastestRouteStats = getRouteDistance_Time_WaypointOrder(fastestRouteResult.result, 0)
-        const originalRouteStats = getRouteDistance_Time_WaypointOrder(originalRouteResult.result, 0)
-        
-        fastestRouteDirectionsRenderer.current.setDirections(fastestRouteResult.result)
-        originalRouteDirectionsRenderer.current.setDirections(originalRouteResult.result)
-        fastestRouteDirectionsRenderer.current.setMap(map.current)
-        originalRouteDirectionsRenderer.current.setMap(null)
-
-        //TODO route cost calculation
-        makeRouteOnDB(5).then(res => {
-          console.log(res)
-
-          setWaypointOrder(fastestRouteStats.order)
-          setRouteStatisticsData({
-            optimized: {dist: fastestRouteStats.totalDistance, time: fastestRouteStats.totalTime }, 
-            origional: {dist: originalRouteStats.totalDistance, time: originalRouteStats.totalTime}
-          })
-        })
-      }
-      else
-      {
-        //TODO handle errors
-      }
-    }, [fastestRouteResult, originalRouteResult])
+    
 
     useEffect(() => {
       let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_jobBody))
@@ -213,7 +166,7 @@ const RouteBuilder: React.FC = () =>
         setUserSelectionRows(selection)
         setRouteStatisticsData(null);
         setWaypointOrder([]);
-        fastestRouteDirectionsRenderer.current.setMap(null)
+        
       })
      
     }
@@ -248,11 +201,42 @@ const RouteBuilder: React.FC = () =>
           }
         }
 
+        //TODO check if there are enought tokens available
+
         Promise.all([createDirections(waypoints, true), createDirections(waypoints, false)]).then(res => {
+
+          const fastestRouteStats = getRouteDistance_Time_WaypointOrder(fastestRouteResult.result, 0)
+          const originalRouteStats = getRouteDistance_Time_WaypointOrder(originalRouteResult.result, 0)
+
+          setRouteStatisticsData({
+            optimized: {dist: fastestRouteStats.totalDistance, time: fastestRouteStats.totalTime }, 
+            origional: {dist: originalRouteStats.totalDistance, time: originalRouteStats.totalTime}
+          })
+
+          setWaypointOrder(fastestRouteStats.order)
+
           setFastestRouteResult(res[0])
           setOriginalRouteResult(res[1])
         })
       }
+    }
+
+    function createDirections(waypoints: google.maps.DirectionsWaypoint[], optimize: boolean) {
+
+      var request: google.maps.DirectionsRequest = {
+        origin: R_departureAddress,
+        destination: R_returnAddress,
+        waypoints: waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+        optimizeWaypoints: optimize
+      };
+
+      return new Promise<IRouteResult>((resolve) => {
+        let directionsService = new google.maps.DirectionsService();
+        directionsService.route(request, (result, status) => {
+            resolve({result, status})
+        });
+      })  
     }
 
     async function makeRouteOnDB(routeCost: number)
@@ -277,32 +261,6 @@ const RouteBuilder: React.FC = () =>
         })
     }
 
-    function createDirections(waypoints: google.maps.DirectionsWaypoint[], optimize: boolean) {
-
-      var request: google.maps.DirectionsRequest = {
-        origin: R_departureAddress,
-        destination: R_returnAddress,
-        waypoints: waypoints,
-        travelMode: google.maps.TravelMode.DRIVING,
-        optimizeWaypoints: optimize
-      };
-
-      return new Promise<IRouteResult>((resolve) => {
-        directionsService.current.route(request, (result, status) => {
-            resolve({result, status})
-        });
-      })  
-    }
-
-    const Item = styled(Paper)(({ theme }) => ({
-        backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-        ...theme.typography.body2,
-        padding: theme.spacing(1),
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-      }));
-
-  
     function handleColumnDesignation(colIdx: number, colValue: EColumnDesignations)
     {
       R_setJobColumnDesignations((currentDesignations) => {
@@ -319,50 +277,6 @@ const RouteBuilder: React.FC = () =>
           return currentDesignations
         }
       })
-    }
-
-  
-    // function saveRoute()
-    // {
-    //   axios.post(getServerUrl() + "/job/save",
-    //     {
-    //         workspaceId: R_workspaceId,
-    //         jobId: jobId.jobId,
-    //         data: R_rawRouteTableData,
-    //     },
-    //     {
-    //       //add bearer
-    //     }).then(res => {
-    //         console.log(res.data)
-    //     }).catch(err => {
-    //         console.error(err)
-    //     })
-    // }
-
-    function handleRouteToDisplay(value: EDisplayRoute)
-    {
-      if(value === EDisplayRoute.Fastest)
-      {
-        fastestRouteDirectionsRenderer.current.setMap(null)
-        fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
-          map: map.current,
-          preserveViewport: true,
-          directions: fastestRouteResult.result
-        })
-        originalRouteDirectionsRenderer.current.setMap(null)
-        setRouteToDisplay(value)
-      }
-      else if(value === EDisplayRoute.Original)
-      {
-        originalRouteDirectionsRenderer.current.setMap(null)
-        originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
-          map: map.current,
-          preserveViewport: true,
-          directions: originalRouteResult.result
-        })
-        fastestRouteDirectionsRenderer.current.setMap(null)
-        setRouteToDisplay(value)
-      }
     }
 
     return(
@@ -406,28 +320,7 @@ const RouteBuilder: React.FC = () =>
 
 
 
-            <Paper sx={{padding: "0.3em", marginTop: "0.3em"}} variant="elevation" elevation={5}>
-
-              <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}} >Google Maps</Typography>
-
-              <Stack direction={"row"} spacing={1} alignItems="center" sx={{marginBottom: "1em"}}>
-                  <Box>
-                    <ToggleButtonGroup
-                      sx={{maxHeight:"100%", height: "100%"}}
-                      size="small"
-                      color="primary"
-                      value={routeToDisplay}
-                      exclusive
-                      onChange={(_e, v) => {handleRouteToDisplay(v)}}
-                      aria-label="Address Type"
-                      >
-                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Fastest}>Fastest Route</ToggleButton>
-                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Original}>Original Route</ToggleButton>
-                    </ToggleButtonGroup>
-                  </Box>
-                </Stack>
-              <Paper style={{width: "100%", height: 500}} id="map"></Paper>
-            </Paper>
+          <GMap fastestRouteResult={fastestRouteResult} originalRouteResult={originalRouteResult}/>
 
         </div>
     )
