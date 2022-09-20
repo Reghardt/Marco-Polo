@@ -2,7 +2,7 @@ import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "
 import React, { useEffect, useRef, useState } from "react"
 import { useRecoilValue } from "recoil";
 import { IRouteResult } from "../../../../interfaces/simpleInterfaces";
-import { RSAddresColumIndex, RSJobBody } from "../../../../state/globalstate";
+import { RSAddresColumIndex, RSDepartReturnState, RSDepartureAddress, RSJobBody, RSReturnAddress } from "../../../../state/globalstate";
 import { createMapMarkers, EDisplayRoute } from "./GMap.service"
 
 interface IGMapsProps{
@@ -19,13 +19,18 @@ const GMap: React.FC<IGMapsProps> = ({fastestRouteResult, originalRouteResult}) 
 
     const [routeToDisplay, setRouteToDisplay] = useState<EDisplayRoute>(EDisplayRoute.Fastest)
 
+    const R_departReturnState = useRecoilValue(RSDepartReturnState)
+    const R_departureAddress = useRecoilValue(RSDepartureAddress);
+    const R_returnAddress = useRecoilValue(RSReturnAddress);
+
     const R_jobBody = useRecoilValue(RSJobBody)
     const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
     const [markers, setMarkers] = useState<google.maps.Marker[]>([])
 
-    // useEffect(() => {
-    //     createMapMarkers(R_jobBody, markers, R_addresColumIndex)
-    // }, [R_jobBody, R_addresColumIndex])
+    useEffect(() => {
+        setMarkers(createMapMarkers(R_jobBody, markers, R_addresColumIndex, map))
+        
+    }, [R_jobBody, R_addresColumIndex])
 
     //Creates map on mount
     useEffect(() => {

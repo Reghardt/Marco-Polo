@@ -104,7 +104,7 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({retrieveUserSelectionFromS
     return(
       // <Paper sx={{padding: "10px", marginBottom: "0.5em"}} variant="elevation" elevation={5}>
       <Box>
-          <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Route Data Editor</Typography>
+          <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Trip Solver</Typography>
 
           <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
 

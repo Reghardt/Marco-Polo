@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
 import { Box, Button, Divider, IconButton, Paper, Stack, styled, Tab, Tabs, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../../services/worksheet/worksheet.service"
@@ -22,47 +22,50 @@ import { createBasicHeadingCell, createBasicHeadingRow } from "../../workspaces/
 import RouteEditor from "../RouteEditor/RouteEditor";
 import { makeRowParentChildRelations, removeRowParentChildRelations, TabPanel, tabProps } from "./RouteBuilder.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
-import { EDisplayRoute } from "./Maps/GMap.service";
+
 import GMap from "./Maps/GMap.component";
 
 
 
 const RouteBuilder: React.FC = () =>
 {
+  //used as temporary storage as there are alot of set states needed and set states are not batched in an async func which is used to retreive data from excel
+  const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
+
   const [tabValue, setTabValue] = useState(0);
 
-    const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
-    const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
-    const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
-    const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+  const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
+  const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
+  const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
+  const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
 
-    const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
+  const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
 
-    const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
-    
-
-    const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
-
-    
-
-    const R_departureAddress = useRecoilValue(RSDepartureAddress);
-    const R_returnAddress = useRecoilValue(RSReturnAddress);
+  const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
   
-    const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
-    
-    const jobId = useRecoilValue(RSJobID)
-    const R_workspaceId = useRecoilValue(RSWorkspaceID)
 
-    const [waypointOrder, setWaypointOrder] = useState<number[]>([])
+  
 
-    const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
+  
 
-    const R_bearer = useRecoilValue(RSBearerToken)
+  const R_departureAddress = useRecoilValue(RSDepartureAddress);
+  const R_returnAddress = useRecoilValue(RSReturnAddress);
 
-    const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
+  const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
+  
+  const jobId = useRecoilValue(RSJobID)
+  const R_workspaceId = useRecoilValue(RSWorkspaceID)
 
-    const [fastestRouteResult, setFastestRouteResult] = useState<IRouteResult>(null)
-    const [originalRouteResult, setOriginalRouteResult] = useState<IRouteResult>(null)
+  const [waypointOrder, setWaypointOrder] = useState<number[]>([])
+
+  const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
+
+  const R_bearer = useRecoilValue(RSBearerToken)
+
+  const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
+
+  const [fastestRouteResult, setFastestRouteResult] = useState<IRouteResult>(null)
+  const [originalRouteResult, setOriginalRouteResult] = useState<IRouteResult>(null)
 
     
 
@@ -172,7 +175,7 @@ const RouteBuilder: React.FC = () =>
     }
 
 
-    function getRouteDistance_Time_WaypointOrder(directions: google.maps.DirectionsResult, directionsIndex: number)
+    function generateRouteStatistics(directions: google.maps.DirectionsResult, directionsIndex: number)
     {
       let legs = directions.routes[directionsIndex].legs;
       let totalDistance = 0;
@@ -203,10 +206,12 @@ const RouteBuilder: React.FC = () =>
 
         //TODO check if there are enought tokens available
 
+        makeRouteOnDB(5)
+
         Promise.all([createDirections(waypoints, true), createDirections(waypoints, false)]).then(res => {
 
-          const fastestRouteStats = getRouteDistance_Time_WaypointOrder(fastestRouteResult.result, 0)
-          const originalRouteStats = getRouteDistance_Time_WaypointOrder(originalRouteResult.result, 0)
+          const fastestRouteStats = generateRouteStatistics(res[0].result, 0)
+          const originalRouteStats = generateRouteStatistics(res[1].result, 0)
 
           setRouteStatisticsData({
             optimized: {dist: fastestRouteStats.totalDistance, time: fastestRouteStats.totalTime }, 
