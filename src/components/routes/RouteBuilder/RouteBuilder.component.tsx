@@ -290,8 +290,8 @@ const RouteBuilder: React.FC = () =>
 
           <Paper elevation={10}>
             <Tabs value={tabValue} onChange={(_e, v) => (setTabValue(v))}>
-              <Tab label="Edit" {...tabProps(0)}/>
-              <Tab label="Finalize" {...tabProps(1)}/>
+              <Tab label="Edit Mode" {...tabProps(0)}/>
+              <Tab label="Sequence Mode" {...tabProps(1)}/>
             </Tabs>
 
             <Box sx={{padding: "0.3em"}}>
@@ -325,7 +325,7 @@ const RouteBuilder: React.FC = () =>
 
 
 
-          <GMap fastestRouteResult={fastestRouteResult} originalRouteResult={originalRouteResult}/>
+          <GMap fastestRouteResult={fastestRouteResult} originalRouteResult={originalRouteResult} waypointOrder={waypointOrder}/>
 
         </div>
     )

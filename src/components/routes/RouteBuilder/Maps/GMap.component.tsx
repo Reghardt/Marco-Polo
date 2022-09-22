@@ -3,14 +3,15 @@ import React, { useEffect, useRef, useState } from "react"
 import { useRecoilValue } from "recoil";
 import { IRouteResult } from "../../../../interfaces/simpleInterfaces";
 import { RSAddresColumIndex, RSDepartReturnState, RSDepartureAddress, RSJobBody, RSReturnAddress } from "../../../../state/globalstate";
-import { createMapMarkers, EDisplayRoute } from "./GMap.service"
+import { createCustomMapMarkers, createMapMarkers, EDisplayRoute } from "./GMap.service"
 
 interface IGMapsProps{
     fastestRouteResult: IRouteResult
     originalRouteResult: IRouteResult
+    waypointOrder: number[]
 }
 
-const GMap: React.FC<IGMapsProps> = ({fastestRouteResult, originalRouteResult}) => {
+const GMap: React.FC<IGMapsProps> = ({fastestRouteResult, originalRouteResult, waypointOrder}) => {
 
     const map = useRef<google.maps.Map>()
     // const directionsService = useRef<google.maps.DirectionsService>()
@@ -25,12 +26,13 @@ const GMap: React.FC<IGMapsProps> = ({fastestRouteResult, originalRouteResult}) 
 
     const R_jobBody = useRecoilValue(RSJobBody)
     const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
-    const [markers, setMarkers] = useState<google.maps.Marker[]>([])
+    const [markers, setMarkers] = useState<JSX.Element[]>([])
 
     useEffect(() => {
-        setMarkers(createMapMarkers(R_jobBody, markers, R_addresColumIndex, map))
+        //setMarkers(createMapMarkers(R_jobBody, markers, R_addresColumIndex, map))
+        setMarkers(createCustomMapMarkers(R_jobBody, R_addresColumIndex, map, routeToDisplay, waypointOrder))
         
-    }, [R_jobBody, R_addresColumIndex])
+    }, [R_jobBody, R_addresColumIndex, routeToDisplay, waypointOrder])
 
     //Creates map on mount
     useEffect(() => {
@@ -119,6 +121,12 @@ const GMap: React.FC<IGMapsProps> = ({fastestRouteResult, originalRouteResult}) 
                 </Box>
             </Stack>
             <Paper style={{width: "100%", height: 500}} id="map"></Paper>
+
+            {markers.length > 0 && (
+                markers.map((marker) => {
+                    return marker
+                })
+            )}
         </Paper>
     )
 }

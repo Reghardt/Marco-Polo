@@ -14,6 +14,7 @@ import Success from './components/payment/Success';
 import PopperExperiment from './components/experiments/PopperExperiment.component';
 import AdminPanel from './components/admin/AdminPanel.component';
 import TabsExperiment from './components/experiments/TabsExperiment';
+import CustomOverlayMap from './components/experiments/CustomOverlay/CustomOverlayMap.component';
 
 
 
@@ -32,7 +33,7 @@ function App() {
           <Route path="/routeMenu" element={<RouteTypeSelection/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/success" element={<Success/>}/>
-          <Route path="/exp" element={<TabsExperiment/>}/>
+          <Route path="/exp" element={<CustomOverlayMap/>}/>
           <Route path="/admin" element={<AdminPanel/>}/>
         </Routes>
       </BrowserRouter>
