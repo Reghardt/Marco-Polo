@@ -1,8 +1,8 @@
 import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useRecoilState } from "recoil"
-import { RSDepartReturnState, RSDepartureAddress, RSReturnAddress } from "../../../../state/globalstate"
-import HelpTooltip from "../../../common/HelpTooltip.component"
+import { RSDepartReturnState, RSDepartureAddress, RSReturnAddress } from "../../../state/globalstate"
+import HelpTooltip from "../../common/HelpTooltip.component"
 import AddressSelector from "./AddressSelector.component"
 
 export enum EDepartReturn{

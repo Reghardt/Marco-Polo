@@ -1,29 +1,29 @@
 /** @jsxImportSource @emotion/react */
 
-import { Box, Button, Divider, IconButton, Paper, Stack, styled, Tab, Tabs, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, Divider, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
-import {IRouteResult, IRouteStatistics } from "../../../interfaces/simpleInterfaces";
-import {loadSelection} from "../../../services/worksheet/worksheet.service"
+import {IRouteResult, IRouteStatistics } from "../../interfaces/simpleInterfaces";
+import {loadSelection} from "../../services/worksheet/worksheet.service"
 
-import RouteStatistics from "../RouteStatistics.component";
 import axios from "axios";
-import { getServerUrl } from "../../../services/server.service";
+import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID } from "../../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID } from "../../state/globalstate";
 
-import RouteSequence from "../../Sequence/RouteSequence.component";
-import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../../services/ColumnDesignation.service";
-import { IRow } from "../../../services/worksheet/row.interface";
 
-import StandardHeader from "../../common/StandardHeader.component";
-import { createBasicHeadingCell, createBasicHeadingRow } from "../../workspaces/workspace.service";
-import RouteEditor from "../RouteEditor/RouteEditor";
-import { makeRowParentChildRelations, removeRowParentChildRelations, TabPanel, tabProps } from "./RouteBuilder.service";
+import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
+import { IRow } from "../../services/worksheet/row.interface";
+
+import StandardHeader from "../common/StandardHeader.component";
+import { createBasicHeadingCell, createBasicHeadingRow } from "../workspaces/workspace.service";
+
+import { makeRowParentChildRelations, removeRowParentChildRelations } from "./Trip.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
-import GMap from "./Maps/GMap.component";
+import GMap from "../Maps/GMap.component";
+import TripTabs from "./TripTabs/TripTabs.component";
 
 
 
@@ -31,8 +31,6 @@ const RouteBuilder: React.FC = () =>
 {
   //used as temporary storage as there are alot of set states needed and set states are not batched in an async func which is used to retreive data from excel
   const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
-
-  const [tabValue, setTabValue] = useState(0);
 
   const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
   const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
@@ -72,9 +70,6 @@ const RouteBuilder: React.FC = () =>
     console.log("refresh")
 
     //START: useEffects
-
-
-
     useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates
       if(userSelectionRows.length > 0)
       {
@@ -113,7 +108,6 @@ const RouteBuilder: React.FC = () =>
         R_setJobFirstRowIsHeading(false)
         R_setJobBody(userSelectionRows)
         R_setColumnVisibility(colVisibility)
-        console.log(colVisibility)
 
         setRouteStatisticsData(null);
         setWaypointOrder([]);
@@ -149,7 +143,11 @@ const RouteBuilder: React.FC = () =>
         R_setJobHeadings(bodyRowToColumnRow)
         R_setJobFirstRowIsHeading(true)
         R_setJobBody(tempJobBody)
+        setRouteStatisticsData(null);
+        setWaypointOrder([]);
 
+        setFastestRouteResult(null)
+        setOriginalRouteResult(null)
       }
       else
       {
@@ -157,6 +155,11 @@ const RouteBuilder: React.FC = () =>
         R_setJobHeadings(createBasicHeadingRow(R_jobHeadings.cells.length))
         R_setJobFirstRowIsHeading(false)
         R_setJobBody(tempJobBody)
+        setRouteStatisticsData(null);
+        setWaypointOrder([]);
+
+        setFastestRouteResult(null)
+        setOriginalRouteResult(null)
 
       }
     }
@@ -166,8 +169,11 @@ const RouteBuilder: React.FC = () =>
     function retrieveUserSelectionFromSpreadsheetAndSet()
     {
       loadSelection().then((selection) => {
+        console.log(selection)
         setUserSelectionRows(selection)
         setRouteStatisticsData(null);
+        setFastestRouteResult(null)
+        setOriginalRouteResult(null)
         setWaypointOrder([]);
         
       })
@@ -289,42 +295,22 @@ const RouteBuilder: React.FC = () =>
           <StandardHeader title="Trip Builder" backNavStr="/routeMenu"/> {/*Trip? Job? Route?*/}
 
           <Paper elevation={10}>
-            <Tabs value={tabValue} onChange={(_e, v) => (setTabValue(v))}>
-              <Tab label="Edit Mode" {...tabProps(0)}/>
-              <Tab label="Sequence Mode" {...tabProps(1)}/>
-            </Tabs>
 
             <Box sx={{padding: "0.3em"}}>
-              <TabPanel value={tabValue} index={0}>
 
               <DepartureReturn/>
               
               <Divider sx={{marginTop: "0.5em", marginBottom: "0.5em"}}/>
 
-              <RouteEditor 
-                retrieveUserSelectionFromSpreadsheetAndSet={retrieveUserSelectionFromSpreadsheetAndSet}
+              <TripTabs 
+                retrieveUserSelectionFromSpreadsheetAndSet={retrieveUserSelectionFromSpreadsheetAndSet} 
                 handleColumnDesignation={handleColumnDesignation}
                 calcRoute={calcRoute}
                 putFirstRowAsHeading={putFirstRowAsHeading}
-                />
-
-              </TabPanel>
-
-              <TabPanel value={tabValue} index={1}>
-
-                <RouteStatistics routeStatisticsData={routeStatisticsData}/>
-
-                <Divider sx={{marginTop: "0.8em", marginBottom: "0.8em"}}/>
-
-                <RouteSequence waypointOrder={waypointOrder}/>
-
-              </TabPanel>
+                waypointOrder={waypointOrder}
+              />
             </Box>
-            
           </Paper>
-
-
-
           <GMap fastestRouteResult={fastestRouteResult} originalRouteResult={originalRouteResult} waypointOrder={waypointOrder}/>
 
         </div>

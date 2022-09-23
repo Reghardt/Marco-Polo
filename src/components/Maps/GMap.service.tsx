@@ -1,6 +1,6 @@
 import React from "react";
-import { IRow } from "../../../../services/worksheet/row.interface";
-import CustomMarker from "../../../experiments/CustomOverlay/CustomMarker.component";
+import { IRow } from "../../services/worksheet/row.interface";
+import CustomMarker from "../experiments/CustomOverlay/CustomMarker.component";
 
 export enum EDisplayRoute{
     Fastest,

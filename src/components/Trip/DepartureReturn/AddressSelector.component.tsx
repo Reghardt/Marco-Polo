@@ -3,8 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 import { usePopper } from "react-popper";
-import { geocodeAddress } from "../../Route.service";
-import PopperContainer from "../../../common/PopperContainer.styled";
+
+import PopperContainer from "../../common/PopperContainer.styled";
+import { geocodeAddress } from "../Trip.service";
 
 type IAddressSelectorProps ={
     address: string;

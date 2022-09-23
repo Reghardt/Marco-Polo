@@ -7,16 +7,16 @@ import BodyEntry from './BodyEntry.component';
 import HeadingEntry from './HeadingEntry.component';
 import { useRecoilValue } from 'recoil';
 import { RSJobHeadings } from '../../../state/globalstate';
-import { createEntryTypeElementsFromRow } from './ResultTable.service';
+import { createEntryTypeElementsFromRow } from './SequenceTable.service';
 
-interface IResultTableProps{
+interface ISequenceTableProps{
   inSequenceJobBody: IRow[];
   waypointOrder: number[];
 }
 
 
 
-const ResultTable: React.FC<IResultTableProps> = ({inSequenceJobBody, waypointOrder}) => {
+const SequenceTable: React.FC<ISequenceTableProps> = ({inSequenceJobBody, waypointOrder}) => {
 
   const R_jobHeadings = useRecoilValue(RSJobHeadings)
 
@@ -54,7 +54,7 @@ const ResultTable: React.FC<IResultTableProps> = ({inSequenceJobBody, waypointOr
 
   function createTableBody(rows: IRow[]) : JSX.Element[][]
   {
-    if(rows.length > 0 && waypointOrder.length > 0)
+    if(rows.length > 0 && waypointOrder.length > 0 && rows.length === waypointOrder.length)
     {
       const cellTable: JSX.Element[][] = [];
       for(let i = 0; i < waypointOrder.length; i++)
@@ -99,4 +99,4 @@ const ResultTable: React.FC<IResultTableProps> = ({inSequenceJobBody, waypointOr
   }
 }
 
-export default ResultTable;
+export default SequenceTable;

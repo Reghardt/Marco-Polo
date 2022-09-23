@@ -1,11 +1,6 @@
 import React from "react";
-import { IRow } from "../../../services/worksheet/row.interface";
-
-interface ITabPanelProps {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-  }
+import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
+import { IRow } from "../../services/worksheet/row.interface";
 
 export function removeRowParentChildRelations(rows: IRow[])
 {
@@ -58,26 +53,14 @@ export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: nu
     return parentWithChildrenRows
 }
 
-export function TabPanel(props: ITabPanelProps): JSX.Element
-{
-    const { children, value, index, ...other } = props;
-  
-    return (
-      <div
-        hidden={!(value === index)}
-        id={`simple-tabpanel-${index}`} //TODO give everything in the app a unique id based on this approach, not just a number
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-            {children}
-      </div>
-    );
-  }
+export function geocodeAddress(address: string) : Promise<IGeocoderResult>
+    {
+      let geoResPromise = new Promise<IGeocoderResult>((resolve) => {
+        let geocoder = new google.maps.Geocoder();
+        geocoder.geocode({address: address, region: "ZA"},(res, status) => {
+          resolve({status, results: res})
+        })
+      })
 
-  //not sure what this function does but include it as a SO answer said it has something to do with the compiler
-export function tabProps(index: number) {
-    return {
-      id: `simple-tab-${index}`,
-      'aria-controls': `simple-tabpanel-${index}`,
-    };
-  }
+      return geoResPromise;
+    }

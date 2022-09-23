@@ -6,5 +6,5 @@ export interface ICell
     origionalData: string;
     geocodedAddressRes: google.maps.GeocoderResult; 
     geocodedResults: google.maps.GeocoderResult[];
-    selectedGeocodedAddressIndex: number;
+    selectedGeocodedAddressIndex: number; // default -1
 }

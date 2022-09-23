@@ -1,8 +1,8 @@
 import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import React, { useEffect, useRef, useState } from "react"
 import { useRecoilValue } from "recoil";
-import { IRouteResult } from "../../../../interfaces/simpleInterfaces";
-import { RSAddresColumIndex, RSDepartReturnState, RSDepartureAddress, RSJobBody, RSReturnAddress } from "../../../../state/globalstate";
+import { IRouteResult } from "../../interfaces/simpleInterfaces";
+import { RSAddresColumIndex, RSDepartReturnState, RSDepartureAddress, RSJobBody, RSReturnAddress } from "../../state/globalstate";
 import { createCustomMapMarkers, createMapMarkers, EDisplayRoute } from "./GMap.service"
 
 interface IGMapsProps{
@@ -19,10 +19,6 @@ const GMap: React.FC<IGMapsProps> = ({fastestRouteResult, originalRouteResult, w
     const originalRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
     const [routeToDisplay, setRouteToDisplay] = useState<EDisplayRoute>(EDisplayRoute.Fastest)
-
-    const R_departReturnState = useRecoilValue(RSDepartReturnState)
-    const R_departureAddress = useRecoilValue(RSDepartureAddress);
-    const R_returnAddress = useRecoilValue(RSReturnAddress);
 
     const R_jobBody = useRecoilValue(RSJobBody)
     const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
@@ -66,7 +62,8 @@ const GMap: React.FC<IGMapsProps> = ({fastestRouteResult, originalRouteResult, w
         }
         else
         {
-            //TODO handle errors
+            fastestRouteDirectionsRenderer.current.setMap(null)
+            originalRouteDirectionsRenderer.current.setMap(null)
         }
     }, [fastestRouteResult, originalRouteResult])
 

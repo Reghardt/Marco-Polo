@@ -1,6 +1,6 @@
 import { Box, Button, Divider, InputAdornment, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import React, { useState } from "react"
-import { IRouteStatistics } from "../../interfaces/simpleInterfaces";
+import { IRouteStatistics } from "../../../interfaces/simpleInterfaces";
 
 interface RouteStatisticsProps
 {

@@ -6,6 +6,11 @@ import BodyEntry from "./BodyEntry.component";
 
 export function createEntryTypeElementsFromRow(row: Readonly<IRow>, nr: string, isChild: boolean)
 {
+    if(row.cells.length === null)
+    {
+        console.error("row is null", nr, isChild)
+        
+    }
     const rowLength = row.cells.length;
     const elementSize = 11 / rowLength;
     let parentRowElements: JSX.Element[] = [];

@@ -1,5 +1,6 @@
 import { atom, selector } from "recoil";
-import { EDepartReturn } from "../components/routes/RouteBuilder/DepartureReturn/DepartureReturn.component";
+import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
+
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
 import { IRow } from "../services/worksheet/row.interface";
 

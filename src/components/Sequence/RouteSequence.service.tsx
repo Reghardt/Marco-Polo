@@ -1,5 +1,6 @@
 import { IRow } from "../../services/worksheet/row.interface";
-import { makeRowParentChildRelations, removeRowParentChildRelations } from "../routes/RouteBuilder/RouteBuilder.service";
+import { makeRowParentChildRelations, removeRowParentChildRelations } from "../Trip/Trip.service";
+
 
 export function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): void
 {

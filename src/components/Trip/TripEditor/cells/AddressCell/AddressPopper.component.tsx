@@ -1,8 +1,8 @@
 import { Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material"
-import { State } from "@popperjs/core";
 import React, { useEffect, useState } from "react"
 import { ICell } from "../../../../../services/worksheet/cell.interface";
-import { geocodeAddress } from "../../../Route.service"
+import { geocodeAddress } from "../../../Trip.service";
+
 
 interface IAddressCellPopperProps{
     currentAddress: string;
@@ -11,7 +11,7 @@ interface IAddressCellPopperProps{
     cellRef: ICell;
 }
 
-const AddressCellPopper: React.FC<IAddressCellPopperProps> = (
+const AddressPopper: React.FC<IAddressCellPopperProps> = (
     {
         currentAddress, 
         closePopper, 
@@ -130,4 +130,4 @@ const AddressCellPopper: React.FC<IAddressCellPopperProps> = (
     )
 }
 
-export default AddressCellPopper
+export default AddressPopper

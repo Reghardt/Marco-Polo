@@ -5,7 +5,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 
 import RouteTypeSelection from './components/workspaces/RouteTypeSelection.component';
-import RouteBuilder from './components/routes/RouteBuilder/RouteBuilder.component';
+
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
@@ -15,6 +15,7 @@ import PopperExperiment from './components/experiments/PopperExperiment.componen
 import AdminPanel from './components/admin/AdminPanel.component';
 import TabsExperiment from './components/experiments/TabsExperiment';
 import CustomOverlayMap from './components/experiments/CustomOverlay/CustomOverlayMap.component';
+import RouteBuilder from './components/Trip/Trip.component';
 
 
 
