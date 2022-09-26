@@ -16,6 +16,7 @@ import AdminPanel from './components/admin/AdminPanel.component';
 import TabsExperiment from './components/experiments/TabsExperiment';
 import CustomOverlayMap from './components/experiments/CustomOverlay/CustomOverlayMap.component';
 import RouteBuilder from './components/Trip/Trip.component';
+import DragAndDrop from './components/experiments/DragNDrop/DragAndDropExp.component';
 
 
 
@@ -34,7 +35,7 @@ function App() {
           <Route path="/routeMenu" element={<RouteTypeSelection/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/success" element={<Success/>}/>
-          <Route path="/exp" element={<CustomOverlayMap/>}/>
+          <Route path="/exp" element={<DragAndDrop/>}/>
           <Route path="/admin" element={<AdminPanel/>}/>
         </Routes>
       </BrowserRouter>

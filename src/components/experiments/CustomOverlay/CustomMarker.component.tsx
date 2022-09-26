@@ -20,7 +20,7 @@ const CustomMarker: React.FC<ICustomMarkerProps> = ({label, map, position}) => {
                     pane={"floatPane"}
 
                 >
-                    <Button variant="contained" sx={{transform: 'translate(-50%, -100%)'}}>{label}</Button>
+                    <Button variant="contained" sx={{transform: 'translate(-50%, -100%)', borderRadius: 8}}>{label}</Button>
                 </OverlayView>
             )}
         </React.Fragment>

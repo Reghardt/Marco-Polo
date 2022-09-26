@@ -1,5 +1,6 @@
 import { atom, selector } from "recoil";
 import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
+import { ITripStatistics } from "../interfaces/simpleInterfaces";
 
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
 import { IRow } from "../services/worksheet/row.interface";
@@ -88,6 +89,11 @@ export const RSColumnVisibility = atom<boolean[]>({
 export const RSTokens = atom<number>({
     key: "tokens",
     default: 0
+})
+
+export const RSTripStatisticsData = atom<ITripStatistics>({
+    key: "tripStatisticsData",
+    default: null
 })
 
 

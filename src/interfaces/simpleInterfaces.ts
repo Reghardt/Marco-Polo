@@ -14,7 +14,7 @@ export interface IRouteResult
     status: google.maps.DirectionsStatus;
 }
 
-export interface IRouteStatistics
+export interface ITripStatistics
 {
     optimized: {dist: number, time: number};
     origional: {dist: number, time: number};

@@ -7,6 +7,7 @@ import { RSColumnVisibility, RSJobBody, RSJobFirstRowIsHeading, RSJobHeadings } 
 
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import RouteEditor from "../TripEditor/TripEditor";
+import RouteStatistics from "../TripStatistics/TripStatistics.component";
 
 import { TabPanel, tabProps } from "./TripTabs.service";
 
@@ -56,8 +57,9 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
             {/* TODO Add route statistics tab */}
             <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Trip Solver</Typography>
             <Tabs value={tabValue} onChange={(_e, v) => (setTabValue(v))}>
-            <Tab label="Edit Mode" {...tabProps(0)}/>
-            <Tab label="Sequence Mode" {...tabProps(1)}/>
+            <Tab label="Edit" {...tabProps(0)}/>
+            <Tab label="Sequence/Writeback" {...tabProps(1)}/>
+            <Tab label="Trip Statistics" {...tabProps(2)}/>
             </Tabs>
 
             <Box sx={{paddingTop: "0.3em"}}>
@@ -93,6 +95,10 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
 
                 <RouteSequence waypointOrder={waypointOrder}/>
 
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={2}>
+                <RouteStatistics/>
             </TabPanel>
             </Box>
             

@@ -3,14 +3,14 @@
 import { Box, Divider, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
-import {IRouteResult, IRouteStatistics } from "../../interfaces/simpleInterfaces";
+import {IRouteResult, ITripStatistics } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet/worksheet.service"
 
 import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID } from "../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSTripStatisticsData, RSWorkspaceID } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -49,7 +49,7 @@ const RouteBuilder: React.FC = () =>
   const R_departureAddress = useRecoilValue(RSDepartureAddress);
   const R_returnAddress = useRecoilValue(RSReturnAddress);
 
-  const [routeStatisticsData, setRouteStatisticsData] = useState<IRouteStatistics>(null)
+  const [R_tripStatisticsData, R_setTripStatisticsData] = useRecoilState(RSTripStatisticsData)
   
   const jobId = useRecoilValue(RSJobID)
   const R_workspaceId = useRecoilValue(RSWorkspaceID)
@@ -109,7 +109,7 @@ const RouteBuilder: React.FC = () =>
         R_setJobBody(userSelectionRows)
         R_setColumnVisibility(colVisibility)
 
-        setRouteStatisticsData(null);
+        R_setTripStatisticsData(null);
         setWaypointOrder([]);
       } 
     }, [userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
@@ -143,7 +143,7 @@ const RouteBuilder: React.FC = () =>
         R_setJobHeadings(bodyRowToColumnRow)
         R_setJobFirstRowIsHeading(true)
         R_setJobBody(tempJobBody)
-        setRouteStatisticsData(null);
+        R_setTripStatisticsData(null);
         setWaypointOrder([]);
 
         setFastestRouteResult(null)
@@ -155,7 +155,7 @@ const RouteBuilder: React.FC = () =>
         R_setJobHeadings(createBasicHeadingRow(R_jobHeadings.cells.length))
         R_setJobFirstRowIsHeading(false)
         R_setJobBody(tempJobBody)
-        setRouteStatisticsData(null);
+        R_setTripStatisticsData(null);
         setWaypointOrder([]);
 
         setFastestRouteResult(null)
@@ -171,7 +171,7 @@ const RouteBuilder: React.FC = () =>
       loadSelection().then((selection) => {
         console.log(selection)
         setUserSelectionRows(selection)
-        setRouteStatisticsData(null);
+        R_setTripStatisticsData(null);
         setFastestRouteResult(null)
         setOriginalRouteResult(null)
         setWaypointOrder([]);
@@ -219,7 +219,7 @@ const RouteBuilder: React.FC = () =>
           const fastestRouteStats = generateRouteStatistics(res[0].result, 0)
           const originalRouteStats = generateRouteStatistics(res[1].result, 0)
 
-          setRouteStatisticsData({
+          R_setTripStatisticsData({
             optimized: {dist: fastestRouteStats.totalDistance, time: fastestRouteStats.totalTime }, 
             origional: {dist: originalRouteStats.totalDistance, time: originalRouteStats.totalTime}
           })
