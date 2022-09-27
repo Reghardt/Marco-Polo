@@ -3,7 +3,7 @@
 import { Box, Divider, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
-import {IRouteResult, ITripStatistics } from "../../interfaces/simpleInterfaces";
+import {IRouteResult } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet/worksheet.service"
 
 import axios from "axios";
