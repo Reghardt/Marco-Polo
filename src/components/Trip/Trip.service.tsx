@@ -64,3 +64,8 @@ export function geocodeAddress(address: string) : Promise<IGeocoderResult>
 
       return geoResPromise;
     }
+
+export function createDataFromNewCollection()
+{
+  
+}

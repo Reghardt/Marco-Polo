@@ -92,7 +92,7 @@ const RouteBuilder: React.FC = () =>
         }
 
         //create data for headings nad column designations
-        let tempHeadings: IRow = {cells: [], children: []}
+        let tempHeadings: IRow = { cells: [], children: []}
         let tempColumnDesignations: number[] = []
         let colVisibility: boolean[] = []
         for(let k = 0; k < userSelectionRows[0].cells.length; k++)
