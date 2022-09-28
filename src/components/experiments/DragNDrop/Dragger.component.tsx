@@ -7,15 +7,14 @@ interface IDraggerProps{
 }
 
 
-function getItemStyle(isDragging: boolean, draggableStyle)
+function getItemStyle(isDragging: boolean, draggableStyle): React.CSSProperties
 {
-    const grid = 8
     return{
         userSelect: "none",
-        padding: grid * 2,
-        margin: `0 0 ${grid}px 0`,
+        //padding: grid * 2,
+        marginBottom: "0.5em",
 
-        background: isDragging ? "lightgreen" : "grey",
+        background: isDragging ? "lightgreen" : "transparent",
         ...draggableStyle
     }
 }

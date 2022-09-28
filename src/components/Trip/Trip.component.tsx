@@ -196,7 +196,7 @@ const RouteBuilder: React.FC = () =>
       return {totalDistance, totalTime, order}
     }
 
-    function calcRoute()
+    function calcFastestAndOriginalRoute()
     {
       if(R_departureAddress !== "" && R_returnAddress !== "") //test if not "none"
       {
@@ -211,9 +211,9 @@ const RouteBuilder: React.FC = () =>
         }
 
         //TODO check if there are enought tokens available
-
         makeRouteOnDB(5)
 
+        
         Promise.all([createDirections(waypoints, true), createDirections(waypoints, false)]).then(res => {
 
           const fastestRouteStats = generateRouteStatistics(res[0].result, 0)
@@ -305,7 +305,7 @@ const RouteBuilder: React.FC = () =>
               <TripTabs 
                 retrieveUserSelectionFromSpreadsheetAndSet={retrieveUserSelectionFromSpreadsheetAndSet} 
                 handleColumnDesignation={handleColumnDesignation}
-                calcRoute={calcRoute}
+                calcRoute={calcFastestAndOriginalRoute}
                 putFirstRowAsHeading={putFirstRowAsHeading}
                 waypointOrder={waypointOrder}
               />

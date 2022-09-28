@@ -12,7 +12,7 @@ const Dropper: React.FC<IDropperProps> = ({droppableId, children}) => {
                 <div 
                     {...provided.droppableProps} 
                     ref={provided.innerRef} 
-                    style={{background: snapshot.isDraggingOver ? "lightblue": "lightgrey", padding: 16, width: 250}}
+                    style={{background: snapshot.isDraggingOver ? "lightblue": "transparent"}}
                 >
                     {children}
                     {provided.placeholder}
