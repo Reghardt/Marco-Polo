@@ -3,12 +3,12 @@ import React from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
 import { ICell } from "../../../../services/worksheet/cell.interface"
 import { IRow } from "../../../../services/worksheet/row.interface"
-import { RSAddresColumIndex, RSJobBody } from "../../../../state/globalstate"
+import { RSAddresColumIndex, RSTripRows } from "../../../../state/globalstate"
 import { makeRowParentChildRelations, removeRowParentChildRelations } from "../../Trip.service"
 
 const RowAdder: React.FC =() => {
 
-    const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+    const [R_jobBody, R_setJobBody] = useRecoilState(RSTripRows)
     const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
 
     function addRowToBody(addressColumn: number)

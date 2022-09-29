@@ -4,7 +4,7 @@ import { IRow } from "../../../services/worksheet/row.interface";
 import { ICell } from "../../../services/worksheet/cell.interface";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSColumnVisibility, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
+import { RSColumnVisibility, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
 import { createCellTypeElementsFromRow, createColumnDecorators, CreateTableHeadingElements } from "./TripEditor.service";
 import RowAdder from "./RowAdder/RowAdder.component";
 
@@ -18,7 +18,7 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
   const R_jobColumnDesignations = useRecoilValue(RSJobColumnDesignations)
   const R_jobFirstRowIsHeading = useRecoilValue(RSJobFirstRowIsHeading)
   const R_jobHeadings = useRecoilValue(RSJobHeadings)
-  const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+  const [R_jobBody, R_setJobBody] = useRecoilState(RSTripRows)
   
   const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
 

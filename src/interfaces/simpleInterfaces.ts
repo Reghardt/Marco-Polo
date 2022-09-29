@@ -8,17 +8,13 @@ export interface IGeocoderResult
     status: google.maps.GeocoderStatus;
 }
 
-export interface IRouteResult
+export interface ITripDirections
 {
     result: google.maps.DirectionsResult;
     status: google.maps.DirectionsStatus;
 }
 
-export interface ITripStatistics
-{
-    optimized: {dist: number, time: number};
-    origional: {dist: number, time: number};
-}
+
 
 export interface ICellAndRange
 {

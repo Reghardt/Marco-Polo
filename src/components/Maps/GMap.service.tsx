@@ -42,7 +42,7 @@ export function createMapMarkers(rows: IRow[], currentMapMarkers: google.maps.Ma
 
 
 
-export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>, routeToDisplay: EDisplayRoute, waypointOrder: number[]): JSX.Element[]
+export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>, routeToDisplay: EDisplayRoute): JSX.Element[]
 {
 
     let newMarkers: JSX.Element[] = []
@@ -53,14 +53,12 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
         {
             let row: IRow = rows[i]
             let label = ""
-            if(routeToDisplay === EDisplayRoute.Fastest && waypointOrder.length > 0)
+            if(routeToDisplay === EDisplayRoute.Fastest)
             {
-                row = rows[waypointOrder[i]]
                 label = (i + 1).toString()
             }
             else
             {
-                row = rows[i]
                 label = String.fromCharCode(i + 'A'.charCodeAt(0))
             }
 

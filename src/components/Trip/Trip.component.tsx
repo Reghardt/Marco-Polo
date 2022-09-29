@@ -3,14 +3,14 @@
 import { Box, Divider, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
-import {IRouteResult } from "../../interfaces/simpleInterfaces";
+import {ITripDirections } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet/worksheet.service"
 
 import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSJobBody, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSTripStatisticsData, RSWorkspaceID } from "../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -19,7 +19,7 @@ import { IRow } from "../../services/worksheet/row.interface";
 import StandardHeader from "../common/StandardHeader.component";
 import { createBasicHeadingCell, createBasicHeadingRow } from "../workspaces/workspace.service";
 
-import { makeRowParentChildRelations, removeRowParentChildRelations } from "./Trip.service";
+import { createDirections, createInSequenceJobRows, makeRowParentChildRelations, removeRowParentChildRelations } from "./Trip.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 import GMap from "../Maps/GMap.component";
@@ -35,7 +35,9 @@ const RouteBuilder: React.FC = () =>
   const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
   const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
   const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
-  const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+
+  const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
+  const [R_inSequenceTripRows, R_setInSequenceTripRows] = useRecoilState(RSInSequenceTripRows)
 
   const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
 
@@ -49,12 +51,12 @@ const RouteBuilder: React.FC = () =>
   const R_departureAddress = useRecoilValue(RSDepartureAddress);
   const R_returnAddress = useRecoilValue(RSReturnAddress);
 
-  const [R_tripStatisticsData, R_setTripStatisticsData] = useRecoilState(RSTripStatisticsData)
+  //const [R_tripStatisticsData, R_setTripStatisticsData] = useRecoilState(RSTripStatisticsData)
   
   const jobId = useRecoilValue(RSJobID)
   const R_workspaceId = useRecoilValue(RSWorkspaceID)
 
-  const [waypointOrder, setWaypointOrder] = useState<number[]>([])
+  //const [waypointOrder, setWaypointOrder] = useState<number[]>([])
 
   const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
 
@@ -62,8 +64,8 @@ const RouteBuilder: React.FC = () =>
 
   const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
 
-  const [fastestRouteResult, setFastestRouteResult] = useState<IRouteResult>(null)
-  const [originalRouteResult, setOriginalRouteResult] = useState<IRouteResult>(null)
+  const [, R_setShortestTripDirections] = useRecoilState(RSShortestTripDirections)
+  const [, R_setOriginalTripDirections] = useRecoilState(RSOriginalTripDirections)
 
     
 
@@ -85,7 +87,7 @@ const RouteBuilder: React.FC = () =>
             R_setJobColumnDesignations([])
             R_setJobHeadings(null)
             R_setJobFirstRowIsHeading(false)
-            R_setJobBody([])
+            R_setTripRows([])
             R_setColumnVisibility([])
             return;
           }
@@ -106,28 +108,26 @@ const RouteBuilder: React.FC = () =>
         R_setJobColumnDesignations(tempColumnDesignations)
         R_setJobHeadings(tempHeadings)
         R_setJobFirstRowIsHeading(false)
-        R_setJobBody(userSelectionRows)
+        R_setTripRows(userSelectionRows)
         R_setColumnVisibility(colVisibility)
 
-        R_setTripStatisticsData(null);
-        setWaypointOrder([]);
       } 
     }, [userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
 
     
 
     useEffect(() => {
-      let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_jobBody))
+      let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_tripRows))
       if(R_addresColumIndex === -1)
       {
         let removedRelationsRows = removeRowParentChildRelations(jobBodyState)
-        R_setJobBody(removedRelationsRows)
+        R_setTripRows(removedRelationsRows)
       }
       else
       {
         let removedRelationsRows = removeRowParentChildRelations(jobBodyState) //remove relations as address column may have changed
         let parentWithChildrenRows = makeRowParentChildRelations(removedRelationsRows, R_addresColumIndex) //re-add relations as per new address col
-        R_setJobBody(parentWithChildrenRows)
+        R_setTripRows(parentWithChildrenRows)
       }
 
     }, [R_addresColumIndex])
@@ -136,30 +136,26 @@ const RouteBuilder: React.FC = () =>
 
     function putFirstRowAsHeading(isHeading: boolean)
     {      
-      let tempJobBody: IRow[] =  JSON.parse(JSON.stringify(R_jobBody))
+      let tempJobBody: IRow[] =  JSON.parse(JSON.stringify(R_tripRows))
       if(isHeading)
       {
         let bodyRowToColumnRow = tempJobBody.shift()
         R_setJobHeadings(bodyRowToColumnRow)
         R_setJobFirstRowIsHeading(true)
-        R_setJobBody(tempJobBody)
-        R_setTripStatisticsData(null);
-        setWaypointOrder([]);
+        R_setTripRows(tempJobBody)
 
-        setFastestRouteResult(null)
-        setOriginalRouteResult(null)
+        R_setShortestTripDirections(null)
+        R_setOriginalTripDirections(null)
       }
       else
       {
         tempJobBody.unshift(R_jobHeadings)
         R_setJobHeadings(createBasicHeadingRow(R_jobHeadings.cells.length))
         R_setJobFirstRowIsHeading(false)
-        R_setJobBody(tempJobBody)
-        R_setTripStatisticsData(null);
-        setWaypointOrder([]);
+        R_setTripRows(tempJobBody)
 
-        setFastestRouteResult(null)
-        setOriginalRouteResult(null)
+        R_setShortestTripDirections(null)
+        R_setOriginalTripDirections(null)
 
       }
     }
@@ -171,30 +167,15 @@ const RouteBuilder: React.FC = () =>
       loadSelection().then((selection) => {
         console.log(selection)
         setUserSelectionRows(selection)
-        R_setTripStatisticsData(null);
-        setFastestRouteResult(null)
-        setOriginalRouteResult(null)
-        setWaypointOrder([]);
-        
+        R_setShortestTripDirections(null)
+        R_setOriginalTripDirections(null)
+
       })
      
     }
 
 
-    function generateRouteStatistics(directions: google.maps.DirectionsResult, directionsIndex: number)
-    {
-      let legs = directions.routes[directionsIndex].legs;
-      let totalDistance = 0;
-      let totalTime = 0;
-      let order = directions.routes[0].waypoint_order
-      for(let i = 0; i < legs.length; i++)
-      {
-        totalDistance += legs[i].distance.value
-        totalTime += legs[i].duration.value
-      }
 
-      return {totalDistance, totalTime, order}
-    }
 
     function calcFastestAndOriginalRoute()
     {
@@ -204,51 +185,29 @@ const RouteBuilder: React.FC = () =>
 
         if(R_addressColumIndex > -1)
         {
-          for(let i = 0; i < R_jobBody.length; i++)
+          for(let i = 0; i < R_tripRows.length; i++)
           {
-            waypoints.push({location: R_jobBody[i].cells[R_addressColumIndex].data, stopover: true})
+            waypoints.push({location: R_tripRows[i].cells[R_addressColumIndex].data, stopover: true})
           }
         }
 
         //TODO check if there are enought tokens available
         makeRouteOnDB(5)
 
-        
-        Promise.all([createDirections(waypoints, true), createDirections(waypoints, false)]).then(res => {
 
-          const fastestRouteStats = generateRouteStatistics(res[0].result, 0)
-          const originalRouteStats = generateRouteStatistics(res[1].result, 0)
+        Promise.all([createDirections(R_departureAddress, R_returnAddress, waypoints, true), createDirections(R_departureAddress, R_returnAddress, waypoints, false)]).then(res => {
 
-          R_setTripStatisticsData({
-            optimized: {dist: fastestRouteStats.totalDistance, time: fastestRouteStats.totalTime }, 
-            origional: {dist: originalRouteStats.totalDistance, time: originalRouteStats.totalTime}
-          })
-
-          setWaypointOrder(fastestRouteStats.order)
-
-          setFastestRouteResult(res[0])
-          setOriginalRouteResult(res[1])
+          //TODO cgeck if status is OK
+          
+          //This line reorders the rows according to what the fastest sequence is
+          R_setInSequenceTripRows(createInSequenceJobRows(Array.from(R_tripRows), res[0].result.routes[0].waypoint_order))
+          R_setShortestTripDirections(res[0])
+          R_setOriginalTripDirections(res[1])
         })
       }
     }
 
-    function createDirections(waypoints: google.maps.DirectionsWaypoint[], optimize: boolean) {
 
-      var request: google.maps.DirectionsRequest = {
-        origin: R_departureAddress,
-        destination: R_returnAddress,
-        waypoints: waypoints,
-        travelMode: google.maps.TravelMode.DRIVING,
-        optimizeWaypoints: optimize
-      };
-
-      return new Promise<IRouteResult>((resolve) => {
-        let directionsService = new google.maps.DirectionsService();
-        directionsService.route(request, (result, status) => {
-            resolve({result, status})
-        });
-      })  
-    }
 
     async function makeRouteOnDB(routeCost: number)
     {
@@ -307,11 +266,10 @@ const RouteBuilder: React.FC = () =>
                 handleColumnDesignation={handleColumnDesignation}
                 calcRoute={calcFastestAndOriginalRoute}
                 putFirstRowAsHeading={putFirstRowAsHeading}
-                waypointOrder={waypointOrder}
               />
             </Box>
           </Paper>
-          <GMap fastestRouteResult={fastestRouteResult} originalRouteResult={originalRouteResult} waypointOrder={waypointOrder}/>
+          <GMap/>
 
         </div>
     )

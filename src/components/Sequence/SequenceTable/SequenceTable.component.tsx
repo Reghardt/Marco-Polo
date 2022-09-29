@@ -5,8 +5,8 @@ import { IRow } from '../../../services/worksheet/row.interface';
 import BodyEntry from './BodyEntry.component';
 
 import HeadingEntry from './HeadingEntry.component';
-import { useRecoilValue } from 'recoil';
-import { RSAddresColumIndex, RSColumnVisibility, RSJobHeadings } from '../../../state/globalstate';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { RSAddresColumIndex, RSColumnVisibility, RSInSequenceTripRows, RSJobHeadings } from '../../../state/globalstate';
 import { createEntryTypeElementsFromRow, preSyncRowDataForWriteBack, writeBackToSpreadsheet } from './SequenceTable.service';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { useEffect, useState } from 'react';
@@ -15,10 +15,7 @@ import Dragger from '../../experiments/DragNDrop/Dragger.component';
 import HelpTooltip from '../../common/HelpTooltip.component';
 import { removeRowParentChildRelations } from '../../Trip/Trip.service';
 
-interface ISequenceTableProps{
-  inSequenceJobBody: IRow[];
-  waypointOrder: number[];
-}
+
 
 enum EAddressType{
   Original,
@@ -27,7 +24,9 @@ enum EAddressType{
 
 
 //TODO why is waypoint order included when the rows are already in sequence?
-const SequenceTable: React.FC<ISequenceTableProps> = ({inSequenceJobBody, waypointOrder}) => {
+const SequenceTable: React.FC = () => {
+
+  const [R_inSequenceTripRows, R_setInSequenceTripRows] = useRecoilState(RSInSequenceTripRows)
 
   const [addressType, setAddressType] = useState<EAddressType>(EAddressType.Original)
 
@@ -37,14 +36,6 @@ const SequenceTable: React.FC<ISequenceTableProps> = ({inSequenceJobBody, waypoi
 
   const R_addressColumnIndex = useRecoilValue(RSAddresColumIndex)
 
-  const [localSequence, setLocalSequence] = useState<IRow[]>([])
-  console.log(localSequence)
-
-  useEffect(() => {
-    setLocalSequence(inSequenceJobBody)
-  }, [inSequenceJobBody])
-
-  
 
   function createTableHeadings(headings: IRow, columnVisibility: boolean[]): JSX.Element
   {
@@ -111,12 +102,18 @@ const SequenceTable: React.FC<ISequenceTableProps> = ({inSequenceJobBody, waypoi
           return;
       }
 
-      const newItems = reorder(localSequence, result.source.index, result.destination.index)
+      const newItems = reorder(R_inSequenceTripRows, result.source.index, result.destination.index)
       //console.log("new items", newItems)
-      setLocalSequence(newItems)
+      R_setInSequenceTripRows(newItems)
     }
 
-  if(localSequence.length > 0 && waypointOrder.length > 0)// Temporary check, the check should rather be in the parent component
+  function reverseOrder(rows: IRow[])
+  {
+    let reversedRows = Array.from(rows).reverse()
+    R_setInSequenceTripRows(reversedRows)
+  }
+
+  if(R_inSequenceTripRows.length > 0)// Temporary check, the check should rather be in the parent component
   {
     return (
       <React.Fragment>
@@ -145,7 +142,7 @@ const SequenceTable: React.FC<ISequenceTableProps> = ({inSequenceJobBody, waypoi
                 </Stack>
             </Box>
             <Box>
-                <Button variant="outlined">Reverse Order</Button>
+                <Button variant="outlined" onClick={() => {reverseOrder(R_inSequenceTripRows)}}>Reverse Order</Button>
             </Box>
         </Stack>
         {createTableHeadings(R_jobHeadings, R_columnVisibility)}
@@ -153,12 +150,12 @@ const SequenceTable: React.FC<ISequenceTableProps> = ({inSequenceJobBody, waypoi
         
         <DragDropContext onDragEnd={onDragEnd}>
           <Dropper droppableId="droppable">
-            {localSequence.map((row, idx) => {
+            {R_inSequenceTripRows.map((row, idx) => {
 
               return (
                 <Dragger key={row.cells[0].y} draggableId={row.cells[0].y.toString()} index={idx}>
                   
-                  {createEntryTypeElementsFromRow(row, idx, R_columnVisibility)}
+                  {createEntryTypeElementsFromRow(row, idx + 1, R_columnVisibility)}
                 </Dragger>)
             })}
           </Dropper>
@@ -166,7 +163,7 @@ const SequenceTable: React.FC<ISequenceTableProps> = ({inSequenceJobBody, waypoi
         </DragDropContext>
 
         <div style={{marginTop: "1em"}}>
-                        <Button onClick={() => {writeBackToSpreadsheet(localSequence, R_addressColumnIndex)}}>Write back</Button>
+                        <Button onClick={() => {writeBackToSpreadsheet(R_inSequenceTripRows, R_addressColumnIndex)}}>Write back</Button>
                         <Button>Reset Spreadsheet</Button>
                     </div>
           

@@ -1,5 +1,5 @@
 import React from "react";
-import { IGeocoderResult } from "../../interfaces/simpleInterfaces";
+import { IGeocoderResult, ITripDirections } from "../../interfaces/simpleInterfaces";
 import { IRow } from "../../services/worksheet/row.interface";
 
 export function removeRowParentChildRelations(rows: IRow[])
@@ -69,3 +69,33 @@ export function createDataFromNewCollection()
 {
   
 }
+
+//this function orders the rows according to thw waypoint orders. X and Y sheet coordinates remain the same.
+export function createInSequenceJobRows(rows: Readonly<IRow[]>, waypointOrder: number[]): IRow[]
+    {
+        let inSequenceBody: IRow[] = []
+        for(let i = 0; i< waypointOrder.length; i++)
+        {
+            const seqRow = rows[waypointOrder[i]];
+            inSequenceBody.push(seqRow)
+        }
+        return inSequenceBody
+    }
+
+export function createDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
+
+        var request: google.maps.DirectionsRequest = {
+          origin: departureAddress,
+          destination: returnAddress,
+          waypoints: waypoints,
+          travelMode: google.maps.TravelMode.DRIVING,
+          optimizeWaypoints: shouldOptimize
+        };
+  
+        return new Promise<ITripDirections>((resolve) => {
+          let directionsService = new google.maps.DirectionsService();
+          directionsService.route(request, (result, status) => {
+              resolve({result, status})
+          });
+        })  
+      }

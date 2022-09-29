@@ -3,11 +3,11 @@ import React, { useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { IRow } from "../../../services/worksheet/row.interface";
-import { RSColumnVisibility, RSJobBody, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
+import { RSColumnVisibility, RSTripRows, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
 
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import RouteEditor from "../TripEditor/TripEditor";
-import RouteStatistics from "../TripStatistics/TripStatistics.component";
+import TripStatistics from "../TripStatistics/TripStatistics.component";
 
 import { TabPanel, tabProps } from "./TripTabs.service";
 
@@ -16,16 +16,15 @@ interface ITripTabs{
     handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void;
     calcRoute: () => void;
     putFirstRowAsHeading: (isHeading: boolean) => void;
-    waypointOrder: number[]
 }
 
-const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndSet, handleColumnDesignation, calcRoute, putFirstRowAsHeading, waypointOrder}) => {
+const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndSet, handleColumnDesignation, calcRoute, putFirstRowAsHeading}) => {
 
     console.log("Trip tabs refresh")
 
     const [tabValue, setTabValue] = useState(0);
 
-    const [R_jobBody, R_setJobBody] = useRecoilState(RSJobBody)
+    const [R_jobBody, R_setJobBody] = useRecoilState(RSTripRows)
 
     const R_jobHeadings = useRecoilValue(RSJobHeadings)
 
@@ -86,19 +85,19 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
             </TabPanel>
 
             <TabPanel value={tabValue} index={1}>
-            {R_jobBody.length > 0 && waypointOrder.length > 0 && (
+            {R_jobBody.length > 0 && (
                     <div>
                         <Typography variant="body2">Show/Hide Columns:</Typography>
                         {createColumnVisibilityOptions(R_jobHeadings, R_columnVisibility)}
                     </div>
                 )}
 
-                <RouteSequence waypointOrder={waypointOrder}/>
+                <RouteSequence/>
 
             </TabPanel>
 
             <TabPanel value={tabValue} index={2}>
-                <RouteStatistics/>
+                <TripStatistics/>
             </TabPanel>
             </Box>
             

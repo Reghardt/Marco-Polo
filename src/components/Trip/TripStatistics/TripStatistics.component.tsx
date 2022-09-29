@@ -1,8 +1,7 @@
 import { Box, Button, Divider, InputAdornment, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useRecoilValue } from "recoil";
-import { ITripStatistics } from "../../../interfaces/simpleInterfaces";
-import { RSTripStatisticsData } from "../../../state/globalstate";
+import { RSOriginalTripDirections, RSShortestTripDirections } from "../../../state/globalstate";
 
 
 enum EAdditionalCostType{
@@ -10,9 +9,19 @@ enum EAdditionalCostType{
     R_100km = "R_100km",
 }
 
-const RouteStatistics: React.FC = () => {
+interface ITripStatistics
+{
+    dist: number;
+    time: number;
+}
 
-    const R_tripStatisticsData = useRecoilValue(RSTripStatisticsData)
+const TripStatistics: React.FC = () => {
+
+    const R_shortestTripDirections = useRecoilValue(RSShortestTripDirections)
+    const R_originalTripDirections = useRecoilValue(RSOriginalTripDirections)
+
+    const [shortestTripStatistics, setShortestTripStatistics] = useState<ITripStatistics>(null)
+    const [originalTripStatistics, setOriginalTripStatistics] = useState<ITripStatistics>(null)
 
     const [petrolPrice, setPetrolPrice] = useState("")
     const [litersKm, setLitersKm] = useState("")
@@ -20,6 +29,38 @@ const RouteStatistics: React.FC = () => {
     const [additionalCostType, setAdditionalCostType] = useState<EAdditionalCostType>(EAdditionalCostType.R_hr)
 
     const [statusText, setStatusText] = useState("")
+
+    useEffect(() => {
+        //TODO check if status is OK
+        if(R_shortestTripDirections && R_originalTripDirections)
+        {
+            if(R_shortestTripDirections.status === google.maps.DirectionsStatus.OK && R_originalTripDirections.status === google.maps.DirectionsStatus.OK)
+            {
+                setShortestTripStatistics(generateRouteStatistics(R_shortestTripDirections.result, 0))
+                setOriginalTripStatistics(generateRouteStatistics(R_originalTripDirections.result, 0))
+            }
+            else
+            {
+                console.error("Status not ok")
+            }
+        }
+
+        
+    }, [R_shortestTripDirections, R_originalTripDirections])
+
+    function generateRouteStatistics(directions: google.maps.DirectionsResult, directionsIndex: number): ITripStatistics
+    {
+      let legs = directions.routes[directionsIndex].legs;
+      let totalDistance = 0;
+      let totalTime = 0;
+      for(let i = 0; i < legs.length; i++)
+      {
+        totalDistance += legs[i].distance.value
+        totalTime += legs[i].duration.value
+      }
+
+      return {dist: totalDistance, time: totalTime}
+    }
 
     function unixTimeToHMFormat(unixTime: number)
     {
@@ -40,8 +81,8 @@ const RouteStatistics: React.FC = () => {
 
     function distanceReductionPercentage()
     {
-        let dif = R_tripStatisticsData.origional.dist - R_tripStatisticsData.optimized.dist
-        let percent = dif / R_tripStatisticsData.origional.dist;
+        let dif = originalTripStatistics.dist - shortestTripStatistics.dist
+        let percent = dif / originalTripStatistics.dist;
         return (percent * 100)
     }
 
@@ -84,7 +125,7 @@ const RouteStatistics: React.FC = () => {
     {
         let totalCost = 0
         let perKm = pricePerKm(petrolPrice, litersKm)
-        let originalRouteCost = metersToKM(R_tripStatisticsData.origional.dist) * perKm;
+        let originalRouteCost = metersToKM(originalTripStatistics.dist) * perKm;
         if(isNaN(originalRouteCost))
         {
             return 0
@@ -96,11 +137,11 @@ const RouteStatistics: React.FC = () => {
         {
             if(additionalCostType === EAdditionalCostType.R_hr)
             {
-                totalCost += randsPerHour(R_tripStatisticsData.origional.time, additionalCostsValue)
+                totalCost += randsPerHour(originalTripStatistics.time, additionalCostsValue)
             }
             else
             {
-                totalCost += randsPer100km(R_tripStatisticsData.origional.dist, additionalCostsValue)
+                totalCost += randsPer100km(originalTripStatistics.dist, additionalCostsValue)
             }
         }
         return totalCost;
@@ -110,7 +151,7 @@ const RouteStatistics: React.FC = () => {
     {
         let totalCost = 0
         let perKm = pricePerKm(petrolPrice, litersKm)
-        let optimizedRouteCost = metersToKM(R_tripStatisticsData.optimized.dist) * perKm;
+        let optimizedRouteCost = metersToKM(shortestTripStatistics.dist) * perKm;
         if(isNaN(optimizedRouteCost))
         {
             return 0
@@ -122,11 +163,11 @@ const RouteStatistics: React.FC = () => {
         {
             if(additionalCostType === EAdditionalCostType.R_hr)
             {
-                totalCost += randsPerHour(R_tripStatisticsData.optimized.time, additionalCostsValue)
+                totalCost += randsPerHour(shortestTripStatistics.time, additionalCostsValue)
             }
             else
             {
-                totalCost += randsPer100km(R_tripStatisticsData.optimized.dist, additionalCostsValue)
+                totalCost += randsPer100km(shortestTripStatistics.dist, additionalCostsValue)
             }
         }
         return totalCost;
@@ -143,22 +184,22 @@ const RouteStatistics: React.FC = () => {
         <Box>
             {/* <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Route Statistics</Typography> */}
 
-            {R_tripStatisticsData !== null && (
+            {shortestTripStatistics !== null && originalTripStatistics !== null && (
                 <div>
                     <Typography variant="h6">Given Route:</Typography>
                     <Typography variant="body1" gutterBottom>
-                        Distance: {metersToKM(R_tripStatisticsData.origional.dist)}km, Time: {unixTimeToHMFormat(R_tripStatisticsData.origional.time)} <br/>
+                        Distance: {metersToKM(originalTripStatistics.dist)}km, Time: {unixTimeToHMFormat(originalTripStatistics.time)} 
                     </Typography>
 
                     <Typography variant="h6">Optimised Route:</Typography>
                     <Typography variant="body1" gutterBottom>
-                        Distance: {metersToKM(R_tripStatisticsData.optimized.dist)}km, Time: {unixTimeToHMFormat(R_tripStatisticsData.optimized.time)} <br/>
+                        Distance: {metersToKM(shortestTripStatistics.dist)}km, Time: {unixTimeToHMFormat(shortestTripStatistics.time)} 
                     </Typography >
 
                     <Typography variant="h6">Result:</Typography>
                     <Typography variant="body1" gutterBottom>
-                        Distance Reduction: {metersToKM(R_tripStatisticsData.origional.dist - R_tripStatisticsData.optimized.dist)}km - {distanceReductionPercentage().toFixed(2)}% <br/>
-                        Estimated Time Saved: {unixTimeToHMFormat(R_tripStatisticsData.origional.time - R_tripStatisticsData.optimized.time)}
+                        Distance Reduction: {metersToKM(originalTripStatistics.dist - shortestTripStatistics.dist)}km - {distanceReductionPercentage().toFixed(2)}%
+                        Estimated Time Saved: {unixTimeToHMFormat(originalTripStatistics.time - shortestTripStatistics.time)}
                     </Typography>
 
                     <Typography variant="h6" gutterBottom>Vehicle Operating Costs:</Typography>
@@ -248,7 +289,7 @@ const RouteStatistics: React.FC = () => {
                 </div>
             )}
 
-            {R_tripStatisticsData === null && (
+            {shortestTripStatistics === null && originalTripStatistics === null && (
                 <Typography variant="body1" gutterBottom>Statistics will be generated and displayed here once a trip has been calculated.</Typography>
             )}
             
@@ -257,4 +298,4 @@ const RouteStatistics: React.FC = () => {
     )
 }
 
-export default RouteStatistics;
+export default TripStatistics;

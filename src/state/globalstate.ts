@@ -1,6 +1,6 @@
 import { atom, selector } from "recoil";
 import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
-import { ITripStatistics } from "../interfaces/simpleInterfaces";
+import { ITripDirections } from "../interfaces/simpleInterfaces";
 
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
 import { IRow } from "../services/worksheet/row.interface";
@@ -50,8 +50,13 @@ export const RSJobFirstRowIsHeading = atom<boolean>({
     default: false
 })
 
-export const RSJobBody = atom<IRow[]>({
+export const RSTripRows = atom<IRow[]>({
     key: "jobBody",
+    default: []
+})
+
+export const RSInSequenceTripRows = atom<IRow[]>({
+    key: "inSequenceJobRows",
     default: []
 })
 
@@ -91,8 +96,14 @@ export const RSTokens = atom<number>({
     default: 0
 })
 
-export const RSTripStatisticsData = atom<ITripStatistics>({
-    key: "tripStatisticsData",
+
+export const RSShortestTripDirections = atom<ITripDirections>({
+    key: "shortestTripDirections",
+    default: null
+})
+
+export const RSOriginalTripDirections = atom<ITripDirections>({
+    key: "originalTripDirections",
     default: null
 })
 
