@@ -1,15 +1,14 @@
 import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import React, { useEffect, useRef, useState } from "react"
-import { useRecoilValue } from "recoil";
-import { ITripDirections } from "../../interfaces/simpleInterfaces";
-import { RSAddresColumIndex, RSDepartReturnState, RSDepartureAddress, RSTripRows, RSReturnAddress, RSInSequenceTripRows, RSShortestTripDirections, RSOriginalTripDirections } from "../../state/globalstate";
-import { createCustomMapMarkers, createMapMarkers, EDisplayRoute } from "./GMap.service"
+import { useRecoilState, useRecoilValue } from "recoil";
+import { RSAddresColumIndex, RSTripRows, RSInSequenceTripRows, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress } from "../../state/globalstate";
+import { createCustomMapMarkers, EDisplayRoute } from "./GMap.service"
 
 
 const GMap: React.FC = () => {
 
-    const R_shortestTripDirections = useRecoilValue(RSShortestTripDirections)
-    const R_originalTripDirections = useRecoilValue(RSOriginalTripDirections)
+    const [R_shortestTripDirections, R_setShortestTripDirections] = useRecoilState(RSShortestTripDirections)
+    const [R_originalTripDirections, R_setOriginalTripDirections] = useRecoilState(RSOriginalTripDirections)
     
     const map = useRef<google.maps.Map>()
     // const directionsService = useRef<google.maps.DirectionsService>()
@@ -24,6 +23,11 @@ const GMap: React.FC = () => {
     const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
     const [markers, setMarkers] = useState<JSX.Element[]>([])
 
+    const R_preserveViewport = useRecoilValue(RSPreserveViewport)
+
+    const R_departureAddress = useRecoilValue(RSDepartureAddress);
+    const R_returnAddress = useRecoilValue(RSReturnAddress);
+
     useEffect(() => {
         //setMarkers(createMapMarkers(R_jobBody, markers, R_addresColumIndex, map))
         if(routeToDisplay === EDisplayRoute.Fastest)
@@ -33,10 +37,8 @@ const GMap: React.FC = () => {
         else
         {
             setMarkers(createCustomMapMarkers(R_tripRows, R_addresColumIndex, map, routeToDisplay))
-        }
-        
-        
-    }, [R_tripRows, R_inSequenceTripRows, R_addresColumIndex, routeToDisplay])
+        } 
+    }, [R_tripRows, R_inSequenceTripRows, R_addresColumIndex, routeToDisplay, R_departureAddress, R_returnAddress])
 
     //Creates map on mount
     useEffect(() => {
@@ -51,22 +53,7 @@ const GMap: React.FC = () => {
     useEffect(() => {
         if(R_shortestTripDirections && R_originalTripDirections && R_shortestTripDirections.status === "OK" && R_originalTripDirections.status === "OK")
         {
-            fastestRouteDirectionsRenderer.current.setMap(null)
-            originalRouteDirectionsRenderer.current.setMap(null)
-
-            fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
-            map: map.current,
-            suppressMarkers: true,
-            directions: R_shortestTripDirections.result
-            })
-            originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
-            map: map.current,
-            suppressMarkers: true,
-            directions: R_originalTripDirections.result
-            })
-            fastestRouteDirectionsRenderer.current.setMap(map.current)
-            originalRouteDirectionsRenderer.current.setMap(null)
-
+                handleRouteToDisplay(routeToDisplay, R_preserveViewport)     
         }
         else
         {
@@ -75,7 +62,7 @@ const GMap: React.FC = () => {
         }
     }, [R_shortestTripDirections, R_originalTripDirections])
 
-    function handleRouteToDisplay(value: EDisplayRoute)
+    function handleRouteToDisplay(value: EDisplayRoute, preserveViewport: boolean)
     {
         if(value === EDisplayRoute.Fastest)
         {
@@ -83,7 +70,7 @@ const GMap: React.FC = () => {
             fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
             map: map.current,
             suppressMarkers: true,
-            preserveViewport: true,
+            preserveViewport: preserveViewport,
             directions: R_shortestTripDirections.result
             })
             originalRouteDirectionsRenderer.current.setMap(null)
@@ -95,7 +82,7 @@ const GMap: React.FC = () => {
             originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
             map: map.current,
             suppressMarkers: true,
-            preserveViewport: true,
+            preserveViewport: preserveViewport,
             directions: R_originalTripDirections.result
             })
             fastestRouteDirectionsRenderer.current.setMap(null)
@@ -117,7 +104,7 @@ const GMap: React.FC = () => {
                         color="primary"
                         value={routeToDisplay}
                         exclusive
-                        onChange={(_e, v) => {handleRouteToDisplay(v)}}
+                        onChange={(_e, v) => {handleRouteToDisplay(v, true)}}
                         aria-label="Address Type"
                         >
                         <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Fastest}>Fastest Route</ToggleButton>

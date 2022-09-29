@@ -89,7 +89,7 @@ export function createDirections(departureAddress: string, returnAddress: string
           destination: returnAddress,
           waypoints: waypoints,
           travelMode: google.maps.TravelMode.DRIVING,
-          optimizeWaypoints: shouldOptimize
+          optimizeWaypoints: shouldOptimize,
         };
   
         return new Promise<ITripDirections>((resolve) => {

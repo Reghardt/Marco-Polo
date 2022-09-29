@@ -6,14 +6,14 @@ import BodyEntry from './BodyEntry.component';
 
 import HeadingEntry from './HeadingEntry.component';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { RSAddresColumIndex, RSColumnVisibility, RSInSequenceTripRows, RSJobHeadings } from '../../../state/globalstate';
+import { RSAddresColumIndex, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSJobHeadings, RSPreserveViewport, RSReturnAddress, RSShortestTripDirections } from '../../../state/globalstate';
 import { createEntryTypeElementsFromRow, preSyncRowDataForWriteBack, writeBackToSpreadsheet } from './SequenceTable.service';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { useEffect, useState } from 'react';
 import Dropper from '../../experiments/DragNDrop/Dropper.component';
 import Dragger from '../../experiments/DragNDrop/Dragger.component';
 import HelpTooltip from '../../common/HelpTooltip.component';
-import { removeRowParentChildRelations } from '../../Trip/Trip.service';
+import { createDirections, createInSequenceJobRows, removeRowParentChildRelations } from '../../Trip/Trip.service';
 
 
 
@@ -35,6 +35,13 @@ const SequenceTable: React.FC = () => {
   const R_jobHeadings = useRecoilValue(RSJobHeadings)
 
   const R_addressColumnIndex = useRecoilValue(RSAddresColumIndex)
+
+  const R_departureAddress = useRecoilValue(RSDepartureAddress);
+  const R_returnAddress = useRecoilValue(RSReturnAddress);
+
+  const [,R_setPreserveViewport] = useRecoilState(RSPreserveViewport)
+
+  const [, R_setShortestTripDirections] = useRecoilState(RSShortestTripDirections)
 
 
   function createTableHeadings(headings: IRow, columnVisibility: boolean[]): JSX.Element
@@ -102,9 +109,29 @@ const SequenceTable: React.FC = () => {
           return;
       }
 
-      const newItems = reorder(R_inSequenceTripRows, result.source.index, result.destination.index)
-      //console.log("new items", newItems)
-      R_setInSequenceTripRows(newItems)
+      const newRows = reorder(R_inSequenceTripRows, result.source.index, result.destination.index)
+      recalculateRoute(R_departureAddress, R_returnAddress, newRows, R_addressColumnIndex)
+      R_setInSequenceTripRows(newRows)
+    }
+
+    async function recalculateRoute(departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number)
+    {
+      if(departureAddress !== "" && returnAddress !== "") //test if not "none"
+      {
+        let waypoints: google.maps.DirectionsWaypoint[]  = [];
+
+        if(addressColumnIndex > -1)
+        {
+          for(let i = 0; i < rows.length; i++)
+          {
+            waypoints.push({location: rows[i].cells[addressColumnIndex].data, stopover: true})
+          }
+        }
+         let directions = await createDirections(departureAddress, returnAddress, waypoints, false)
+          R_setPreserveViewport(true)
+          //TODO cgeck if status is OK
+          R_setShortestTripDirections(directions)
+      }
     }
 
   function reverseOrder(rows: IRow[])

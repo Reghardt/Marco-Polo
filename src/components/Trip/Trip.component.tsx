@@ -10,7 +10,7 @@ import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections } from "../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -43,7 +43,7 @@ const RouteBuilder: React.FC = () =>
 
   const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
   
-
+  const [,R_setPreserveViewport] = useRecoilState(RSPreserveViewport)
   
 
   
@@ -67,7 +67,7 @@ const RouteBuilder: React.FC = () =>
   const [, R_setShortestTripDirections] = useRecoilState(RSShortestTripDirections)
   const [, R_setOriginalTripDirections] = useRecoilState(RSOriginalTripDirections)
 
-    
+  const [Cache_tripDirections, Cache_setTripDirections] = useState<ITripDirections[]>([])
 
     console.log("refresh")
 
@@ -132,6 +132,19 @@ const RouteBuilder: React.FC = () =>
 
     }, [R_addresColumIndex])
 
+    useEffect(() => {
+      if(Cache_tripDirections.length > 0)
+      {
+          //TODO cgeck if status is OK
+          
+          //This line reorders the rows according to what the fastest sequence is
+          R_setPreserveViewport(false)
+          R_setInSequenceTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0].result.routes[0].waypoint_order))
+          R_setShortestTripDirections(Cache_tripDirections[0])
+          R_setOriginalTripDirections(Cache_tripDirections[1])
+      }
+    }, [Cache_tripDirections])
+
     //END useEffects
 
     function putFirstRowAsHeading(isHeading: boolean)
@@ -169,7 +182,7 @@ const RouteBuilder: React.FC = () =>
         setUserSelectionRows(selection)
         R_setShortestTripDirections(null)
         R_setOriginalTripDirections(null)
-
+        R_setInSequenceTripRows([])
       })
      
     }
@@ -194,15 +207,8 @@ const RouteBuilder: React.FC = () =>
         //TODO check if there are enought tokens available
         makeRouteOnDB(5)
 
-
         Promise.all([createDirections(R_departureAddress, R_returnAddress, waypoints, true), createDirections(R_departureAddress, R_returnAddress, waypoints, false)]).then(res => {
-
-          //TODO cgeck if status is OK
-          
-          //This line reorders the rows according to what the fastest sequence is
-          R_setInSequenceTripRows(createInSequenceJobRows(Array.from(R_tripRows), res[0].result.routes[0].waypoint_order))
-          R_setShortestTripDirections(res[0])
-          R_setOriginalTripDirections(res[1])
+          Cache_setTripDirections(res)
         })
       }
     }

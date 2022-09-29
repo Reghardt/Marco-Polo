@@ -46,6 +46,12 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
 {
 
     let newMarkers: JSX.Element[] = []
+
+    // if(departureAddress)
+    // {
+    //     newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location}/>)
+    // }
+
     if(addressColumnIndex > -1)
     {
 

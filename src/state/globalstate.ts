@@ -107,6 +107,11 @@ export const RSOriginalTripDirections = atom<ITripDirections>({
     default: null
 })
 
+export const RSPreserveViewport = atom<boolean>({
+    key: "preserveViewport",
+    default: false
+})
+
 
 
 
