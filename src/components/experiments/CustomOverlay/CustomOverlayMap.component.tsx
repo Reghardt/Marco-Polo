@@ -27,7 +27,7 @@ const CustomOverlayMap: React.FC = () => {
         let newMarkers: JSX.Element[] = []
         for(let i = 0; i < 3; i++)
         {
-            newMarkers.push(<CustomMarker label={i.toString()} map={map.current} position={new google.maps.LatLng({lat: pos.lat(), lng: pos.lng() + i})} />)
+            newMarkers.push(<CustomMarker label={i.toString()} map={map.current} position={new google.maps.LatLng({lat: pos.lat(), lng: pos.lng() + i})} backgroundColor="blue" />)
         }
         setMarkers(newMarkers)
         //setPos(new google.maps.LatLng({lat: pos.lat(), lng: pos.lng() + 3}))

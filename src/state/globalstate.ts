@@ -1,4 +1,5 @@
 import { atom, selector } from "recoil";
+import { EDisplayRoute } from "../components/Maps/GMap.service";
 import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
 import { ITripDirections } from "../interfaces/simpleInterfaces";
 
@@ -20,14 +21,14 @@ export const RSJobID = atom<{jobId: string, shouldFetch: boolean}>({
     default: {jobId: "", shouldFetch: false}
 })
 
-export const RSDepartureAddress = atom<string>({
+export const RSDepartureAddress = atom<google.maps.GeocoderResult>({
     key: "departureAddress",
-    default: ""
+    default: null
 })
 
-export const RSReturnAddress = atom<string>({
+export const RSReturnAddress = atom<google.maps.GeocoderResult>({
     key: "returnAddress",
-    default: ""
+    default: null
 })
 
 export const RSDepartReturnState = atom<EDepartReturn>({
@@ -110,6 +111,11 @@ export const RSOriginalTripDirections = atom<ITripDirections>({
 export const RSPreserveViewport = atom<boolean>({
     key: "preserveViewport",
     default: false
+})
+
+export const RSRouteToDisplay = atom<EDisplayRoute>({
+    key: "routeToDisplay",
+    default: EDisplayRoute.Original
 })
 
 

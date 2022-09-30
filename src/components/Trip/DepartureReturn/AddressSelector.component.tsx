@@ -6,10 +6,11 @@ import { usePopper } from "react-popper";
 
 import PopperContainer from "../../common/PopperContainer.styled";
 import { geocodeAddress } from "../Trip.service";
+import { width } from "@mui/system";
 
 type IAddressSelectorProps ={
-    address: string;
-    addressSetter: React.Dispatch<React.SetStateAction<string>>;
+    address: google.maps.GeocoderResult;
+    addressSetter: React.Dispatch<React.SetStateAction<google.maps.GeocoderResult>>;
     title: string;
 
 }
@@ -22,9 +23,9 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
     const popperRef = useRef(null);
     const [arrowRef, setArrowRef] = useState<any>(null);
 
-    const [localAddress, setLocalAddress] = useState(address)
+    const [localAddress, setLocalAddress] = useState<string>(address === null ? "" : address.formatted_address)
 
-    const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>(null);
+    const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>([]);
     const [selectedAddress, setSelectedAddress] = useState<google.maps.GeocoderResult>()
 
     useEffect(() => {
@@ -63,7 +64,8 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
 
       function saveAddress()
       {
-        addressSetter(selectedAddress.formatted_address)
+        addressSetter(selectedAddress)
+        setGeocodedResults([])
         setShow(!show)
       }
 
@@ -94,8 +96,8 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
             </Box>
             
             <Box>
-              <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}} sx={{fontStyle: (address === "" ? "italic" : "normal")}}>
-                {(address === "" ? "click to specify address" : address)}
+              <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}} sx={{fontStyle: (address === null ? "italic" : "normal")}}>
+                {(address === null ? "click to specify address" : address.formatted_address)}
             </Button>
             </Box>
 
@@ -104,29 +106,24 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
             </Box> */}
           </Stack>
 
-            
-            
-            
-            
-
             {show && (
                 <ClickAwayListener onClickAway={()=> setShow(!show)}>
                     <PopperContainer 
                         ref={popperRef}
-                        style={styles.popper}
+                        style={{...styles.popper, width: "80%"}}
                         {...attributes.popper}
                         >
                             <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
-                            <Paper className="paper" >
+                            <Paper className="paper">
                                 <DialogTitle>{title}</DialogTitle>
                                 <DialogContent>
                                     <br></br>
-                                    <TextField defaultValue={address} onChange={(e)=> captureInput(e.target.value)} autoFocus size="medium" label="Address"></TextField>
+                                    <TextField defaultValue={address === null ? "" : address.formatted_address} onChange={(e)=> captureInput(e.target.value)} size="medium" label="Address" fullWidth></TextField>
                                     <br/>
                                     <Button onClick={()=> generateGeocodeResults()}>Search</Button>
                                     <br/>
 
-                                    {geocodedResults &&  
+                                    {geocodedResults.length > 0 &&  
                                         (<FormControl>
                                             <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
                                             <RadioGroup

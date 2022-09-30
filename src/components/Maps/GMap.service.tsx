@@ -42,15 +42,12 @@ export function createMapMarkers(rows: IRow[], currentMapMarkers: google.maps.Ma
 
 
 
-export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>, routeToDisplay: EDisplayRoute): JSX.Element[]
+export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>, routeToDisplay: EDisplayRoute, departureAddress: google.maps.GeocoderResult, returnAddress: google.maps.GeocoderResult): JSX.Element[]
 {
 
     let newMarkers: JSX.Element[] = []
 
-    // if(departureAddress)
-    // {
-    //     newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location}/>)
-    // }
+    
 
     if(addressColumnIndex > -1)
     {
@@ -71,10 +68,36 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
             if(row.cells[addressColumnIndex].geocodedAddressRes !== null)
             {
                 let addressRes = row.cells[addressColumnIndex].geocodedAddressRes
-                newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location}/>)
+                newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location} backgroundColor={"primary"}/>)
             }
         }
     }
+
+    if(departureAddress === returnAddress)
+    {
+        if(departureAddress)
+        {
+            newMarkers.unshift(<CustomMarker label={"D+R"} map={map.current} position={departureAddress.geometry.location} backgroundColor={"green"}/>)
+        }
+        
+    }
+    else
+    {
+        if(departureAddress)
+        {
+            newMarkers.unshift(<CustomMarker label={"Dep"} map={map.current} position={departureAddress.geometry.location} backgroundColor={"green"}/>)
+        }
+        if(returnAddress)
+        {
+            newMarkers.push(<CustomMarker label={"Ret"} map={map.current} position={returnAddress.geometry.location} backgroundColor={"green"}/>)
+        }
+        
+
+        
+        
+    }
+
+    
 
     return newMarkers;
 }

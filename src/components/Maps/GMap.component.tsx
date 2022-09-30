@@ -1,7 +1,7 @@
 import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import React, { useEffect, useRef, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSTripRows, RSInSequenceTripRows, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress } from "../../state/globalstate";
+import { RSAddresColumIndex, RSTripRows, RSInSequenceTripRows, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress, RSRouteToDisplay } from "../../state/globalstate";
 import { createCustomMapMarkers, EDisplayRoute } from "./GMap.service"
 
 
@@ -15,7 +15,7 @@ const GMap: React.FC = () => {
     const fastestRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
     const originalRouteDirectionsRenderer = useRef<google.maps.DirectionsRenderer>()
 
-    const [routeToDisplay, setRouteToDisplay] = useState<EDisplayRoute>(EDisplayRoute.Fastest)
+    const [R_routeToDisplay, R_setRouteToDisplay] = useRecoilState(RSRouteToDisplay)
 
     const R_tripRows = useRecoilValue(RSTripRows)
     const R_inSequenceTripRows = useRecoilValue(RSInSequenceTripRows)
@@ -30,15 +30,15 @@ const GMap: React.FC = () => {
 
     useEffect(() => {
         //setMarkers(createMapMarkers(R_jobBody, markers, R_addresColumIndex, map))
-        if(routeToDisplay === EDisplayRoute.Fastest)
+        if(R_routeToDisplay === EDisplayRoute.Fastest)
         {
-            setMarkers(createCustomMapMarkers(R_inSequenceTripRows, R_addresColumIndex, map, routeToDisplay))
+            setMarkers(createCustomMapMarkers(R_inSequenceTripRows, R_addresColumIndex, map, R_routeToDisplay, R_departureAddress, R_returnAddress))
         }
         else
         {
-            setMarkers(createCustomMapMarkers(R_tripRows, R_addresColumIndex, map, routeToDisplay))
+            setMarkers(createCustomMapMarkers(R_tripRows, R_addresColumIndex, map, R_routeToDisplay, R_departureAddress, R_returnAddress))
         } 
-    }, [R_tripRows, R_inSequenceTripRows, R_addresColumIndex, routeToDisplay, R_departureAddress, R_returnAddress])
+    }, [R_tripRows, R_inSequenceTripRows, R_addresColumIndex, R_routeToDisplay, R_departureAddress, R_returnAddress])
 
     //Creates map on mount
     useEffect(() => {
@@ -53,7 +53,7 @@ const GMap: React.FC = () => {
     useEffect(() => {
         if(R_shortestTripDirections && R_originalTripDirections && R_shortestTripDirections.status === "OK" && R_originalTripDirections.status === "OK")
         {
-                handleRouteToDisplay(routeToDisplay, R_preserveViewport)     
+                handleRouteToDisplay(R_routeToDisplay, R_preserveViewport)     
         }
         else
         {
@@ -64,7 +64,7 @@ const GMap: React.FC = () => {
 
     function handleRouteToDisplay(value: EDisplayRoute, preserveViewport: boolean)
     {
-        if(value === EDisplayRoute.Fastest)
+        if(value === EDisplayRoute.Fastest && R_shortestTripDirections)
         {
             fastestRouteDirectionsRenderer.current.setMap(null)
             fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
@@ -74,9 +74,9 @@ const GMap: React.FC = () => {
             directions: R_shortestTripDirections.result
             })
             originalRouteDirectionsRenderer.current.setMap(null)
-            setRouteToDisplay(value)
+            R_setRouteToDisplay(value)
         }
-        else if(value === EDisplayRoute.Original)
+        else if(value === EDisplayRoute.Original && R_originalTripDirections)
         {
             originalRouteDirectionsRenderer.current.setMap(null)
             originalRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
@@ -86,7 +86,7 @@ const GMap: React.FC = () => {
             directions: R_originalTripDirections.result
             })
             fastestRouteDirectionsRenderer.current.setMap(null)
-            setRouteToDisplay(value)
+            R_setRouteToDisplay(value)
         }
     }
     
@@ -102,7 +102,7 @@ const GMap: React.FC = () => {
                         sx={{maxHeight:"100%", height: "100%"}}
                         size="small"
                         color="primary"
-                        value={routeToDisplay}
+                        value={R_routeToDisplay}
                         exclusive
                         onChange={(_e, v) => {handleRouteToDisplay(v, true)}}
                         aria-label="Address Type"

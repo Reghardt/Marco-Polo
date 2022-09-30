@@ -192,7 +192,7 @@ const RouteBuilder: React.FC = () =>
 
     function calcFastestAndOriginalRoute()
     {
-      if(R_departureAddress !== "" && R_returnAddress !== "") //test if not "none"
+      if(R_departureAddress !== null && R_returnAddress !== null) //test if not "none"
       {
         let waypoints: google.maps.DirectionsWaypoint[]  = [];
 
@@ -207,7 +207,10 @@ const RouteBuilder: React.FC = () =>
         //TODO check if there are enought tokens available
         makeRouteOnDB(5)
 
-        Promise.all([createDirections(R_departureAddress, R_returnAddress, waypoints, true), createDirections(R_departureAddress, R_returnAddress, waypoints, false)]).then(res => {
+        Promise.all(
+          [createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, true), 
+            createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, false)
+          ]).then(res => {
           Cache_setTripDirections(res)
         })
       }

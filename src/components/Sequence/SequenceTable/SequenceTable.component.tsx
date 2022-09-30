@@ -110,7 +110,7 @@ const SequenceTable: React.FC = () => {
       }
 
       const newRows = reorder(R_inSequenceTripRows, result.source.index, result.destination.index)
-      recalculateRoute(R_departureAddress, R_returnAddress, newRows, R_addressColumnIndex)
+      recalculateRoute(R_departureAddress.formatted_address, R_returnAddress.formatted_address, newRows, R_addressColumnIndex)
       R_setInSequenceTripRows(newRows)
     }
 
@@ -137,6 +137,7 @@ const SequenceTable: React.FC = () => {
   function reverseOrder(rows: IRow[])
   {
     let reversedRows = Array.from(rows).reverse()
+    recalculateRoute(R_departureAddress.formatted_address, R_returnAddress.formatted_address, reversedRows, R_addressColumnIndex)
     R_setInSequenceTripRows(reversedRows)
   }
 
