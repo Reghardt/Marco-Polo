@@ -118,6 +118,11 @@ export const RSRouteToDisplay = atom<EDisplayRoute>({
     default: EDisplayRoute.Original
 })
 
+export const RSTripTabValue = atom<number>({
+    key: "tripTabsValue",
+    default: 0
+})
+
 
 
 

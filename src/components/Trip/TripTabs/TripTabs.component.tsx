@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { IRow } from "../../../services/worksheet/row.interface";
-import { RSColumnVisibility, RSTripRows, RSJobFirstRowIsHeading, RSJobHeadings } from "../../../state/globalstate";
+import { RSColumnVisibility, RSTripRows, RSJobFirstRowIsHeading, RSJobHeadings, RSTripTabValue } from "../../../state/globalstate";
 
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import RouteEditor from "../TripEditor/TripEditor";
@@ -22,7 +22,7 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
 
     console.log("Trip tabs refresh")
 
-    const [tabValue, setTabValue] = useState(0);
+    const [R_tripTabValue, R_setTripTabValue] = useRecoilState(RSTripTabValue);
 
     const [R_jobBody, R_setJobBody] = useRecoilState(RSTripRows)
 
@@ -55,7 +55,7 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
         <Box>
             {/* TODO Add route statistics tab */}
             <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Trip Solver</Typography>
-            <Tabs value={tabValue} onChange={(_e, v) => (setTabValue(v))}>
+            <Tabs value={R_tripTabValue} onChange={(_e, v) => (R_setTripTabValue(v))}>
             <Tab label="Edit" {...tabProps(0)}/>
             <Tab label="Sequence/Writeback" {...tabProps(1)}/>
             <Tab label="Trip Statistics" {...tabProps(2)}/>
@@ -63,7 +63,7 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
 
             <Box sx={{paddingTop: "0.3em"}}>
 
-            <TabPanel value={tabValue} index={0}>
+            <TabPanel value={R_tripTabValue} index={0}>
                 <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
 
                 {R_jobBody.length > 0 && (
@@ -84,7 +84,7 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
 
             </TabPanel>
 
-            <TabPanel value={tabValue} index={1}>
+            <TabPanel value={R_tripTabValue} index={1}>
             {R_jobBody.length > 0 && (
                     <div>
                         <Typography variant="body2">Show/Hide Columns:</Typography>
@@ -96,7 +96,7 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
 
             </TabPanel>
 
-            <TabPanel value={tabValue} index={2}>
+            <TabPanel value={R_tripTabValue} index={2}>
                 <TripStatistics/>
             </TabPanel>
             </Box>

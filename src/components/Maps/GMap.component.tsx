@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSAddresColumIndex, RSTripRows, RSInSequenceTripRows, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress, RSRouteToDisplay } from "../../state/globalstate";
 import { createCustomMapMarkers, EDisplayRoute } from "./GMap.service"
+import GMapLegends from "./GMapLegends.component";
 
 
 const GMap: React.FC = () => {
@@ -96,7 +97,7 @@ const GMap: React.FC = () => {
 
             <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}} >Google Maps</Typography>
 
-            <Stack direction={"row"} spacing={1} alignItems="center" sx={{marginBottom: "1em"}}>
+            <Stack direction={"row"} spacing={1} alignItems="center" sx={{marginBottom: "0.5em"}}>
                 <Box>
                     <ToggleButtonGroup
                         sx={{maxHeight:"100%", height: "100%"}}
@@ -112,7 +113,10 @@ const GMap: React.FC = () => {
                     </ToggleButtonGroup>
                 </Box>
             </Stack>
-            <Paper style={{width: "100%", height: 500}} id="map"></Paper>
+
+            
+            <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
+            <GMapLegends/>
 
             {markers.length > 0 && (
                 markers.map((marker) => {

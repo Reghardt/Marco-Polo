@@ -10,7 +10,7 @@ import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport } from "../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSRouteToDisplay, RSTripTabValue } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -24,6 +24,7 @@ import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 import GMap from "../Maps/GMap.component";
 import TripTabs from "./TripTabs/TripTabs.component";
+import { EDisplayRoute } from "../Maps/GMap.service";
 
 
 
@@ -46,7 +47,9 @@ const RouteBuilder: React.FC = () =>
   const [,R_setPreserveViewport] = useRecoilState(RSPreserveViewport)
   
 
-  
+  const [R_routeToDisplay, R_setRouteToDisplay] = useRecoilState(RSRouteToDisplay)
+
+  const [R_tripTabValue, R_setTripTabValue] = useRecoilState(RSTripTabValue);
 
   const R_departureAddress = useRecoilValue(RSDepartureAddress);
   const R_returnAddress = useRecoilValue(RSReturnAddress);
@@ -139,9 +142,12 @@ const RouteBuilder: React.FC = () =>
           
           //This line reorders the rows according to what the fastest sequence is
           R_setPreserveViewport(false)
+          R_setRouteToDisplay(EDisplayRoute.Fastest)
+          R_setTripTabValue(1)
           R_setInSequenceTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0].result.routes[0].waypoint_order))
           R_setShortestTripDirections(Cache_tripDirections[0])
           R_setOriginalTripDirections(Cache_tripDirections[1])
+          
       }
     }, [Cache_tripDirections])
 
