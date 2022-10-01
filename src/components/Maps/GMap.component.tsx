@@ -108,8 +108,8 @@ const GMap: React.FC = () => {
                         onChange={(_e, v) => {handleRouteToDisplay(v, true)}}
                         aria-label="Address Type"
                         >
-                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Fastest}>Fastest Route</ToggleButton>
                         <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Original}>Original Route</ToggleButton>
+                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Fastest}>Fastest Route</ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
             </Stack>

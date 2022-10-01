@@ -24,24 +24,24 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
 
     //Creator Functions //////////////////////////////////////////////////////
 
-    function CreateTableBody(jobBody: IRow[]) : JSX.Element[][]
-    {
-      console.log()
-      const cellTable: JSX.Element[][] = [];
-      if(jobBody.length > 0)
-      {
-        for(let i = 0; i< jobBody.length; i++) //loop through rows
-        {
-          const row = jobBody[i];
-          cellTable.push(...createCellTypeElementsFromRow(row, R_jobColumnDesignations, updateBodyCell, R_columnVisibility)) //create jsx elemets for each row's cells as an array         
-        }
-        return cellTable
-      }
-      else
-      {
-        return []
-      }
-    }
+    // function CreateTableBody(jobBody: IRow[]) : JSX.Element[][]
+    // {
+    //   console.log()
+    //   const cellTable: JSX.Element[][] = [];
+    //   if(jobBody.length > 0)
+    //   {
+    //     for(let i = 0; i< jobBody.length; i++) //loop through rows
+    //     {
+    //       const row = jobBody[i];
+    //       cellTable.push(...createCellTypeElementsFromRow(row, i, R_jobColumnDesignations, updateBodyCell, R_columnVisibility)) //create jsx elemets for each row's cells as an array         
+    //     }
+    //     return cellTable
+    //   }
+    //   else
+    //   {
+    //     return []
+    //   }
+    // }
 
     /////////////////////////////////////////////////////////////////
 
@@ -94,22 +94,18 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
           {R_jobBody.length > 0 && (
             <div>      
               <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
-                {createColumnDecorators(R_jobHeadings, R_columnVisibility, handleColumnDesignation).map((elem, idx) => {
-                  return <React.Fragment key={`column-decorator-${idx}`}>{elem}</React.Fragment>
-                })}
+                {createColumnDecorators(R_jobHeadings, R_columnVisibility, handleColumnDesignation)}
               </Grid>
               <Grid container spacing={0.3}>
-                {CreateTableHeadingElements(R_jobHeadings, updateBodyCell, R_columnVisibility).map((elem, idx) => {
-                    return <React.Fragment key={`heading-${idx}`}>{elem}</React.Fragment>
-                    })}
+                {CreateTableHeadingElements(R_jobHeadings, updateBodyCell, R_columnVisibility)}
               </Grid>
               <div style={{padding: "5px"}}>
                 <Divider/>
               </div>
                 
               <Grid container spacing={0.3} justifyContent="flex-end">
-                {CreateTableBody(R_jobBody).map((elem, idx) => {
-                    return <React.Fragment key={`body-${idx}`}>{elem}</React.Fragment>
+                {R_jobBody.map((row, index) => {
+                    return createCellTypeElementsFromRow(row, index, R_jobColumnDesignations, updateBodyCell, R_columnVisibility)
                 })} 
               </Grid>
 
@@ -120,7 +116,10 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
                       <RowAdder/>
                     </Box>
                     <Box >
-                      <Button sx={{marginTop: "1em"}} variant="outlined">Append Selection</Button>
+                      <Button sx={{marginTop: "1em"}} variant="outlined" disabled>Append Selection</Button>
+                    </Box>
+                    <Box >
+                      <Button sx={{marginTop: "1em"}} variant="outlined" disabled>Reset Spreadsheet</Button>
                     </Box>
                   </Stack>
                   
@@ -129,11 +128,7 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
                   <Button sx={{marginTop: "1em", width: "100%"}} onClick={() => calcRoute()} variant="outlined">Find Route</Button>
                 </Box>
               </Stack>
-
-              
-
-              
-              </div>
+            </div>
           )}
 
           {R_jobBody.length === 0 && (

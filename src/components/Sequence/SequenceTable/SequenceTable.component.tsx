@@ -156,6 +156,7 @@ const SequenceTable: React.FC = () => {
                             color="primary"
                             value={addressType}
                             exclusive
+                            disabled
                             onChange={(_e, v) => {setAddressType(v)}}
                             aria-label="Address Type"
                             >
@@ -190,10 +191,16 @@ const SequenceTable: React.FC = () => {
           
         </DragDropContext>
 
-        <div style={{marginTop: "1em"}}>
-                        <Button onClick={() => {writeBackToSpreadsheet(R_inSequenceTripRows, R_addressColumnIndex)}}>Write back</Button>
-                        <Button>Reset Spreadsheet</Button>
-                    </div>
+        <Stack direction={"row"} spacing={1}>
+          <Box>
+            <Button variant='outlined' onClick={() => {writeBackToSpreadsheet(R_inSequenceTripRows, R_addressColumnIndex)}}>Write back</Button>
+          </Box>
+          <Box>
+            <Button variant='outlined' disabled>Reset Spreadsheet</Button>
+          </Box>              
+        </Stack>
+                        
+                    
           
       </React.Fragment>
     );

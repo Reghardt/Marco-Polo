@@ -41,6 +41,7 @@ export class SelectedCells
                 let cell = row.cells[j];
                 let cellAndRange: ICellAndRange = {cell: cell, range: worksheet.getCell(cell.y - 1, cell.x - 1)}; //store cell and range object together to keep track of the realtionship
                 cellAndRange.range.load("values") //tells the range object we want to load values
+                cellAndRange.range.load("formulas") //tells the range object we want to load values
                 this.cellAndRange.push(cellAndRange) //cellAndRange object is pushed to array to later be used (after sync) to extract the value from the range and assign it to the cell
             }
         }
@@ -55,6 +56,19 @@ export class SelectedCells
             this.cellAndRange[i].cell.data = this.cellAndRange[i].range.values[0][0] as string;
             this.cellAndRange[i].cell.origionalData = this.cellAndRange[i].range.values[0][0] as string;
             this.cellAndRange[i].cell.geocodedAddressRes = null; //initialize geocodedAddressRes as null. Only cells designated as an address will be not null
+
+            if(this.cellAndRange[i].range.values[0][0] !== this.cellAndRange[i].range.formulas[0][0])
+            {
+                //console.log("is formula")
+                this.cellAndRange[i].cell.isFormula = true
+            }
+            else
+            {
+                //console.log("is not formula")
+            }
+
+            // console.log(JSON.stringify(this.cellAndRange[i].range.values[0][0]), JSON.stringify(this.cellAndRange[i].range.formulas[0][0]))
+
         }
     }
 }

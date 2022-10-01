@@ -97,9 +97,13 @@ export function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): v
 {
     for(let j = 0; j < row.cells.length; j++)
     {
-        let range = sheet.getCell(row.cells[j].y - 1, row.cells[j].x - 1)
-        range.values = [[row.cells[j].data]]
-        range.format.autofitColumns();
+        let cell = row.cells[j]
+        if(!cell.isFormula) //if cell is not formula
+        {
+            let range = sheet.getCell(cell.y - 1, cell.x - 1)
+            range.values = [[cell.data]]
+            range.format.autofitColumns();
+        }
     }
 
     for(let i = 0; i < row.children.length; i++)

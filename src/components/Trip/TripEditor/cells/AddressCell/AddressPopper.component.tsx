@@ -1,7 +1,11 @@
 import { Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material"
 import React, { useEffect, useState } from "react"
+import { useRecoilState } from "recoil";
 import { ICell } from "../../../../../services/worksheet/cell.interface";
+import { IRow } from "../../../../../services/worksheet/row.interface";
+import { RSTripRows } from "../../../../../state/globalstate";
 import { geocodeAddress } from "../../../Trip.service";
+import { deleteRow } from "../../TripEditor.service";
 
 
 interface IAddressCellPopperProps{
@@ -24,7 +28,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
 
     const [textboxContent, setTextboxContent] = useState(currentAddress)
     
-    
+    const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
     const [errorMessage, setErrorMessage] = useState("")
 
     function captureInput(input: string)
@@ -86,6 +90,13 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
         
     }
 
+    function handleDeleteRow(rowYCoord: number, rows: IRow[])
+    {
+        
+        R_setTripRows(deleteRow(rowYCoord, rows))
+        closePopper()
+    }
+
     //TODO delete button to remove address. View on map option to preview location
     return(
         <Paper variant="elevation" elevation={20}>
@@ -123,8 +134,9 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
             </DialogContent>
 
             <DialogActions>
-                <Button onClick={() => handleSaveAndClose()}>Save</Button>
-                <Button onClick={() => closePopper()}>Cancel</Button>
+                <Button variant="outlined" onClick={() => handleSaveAndClose()}>Save</Button>
+                <Button variant="outlined" onClick={() => closePopper()}>Cancel</Button>
+                <Button variant="outlined" onClick={() => handleDeleteRow(cellRef.y, R_tripRows)}>Delete Row</Button>
             </DialogActions>
         </Paper>
     )

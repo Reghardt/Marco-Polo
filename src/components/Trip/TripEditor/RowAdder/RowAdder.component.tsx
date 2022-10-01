@@ -31,12 +31,12 @@ const RowAdder: React.FC =() => {
             if(addressColumn === i)
             {
                 //TODO create a cell creator function so there is one truth
-                let newCell: ICell ={x: i, y: highestRow + 1, data: "Address Placeholder", origionalData: "Address Placeholder", geocodedAddressRes: null, geocodedResults: [], selectedGeocodedAddressIndex: -1}
+                let newCell: ICell ={x: i, y: highestRow + 1, data: "Address Placeholder", origionalData: "Address Placeholder", geocodedAddressRes: null, geocodedResults: [], selectedGeocodedAddressIndex: -1, isFormula: false}
                 newRow.cells.push(newCell)
             }
             else
             {
-                let newCell: ICell ={x: i, y: highestRow + 1, data: "", origionalData: "", geocodedAddressRes: null, geocodedResults: [], selectedGeocodedAddressIndex: -1}
+                let newCell: ICell ={x: i, y: highestRow + 1, data: "", origionalData: "", geocodedAddressRes: null, geocodedResults: [], selectedGeocodedAddressIndex: -1, isFormula: false}
                 newRow.cells.push(newCell)
             }
         }
