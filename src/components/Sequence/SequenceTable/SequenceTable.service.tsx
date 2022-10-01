@@ -112,6 +112,25 @@ export function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): v
     }
 }
 
+export function preSyncRowDataForDeletion(row: IRow, sheet: Excel.Worksheet): void
+{
+    for(let j = 0; j < row.cells.length; j++)
+    {
+        let cell = row.cells[j]
+        if(!cell.isFormula) //if cell is not formula
+        {
+            let range = sheet.getCell(cell.y - 1, cell.x - 1)
+            range.values = [[""]]
+            //range.format.autofitColumns();
+        }
+    }
+
+    for(let i = 0; i < row.children.length; i++)
+    {
+        preSyncRowDataForDeletion(row.children[i], sheet)
+    }
+}
+
 function getTopRowYValue(rows: IRow[]): number
 {
     let topRowNr = rows[0].cells[0].y

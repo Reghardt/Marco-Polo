@@ -90,11 +90,12 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
         
     }
 
-    function handleDeleteRow(rowYCoord: number, rows: IRow[])
+    async function handleDeleteRow(rowYCoord: number, rows: IRow[])
     {
         
-        R_setTripRows(deleteRow(rowYCoord, rows))
+        
         closePopper()
+        R_setTripRows(await deleteRow(rowYCoord, rows))
     }
 
     //TODO delete button to remove address. View on map option to preview location

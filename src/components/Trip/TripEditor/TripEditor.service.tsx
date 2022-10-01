@@ -3,6 +3,7 @@ import React from "react";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { ICell } from "../../../services/worksheet/cell.interface";
 import { IRow } from "../../../services/worksheet/row.interface";
+import { preSyncRowDataForDeletion } from "../../Sequence/SequenceTable/SequenceTable.service";
 
 import AddressCell from "./cells/AddressCell/AddressCell.component";
 import ColumnDecorator from "./cells/ColumnDecorator.component";
@@ -162,7 +163,7 @@ function createChildRow(row: Readonly<IRow>, updateBodyCell: (cell: ICell) => vo
     return childRow
 }
 
-export function deleteRow(rowYCoord: number, rows: IRow[])
+export async function deleteRow(rowYCoord: number, rows: IRow[])
 {
     for(let i = 0; i < rows.length; i++)
     {
@@ -171,6 +172,18 @@ export function deleteRow(rowYCoord: number, rows: IRow[])
         {
             let newRows = Array.from(rows)
             let deletedRow = newRows.splice(i, 1)
+
+            Excel.run(async (context) => {
+                let sheet = context.workbook.worksheets.getActiveWorksheet()
+                for(let j = 0; j < deletedRow.length; j++)
+                {   
+                    preSyncRowDataForDeletion(deletedRow[j], sheet)
+                }
+                    
+                
+                await context.sync()
+            })
+
             return newRows
         }
     }
