@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { IRow } from "../../../services/worksheet/row.interface";
-import { RSColumnVisibility, RSTripRows, RSJobFirstRowIsHeading, RSJobHeadings, RSTripTabValue } from "../../../state/globalstate";
+import { RSColumnVisibility, RSTripRows, RSJobFirstRowIsHeading, RSJobHeadings, RSTripTabValue, RSInSequenceTripRows } from "../../../state/globalstate";
 
 import RouteSequence from "../../Sequence/RouteSequence.component";
 import RouteEditor from "../TripEditor/TripEditor";
@@ -24,7 +24,9 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
 
     const [R_tripTabValue, R_setTripTabValue] = useRecoilState(RSTripTabValue);
 
-    const [R_jobBody, R_setJobBody] = useRecoilState(RSTripRows)
+    const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
+
+    const R_inSequenceTripRows = useRecoilValue(RSInSequenceTripRows)
 
     const R_jobHeadings = useRecoilValue(RSJobHeadings)
 
@@ -56,8 +58,8 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
             {/* TODO Add route statistics tab */}
             <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Trip Solver</Typography>
             <Tabs value={R_tripTabValue} onChange={(_e, v) => (R_setTripTabValue(v))}>
-            <Tab label="Edit" {...tabProps(0)}/>
-            <Tab label="Sequence/Writeback" {...tabProps(1)}/>
+            <Tab label="Edit Mode" {...tabProps(0)}/>
+            <Tab label="Sequence Mode" {...tabProps(1)}/>
             <Tab label="Trip Statistics" {...tabProps(2)}/>
             </Tabs>
 
@@ -66,7 +68,7 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
             <TabPanel value={R_tripTabValue} index={0}>
                 <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
 
-                {R_jobBody.length > 0 && (
+                {R_tripRows.length > 0 && (
                     <div>
                         <Stack spacing={0} sx={{marginBottom:"1em"}}>
                             <Box>
@@ -85,7 +87,7 @@ const TripTabs: React.FC<ITripTabs> = ({retrieveUserSelectionFromSpreadsheetAndS
             </TabPanel>
 
             <TabPanel value={R_tripTabValue} index={1}>
-            {R_jobBody.length > 0 && (
+            {R_inSequenceTripRows.length > 0 && (
                     <div>
                         <Typography variant="body2">Show/Hide Columns:</Typography>
                         {createColumnVisibilityOptions(R_jobHeadings, R_columnVisibility)}

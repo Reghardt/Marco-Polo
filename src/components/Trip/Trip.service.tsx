@@ -99,3 +99,78 @@ export function createDirections(departureAddress: string, returnAddress: string
           });
         })  
       }
+
+
+      //this function checks if a number of rows are of equal length and if their columns align.
+export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status: boolean, reason: string}
+{
+  //
+  if(referenceRow === null) //reference row to test against, otherwise use the first row of the rows
+  {
+    referenceRow = rows[0]
+  }
+  
+  for(let i = 0; i < rows.length; i++)
+  {
+    let row = rows[i]
+    if(row.cells.length === referenceRow.cells.length) //are lengths equal
+    {
+      for(let j = 0; j < row.cells.length; j++)
+      {
+        if(row.cells[j].x !== referenceRow.cells[j].x) //do all x coord of this row allign with the referece row's x coords
+        {
+          return {status: false, reason: "Columns don't align"}
+        }
+      }
+    }
+    else
+    {
+      return {status: false, reason: "Rows not of equal length"}
+    }
+  }
+  return {status: true, reason: ""}
+}
+
+export function addAndUpdateRows(rows: IRow[], rowsToAdd: IRow[], addressColumnIndex: number)
+{
+  let conformRes = doRowsConform(rowsToAdd, rows[0])
+  if(conformRes.status === false)
+  {
+    console.error(conformRes.reason)
+    return rows
+  }
+  else
+  {
+    // let newRows = Array.from(rows)
+    let newRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
+    
+    let rowsToAddAccumilator: IRow[] = []
+    for(let i = 0; i < rowsToAdd.length; i++)
+    {
+      let addRow = rowsToAdd[i]
+      let matchFound = false
+      for(let j = 0; j < newRows.length; j++)
+      {
+        if(newRows[j].cells[0].y === addRow.cells[0].y)
+        {
+          console.log("match found")
+          //update row here
+          matchFound = true
+          break;
+        }
+      }
+
+      if(matchFound === false)
+      {
+        rowsToAddAccumilator.push(addRow)
+      }
+    }
+
+    newRows = [...newRows, ...rowsToAddAccumilator]
+    console.log(newRows)
+    
+    return makeRowParentChildRelations(newRows, addressColumnIndex)
+  }
+
+  
+}

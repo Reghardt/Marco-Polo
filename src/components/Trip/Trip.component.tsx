@@ -19,7 +19,7 @@ import { IRow } from "../../services/worksheet/row.interface";
 import StandardHeader from "../common/StandardHeader.component";
 import { createBasicHeadingCell, createBasicHeadingRow } from "../workspaces/workspace.service";
 
-import { createDirections, createInSequenceJobRows, makeRowParentChildRelations, removeRowParentChildRelations } from "./Trip.service";
+import { createDirections, createInSequenceJobRows, makeRowParentChildRelations, removeRowParentChildRelations, doRowsConform } from "./Trip.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 import GMap from "../Maps/GMap.component";
@@ -31,7 +31,8 @@ import { EDisplayRoute } from "../Maps/GMap.service";
 const RouteBuilder: React.FC = () =>
 {
   //used as temporary storage as there are alot of set states needed and set states are not batched in an async func which is used to retreive data from excel
-  const [userSelectionRows, setUserSelectionRows] = useState<IRow[]>([])
+  const [Cache_rowsToImport, Cache_setRowsToImport] = useState<IRow[]>([])
+  
 
   const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
   const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
@@ -76,31 +77,30 @@ const RouteBuilder: React.FC = () =>
 
     //START: useEffects
     useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates
-      if(userSelectionRows.length > 0)
+      if(Cache_rowsToImport.length > 0)
       {
-        
-        const nrOfColumns = userSelectionRows[0].cells.length;
-
-        for(let i = 0; i < userSelectionRows.length; i++)
+        let conformRes = doRowsConform(Cache_rowsToImport)
+        if(conformRes.status === false)
         {
-          const row = userSelectionRows[i];
-          if(nrOfColumns !== row.cells.length)
-          {
-            console.error("Each row should have the same number of cells")
-            R_setJobColumnDesignations([])
-            R_setJobHeadings(null)
-            R_setJobFirstRowIsHeading(false)
-            R_setTripRows([])
-            R_setColumnVisibility([])
-            return;
-          }
+          console.error(conformRes.reason)
+
+          R_setJobColumnDesignations([])
+          R_setJobHeadings(null)
+          R_setJobFirstRowIsHeading(false)
+          R_setTripRows([])
+          R_setColumnVisibility([])
+
+          R_setShortestTripDirections(null)
+          R_setOriginalTripDirections(null)
+          R_setInSequenceTripRows([])
+          return;
         }
 
         //create data for headings nad column designations
         let tempHeadings: IRow = { cells: [], children: []}
         let tempColumnDesignations: number[] = []
         let colVisibility: boolean[] = []
-        for(let k = 0; k < userSelectionRows[0].cells.length; k++)
+        for(let k = 0; k < Cache_rowsToImport[0].cells.length; k++)
         {
           tempHeadings.cells.push(createBasicHeadingCell("C" + k, k ))
           tempColumnDesignations.push(0) 
@@ -111,14 +111,19 @@ const RouteBuilder: React.FC = () =>
         R_setJobColumnDesignations(tempColumnDesignations)
         R_setJobHeadings(tempHeadings)
         R_setJobFirstRowIsHeading(false)
-        R_setTripRows(userSelectionRows)
+        R_setTripRows(Cache_rowsToImport)
         R_setColumnVisibility(colVisibility)
 
+        R_setShortestTripDirections(null)
+        R_setOriginalTripDirections(null)
+        R_setInSequenceTripRows([])
+
       } 
-    }, [userSelectionRows]) //why does this throw a warning when the function is not in the dependency array?
+    }, [Cache_rowsToImport]) //why does this throw a warning when the function is not in the dependency array?
 
     
 
+    
     useEffect(() => {
       let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_tripRows))
       if(R_addresColumIndex === -1)
@@ -185,13 +190,13 @@ const RouteBuilder: React.FC = () =>
     {
       loadSelection().then((selection) => {
         console.log(selection)
-        setUserSelectionRows(selection)
-        R_setShortestTripDirections(null)
-        R_setOriginalTripDirections(null)
-        R_setInSequenceTripRows([])
+        Cache_setRowsToImport(selection)
+        
       })
      
     }
+
+
 
 
 
