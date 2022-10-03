@@ -123,6 +123,11 @@ export const RSTripTabValue = atom<number>({
     default: 0
 })
 
+export const RSErrorMessage = atom<string>({
+    key: "errorMessage",
+    default: ""
+})
+
 
 
 

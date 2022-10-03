@@ -133,14 +133,7 @@ export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status
 
 export function addAndUpdateRows(rows: IRow[], rowsToAdd: IRow[], addressColumnIndex: number)
 {
-  let conformRes = doRowsConform(rowsToAdd, rows[0])
-  if(conformRes.status === false)
-  {
-    console.error(conformRes.reason)
-    return rows
-  }
-  else
-  {
+  
     // let newRows = Array.from(rows)
     let newRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
     
@@ -170,7 +163,7 @@ export function addAndUpdateRows(rows: IRow[], rowsToAdd: IRow[], addressColumnI
     console.log(newRows)
     
     return makeRowParentChildRelations(newRows, addressColumnIndex)
-  }
+  
 
   
 }

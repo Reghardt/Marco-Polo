@@ -4,11 +4,11 @@ import { IRow } from "../../../services/worksheet/row.interface";
 import { ICell } from "../../../services/worksheet/cell.interface";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSColumnVisibility, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSAddresColumIndex } from "../../../state/globalstate";
+import { RSColumnVisibility, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSAddresColumIndex, RSErrorMessage } from "../../../state/globalstate";
 import { createCellTypeElementsFromRow, createColumnDecorators, CreateTableHeadingElements } from "./TripEditor.service";
 import RowAdder from "./RowAdder/RowAdder.component";
 import { loadSelection } from "../../../services/worksheet/worksheet.service";
-import { addAndUpdateRows } from "../Trip.service";
+import { addAndUpdateRows, doRowsConform } from "../Trip.service";
 
 interface RoutedataEditorProps{
     handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void;
@@ -27,9 +27,23 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
 
   const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
 
+  const [R_errorMessage, R_setErrorMessage] = useRecoilState(RSErrorMessage)
+
   useEffect(() => {
     console.log(Cache_rowsToAdd)
-    R_setTripRows(addAndUpdateRows(R_tripRows, Cache_rowsToAdd, R_addressColumIndex))
+
+    let conformRes = doRowsConform(Cache_rowsToAdd, R_tripRows[0])
+    if(conformRes.status === false)
+    {
+      console.error(conformRes.reason)
+      R_setErrorMessage("Error: " + conformRes.reason)
+    }
+    else
+    {
+      R_setTripRows(addAndUpdateRows(R_tripRows, Cache_rowsToAdd, R_addressColumIndex))
+      R_setErrorMessage("")
+    }
+    
   }, [Cache_rowsToAdd])
 
   function addRows()
@@ -127,6 +141,10 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
               </Box>
               <Box sx={{width: "100%"}}>
                 <Button sx={{marginTop: "1em", width: "100%"}} onClick={() => calcRoute()} variant="outlined">Find Route</Button>
+              </Box>
+              <Box>
+                <Typography variant="body1" sx={{color: "red"}}>{R_errorMessage}</Typography>
+                
               </Box>
             </Stack>
           </div>

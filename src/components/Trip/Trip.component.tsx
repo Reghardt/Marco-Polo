@@ -10,7 +10,7 @@ import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSRouteToDisplay, RSTripTabValue } from "../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSRouteToDisplay, RSTripTabValue, RSErrorMessage } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -72,6 +72,8 @@ const RouteBuilder: React.FC = () =>
   const [, R_setOriginalTripDirections] = useRecoilState(RSOriginalTripDirections)
 
   const [Cache_tripDirections, Cache_setTripDirections] = useState<ITripDirections[]>([])
+
+  const [R_errorMessage, R_setErrorMessage] = useRecoilState(RSErrorMessage)
 
     console.log("refresh")
 
@@ -152,6 +154,7 @@ const RouteBuilder: React.FC = () =>
           R_setInSequenceTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0].result.routes[0].waypoint_order))
           R_setShortestTripDirections(Cache_tripDirections[0])
           R_setOriginalTripDirections(Cache_tripDirections[1])
+          R_setErrorMessage("")
           
       }
     }, [Cache_tripDirections])
@@ -211,19 +214,36 @@ const RouteBuilder: React.FC = () =>
         {
           for(let i = 0; i < R_tripRows.length; i++)
           {
-            waypoints.push({location: R_tripRows[i].cells[R_addressColumIndex].data, stopover: true})
+            if(R_tripRows[i].cells[R_addressColumIndex].geocodedAddressRes !== null)
+            {
+              waypoints.push({location: R_tripRows[i].cells[R_addressColumIndex].geocodedAddressRes.formatted_address, stopover: true})
+            }
+            else
+            {
+              R_setErrorMessage("Error: Check if all addresses are solved")
+              return
+            }
+            
           }
+
+          //TODO check if there are enought tokens available
+          makeRouteOnDB(5)
+
+          Promise.all(
+            [createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, true), 
+              createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, false)
+            ]).then(res => {
+            Cache_setTripDirections(res)
+          })
         }
-
-        //TODO check if there are enought tokens available
-        makeRouteOnDB(5)
-
-        Promise.all(
-          [createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, true), 
-            createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, false)
-          ]).then(res => {
-          Cache_setTripDirections(res)
-        })
+        else
+        {
+          R_setErrorMessage("Error: No address column set")
+        }
+      }
+      else
+      {
+        R_setErrorMessage("Error: Check if Departure/Return are set")
       }
     }
 
