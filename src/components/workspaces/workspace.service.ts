@@ -20,7 +20,7 @@ export function updateLastUsedWorkspaceId(bearer: string, workspaceId: string)
 
 export function createBasicHeadingCell(name: string, x: number)
 {
-    let cell: ICell = {x: x, y: -1, data: name, origionalData: name, geocodedAddressRes: null, geocodedResults: null, selectedGeocodedAddressIndex: null, isFormula: false}
+    let cell: ICell = {x: x, y: -1, data: name, origionalData: name, geocodedAddressRes: null, geocodedResults: null, selectedGeocodedAddressIndex: null, formula: ""}
     return cell
 }
 

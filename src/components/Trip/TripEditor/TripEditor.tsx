@@ -6,7 +6,6 @@ import { EColumnDesignations } from "../../../services/ColumnDesignation.service
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSColumnVisibility, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSAddresColumIndex, RSErrorMessage } from "../../../state/globalstate";
 import { createCellTypeElementsFromRow, createColumnDecorators, CreateTableHeadingElements } from "./TripEditor.service";
-import RowAdder from "./RowAdder/RowAdder.component";
 import { loadSelection } from "../../../services/worksheet/worksheet.service";
 import { addAndUpdateRows, doRowsConform } from "../Trip.service";
 

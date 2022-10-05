@@ -7,5 +7,5 @@ export interface ICell
     geocodedAddressRes: google.maps.GeocoderResult; 
     geocodedResults: google.maps.GeocoderResult[];
     selectedGeocodedAddressIndex: number; // default -1
-    isFormula: boolean; // default false
+    formula: string; // default ""
 }

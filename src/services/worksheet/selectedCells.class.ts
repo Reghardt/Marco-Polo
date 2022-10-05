@@ -60,7 +60,7 @@ export class SelectedCells
             if(this.cellAndRange[i].range.values[0][0] !== this.cellAndRange[i].range.formulas[0][0])
             {
                 //console.log("is formula")
-                this.cellAndRange[i].cell.isFormula = true
+                this.cellAndRange[i].cell.formula = this.cellAndRange[i].range.formulas[0][0] as string
             }
             else
             {

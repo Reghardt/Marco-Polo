@@ -98,11 +98,18 @@ export function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): v
     for(let j = 0; j < row.cells.length; j++)
     {
         let cell = row.cells[j]
-        if(!cell.isFormula) //if cell is not formula
+        if(cell.formula !== "") //if cell is formula
         {
+            //write formula
+            let range = sheet.getCell(cell.y - 1, cell.x - 1)
+            range.formulas = [[cell.formula]]
+            //range.format.autofitColumns();
+        }
+        else //cell only has data
+        {
+            //write data
             let range = sheet.getCell(cell.y - 1, cell.x - 1)
             range.values = [[cell.data]]
-            range.format.autofitColumns();
         }
     }
 
@@ -116,13 +123,15 @@ export function preSyncRowDataForDeletion(row: IRow, sheet: Excel.Worksheet): vo
 {
     for(let j = 0; j < row.cells.length; j++)
     {
-        let cell = row.cells[j]
-        if(!cell.isFormula) //if cell is not formula
-        {
-            let range = sheet.getCell(cell.y - 1, cell.x - 1)
-            range.values = [[""]]
-            //range.format.autofitColumns();
-        }
+        let cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
+        // if(!cell.isFormula) //if cell is not formula
+        // {
+        //     let range = sheet.getCell(cell.y - 1, cell.x - 1)
+        //     range.values = [[""]]
+        //     //range.format.autofitColumns();
+        // }
+        let range = sheet.getCell(cell.y - 1, cell.x - 1)
+        range.values = [[""]]
     }
 
     for(let i = 0; i < row.children.length; i++)

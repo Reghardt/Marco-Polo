@@ -39,7 +39,7 @@ function generateCellsFromCoordinates(userSelection: string)
         {
             for(let k = range.start.y; k <= range.stop.y; k++)
             {
-                selectionData.insertCell({x: j, y: k, data: "", origionalData: "", geocodedAddressRes: null, geocodedResults: [], selectedGeocodedAddressIndex: -1, isFormula: false});
+                selectionData.insertCell({x: j, y: k, data: "", origionalData: "", geocodedAddressRes: null, geocodedResults: [], selectedGeocodedAddressIndex: -1, formula: ""});
             }
         }
     }
