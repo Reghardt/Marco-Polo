@@ -1,12 +1,15 @@
-import { Box, Divider, Grid } from "@mui/material"
+import { Box, Grid, Typography } from "@mui/material"
 import React from "react"
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service"
 import { ICell } from "../../../services/worksheet/cell.interface"
 import { IRow } from "../../../services/worksheet/row.interface"
+import { makeRowParentChildRelations, removeRowParentChildRelations } from "../../Trip/Trip.service"
 import AddressCell from "../../Trip/TripEditor/cells/AddressCell/AddressCell.component"
 import ColumnDecorator from "../../Trip/TripEditor/cells/ColumnDecorator.component"
 import DataCell from "../../Trip/TripEditor/cells/DataCell.component"
-import BodyEntry from "../SequenceTable/BodyEntry.component"
+import HeadingCell from "../../Trip/TripEditor/cells/HeadingCell.component"
+
+
 
 
 const labelSize = 0.5;
@@ -52,7 +55,7 @@ export function createColumnDecorators_master(jobHeadings: IRow, columnVisibilit
 
 }
 
-export function CreateTableHeadingElements_master(jobHeadings: IRow, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[])
+export function CreateTableHeadingElements_master(jobHeadings: IRow, columnVisibility: boolean[])
     {
       const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility)
       let headings =
@@ -65,9 +68,7 @@ export function CreateTableHeadingElements_master(jobHeadings: IRow, updateBodyC
             {
                 return(
                     <Grid item xs={elementSize}>
-                        <DataCell
-                        cellRef={cell}
-                        updateBodyCell={updateBodyCell}/>
+                        <HeadingCell colNumber={cell.x}/>
                     </Grid>
                 )
             }
@@ -80,100 +81,90 @@ export function CreateTableHeadingElements_master(jobHeadings: IRow, updateBodyC
       return headings
     }
 
-export function createEntryTypeElementsFromRow_master(row: Readonly<IRow>, nr: number, columnVisibility: boolean[], addressColumIndex: number, updateBodyCell: (cell: ICell) => void)
+export function createCellTypeElementsFromRow_master(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[]) : JSX.Element
 {
-    let nrOfVisibleColumns = 0;
-    for(let i = 0; i < columnVisibility.length; i++)
-    {
-        if(columnVisibility[i])
-        {
-            nrOfVisibleColumns++
-        }
-    }
-
-    const elementSize = 11 / nrOfVisibleColumns;
-    let childRows: JSX.Element
-
-    if(row.children.length > 0)
-    {
-        childRows = <React.Fragment>
-            {row.children.map((row) => {
-                return createChildRow(row, columnVisibility)
-            })}
-        </React.Fragment>
-    }
-    
+    const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
 
     let rowWithChildren = 
-        <React.Fragment>
-            <Grid container spacing={0.3}>
-                <Grid item xs={1}>
-                    <BodyEntry content={nr.toString()}/>
-                </Grid>
-                {row.cells.map((cell, index) => {
-                    if(columnVisibility[index] === true)
-                    {
-                        if(addressColumIndex === index)
-                        {
-                            return <AddressCell cellRef={cell} updateBodyCell={updateBodyCell}/>
-                        }
-                        else
-                        {
-                            return(
-                                <Grid item xs={elementSize}>
-                                    <BodyEntry content={cell.data}/>
-                                </Grid>
-                            )
-                        }
-                        
-                    }
-                    else
-                    {
-                        return <></>
-                    }
-                    
-                })}
-            </Grid>
-            {childRows}
-            <Divider/>
-        </React.Fragment>
-        
-    return rowWithChildren
-}
-
-function createChildRow(row: Readonly<IRow>, columnVisibility: boolean[])
-{
-    let nrOfVisibleColumns = 0;
-    for(let i = 0; i < columnVisibility.length; i++)
-    {
-        if(columnVisibility[i])
-        {
-            nrOfVisibleColumns++
-        }
-    }
-
-    const elementSize = 11 / nrOfVisibleColumns;
-
-    let childRow =
-        <Grid container spacing={0.3}>
-            <Grid item xs={1}>
-                <BodyEntry content={""}/>
+    <React.Fragment>
+        <Grid container spacing={"0.2em"} justifyContent="flex-end">
+            <Grid item xs={labelSize}>
+                <Box sx={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white"}} variant="body1">{nr + 1}</Typography></Box>
             </Grid>
             {row.cells.map((cell, index) => {
                 if(columnVisibility[index] === true)
                 {
-                    return <Grid item xs={elementSize}>
-                        <BodyEntry content={cell.data}/>
-                    </Grid>
+                    if(columnDesignations[index] === EColumnDesignations.Address)
+                    {
+                        return(
+                            <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
+                                <AddressCell
+                                    cellRef={cell}
+                                    updateBodyCell={updateBodyCell}
+                                />
+                            </Grid>
+                        )
+                    }
+                    else
+                    {
+                        return(
+                            <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
+                                <DataCell
+                                    cellRef={cell}
+                                    updateBodyCell={updateBodyCell}
+                                />
+                            </Grid>
+                        )
+                    }
                 }
                 else
                 {
                     return <></>
                 }
-                
             })}
-        </Grid>;
 
+            {row.children.map((row) => {
+                return createChildRow(row, updateBodyCell, columnVisibility)
+            })}
+        </Grid>
+        {/* <Divider sx={{margin: "0.2em"}}/> */}
+    </React.Fragment>
     
+        
+
+
+    return rowWithChildren;
+}
+
+function createChildRow(row: Readonly<IRow>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[])
+{
+    const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
+
+    let childRow =
+    <React.Fragment>
+        <Grid item xs={labelSize}>
+            <Box sx={{height: "100%", width: "100%"}}></Box>
+        </Grid>
+
+        {row.cells.map((cell, index) => {
+            if(columnVisibility[index] === true)
+            {
+                return(
+                    <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
+                        <DataCell
+                            cellRef={cell}
+                            updateBodyCell={updateBodyCell}
+                        />
+                    </Grid>
+                )
+            }
+            else
+            {
+                return <></>
+            }
+        })}
+    </React.Fragment>
+
     return childRow
 }
+

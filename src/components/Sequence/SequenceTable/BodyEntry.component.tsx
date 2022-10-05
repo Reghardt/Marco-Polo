@@ -12,8 +12,8 @@ const BodyEntry: React.FC<BodyEntryProps> = ({content}) => {
             {width: "100%", 
             height: "100%", 
             justifyContent: "flex-start",
-            paddingBottom: "0.2em",
-            paddingTop: "0.2em",
+            // paddingBottom: "0.2em",
+            // paddingTop: "0.2em",
             minHeight: "1.8em"
             }}
             >

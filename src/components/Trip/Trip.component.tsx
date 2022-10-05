@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
-import { Box, Divider, Paper } from "@mui/material";
+import { Box, Button, Divider, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import {ITripDirections } from "../../interfaces/simpleInterfaces";
@@ -10,7 +10,7 @@ import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSInSequenceTripRows, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSShortestTripDirections, RSOriginalTripDirections, RSPreserveViewport, RSRouteToDisplay, RSTripTabValue, RSErrorMessage } from "../../state/globalstate";
+import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -23,8 +23,7 @@ import { createDirections, createInSequenceJobRows, makeRowParentChildRelations,
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 import GMap from "../Maps/GMap.component";
-import TripTabs from "./TripTabs/TripTabs.component";
-import { EDisplayRoute } from "../Maps/GMap.service";
+
 import MasterSequence from "../Sequence/MasterSequence/MasterSequence.component";
 
 
@@ -36,11 +35,8 @@ const RouteBuilder: React.FC = () =>
   
 
   const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
-  const [R_jobHeadings, R_setJobHeadings] = useRecoilState(RSJobHeadings)
-  const [R_jobFirstRowIsHeading, R_setJobFirstRowIsHeading] = useRecoilState(RSJobFirstRowIsHeading)
 
   const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
-  const [R_inSequenceTripRows, R_setInSequenceTripRows] = useRecoilState(RSInSequenceTripRows)
 
   const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
 
@@ -48,10 +44,6 @@ const RouteBuilder: React.FC = () =>
   
   const [,R_setPreserveViewport] = useRecoilState(RSPreserveViewport)
   
-
-  const [R_routeToDisplay, R_setRouteToDisplay] = useRecoilState(RSRouteToDisplay)
-
-  const [R_tripTabValue, R_setTripTabValue] = useRecoilState(RSTripTabValue);
 
   const R_departureAddress = useRecoilValue(RSDepartureAddress);
   const R_returnAddress = useRecoilValue(RSReturnAddress);
@@ -69,8 +61,8 @@ const RouteBuilder: React.FC = () =>
 
   const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
 
-  const [, R_setShortestTripDirections] = useRecoilState(RSShortestTripDirections)
-  const [, R_setOriginalTripDirections] = useRecoilState(RSOriginalTripDirections)
+  const [, R_setTripDirections] = useRecoilState(RSTripDirections)
+
 
   const [Cache_tripDirections, Cache_setTripDirections] = useState<ITripDirections[]>([])
 
@@ -88,14 +80,10 @@ const RouteBuilder: React.FC = () =>
           console.error(conformRes.reason)
 
           R_setJobColumnDesignations([])
-          R_setJobHeadings(null)
-          R_setJobFirstRowIsHeading(false)
           R_setTripRows([])
           R_setColumnVisibility([])
 
-          R_setShortestTripDirections(null)
-          R_setOriginalTripDirections(null)
-          R_setInSequenceTripRows([])
+          R_setTripDirections(null)
           return;
         }
 
@@ -112,14 +100,10 @@ const RouteBuilder: React.FC = () =>
 
 
         R_setJobColumnDesignations(tempColumnDesignations)
-        R_setJobHeadings(tempHeadings)
-        R_setJobFirstRowIsHeading(false)
         R_setTripRows(Cache_rowsToImport)
         R_setColumnVisibility(colVisibility)
 
-        R_setShortestTripDirections(null)
-        R_setOriginalTripDirections(null)
-        R_setInSequenceTripRows([])
+        R_setTripDirections(null)
 
       } 
     }, [Cache_rowsToImport]) //why does this throw a warning when the function is not in the dependency array?
@@ -150,43 +134,14 @@ const RouteBuilder: React.FC = () =>
           
           //This line reorders the rows according to what the fastest sequence is
           R_setPreserveViewport(false)
-          R_setRouteToDisplay(EDisplayRoute.Fastest)
-          R_setTripTabValue(1)
-          R_setInSequenceTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0].result.routes[0].waypoint_order))
-          R_setShortestTripDirections(Cache_tripDirections[0])
-          R_setOriginalTripDirections(Cache_tripDirections[1])
+          R_setTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0].result.routes[0].waypoint_order))
+          R_setTripDirections(Cache_tripDirections[0])
           R_setErrorMessage("")
           
       }
     }, [Cache_tripDirections])
 
     //END useEffects
-
-    function putFirstRowAsHeading(isHeading: boolean)
-    {      
-      let tempJobBody: IRow[] =  JSON.parse(JSON.stringify(R_tripRows))
-      if(isHeading)
-      {
-        let bodyRowToColumnRow = tempJobBody.shift()
-        R_setJobHeadings(bodyRowToColumnRow)
-        R_setJobFirstRowIsHeading(true)
-        R_setTripRows(tempJobBody)
-
-        R_setShortestTripDirections(null)
-        R_setOriginalTripDirections(null)
-      }
-      else
-      {
-        tempJobBody.unshift(R_jobHeadings)
-        R_setJobHeadings(createBasicHeadingRow(R_jobHeadings.cells.length))
-        R_setJobFirstRowIsHeading(false)
-        R_setTripRows(tempJobBody)
-
-        R_setShortestTripDirections(null)
-        R_setOriginalTripDirections(null)
-
-      }
-    }
     
 
     //TODO move setStates outside of func, async func setState not batched
@@ -302,14 +257,16 @@ const RouteBuilder: React.FC = () =>
               
               <Divider sx={{marginTop: "0.5em", marginBottom: "0.5em"}}/>
 
-              <MasterSequence handleColumnDesignation={handleColumnDesignation}/>
+              <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
 
-              <TripTabs 
+              <MasterSequence handleColumnDesignation={handleColumnDesignation} calcRoute={calcFastestAndOriginalRoute}/>
+
+              {/* <TripTabs 
                 retrieveUserSelectionFromSpreadsheetAndSet={retrieveUserSelectionFromSpreadsheetAndSet} 
                 handleColumnDesignation={handleColumnDesignation}
                 calcRoute={calcFastestAndOriginalRoute}
                 putFirstRowAsHeading={putFirstRowAsHeading}
-              />
+              /> */}
             </Box>
           </Paper>
           <GMap/>

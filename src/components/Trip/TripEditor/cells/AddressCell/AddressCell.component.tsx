@@ -111,7 +111,8 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
 
     return(
         <React.Fragment>
-        <Button sx={{background: getStateColor(solveState), ":hover": {backgroundColor: getStateColor(solveState, true)}}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> closePopper()}>{cellRef.data}</Button>
+        <Button sx={{background: getStateColor(solveState), ":hover": {backgroundColor: getStateColor(solveState, true)}, width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} variant={"contained"} 
+          ref={buttonRef} onClick={()=> closePopper()}>{cellRef.data}</Button>
         
         {show && (
         <ClickAwayListener onClickAway={()=> closePopper()}>

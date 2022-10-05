@@ -2,12 +2,6 @@ import React from "react";
 import { IRow } from "../../services/worksheet/row.interface";
 import CustomMarker from "../experiments/CustomOverlay/CustomMarker.component";
 
-export enum EDisplayRoute{
-    Fastest,
-    Original
-  }
-
-
 export function createMapMarkers(rows: IRow[], currentMapMarkers: google.maps.Marker[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>)
 {
     let newMarkers: google.maps.Marker[] = [];
@@ -42,28 +36,18 @@ export function createMapMarkers(rows: IRow[], currentMapMarkers: google.maps.Ma
 
 
 
-export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>, routeToDisplay: EDisplayRoute, departureAddress: google.maps.GeocoderResult, returnAddress: google.maps.GeocoderResult): JSX.Element[]
+export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>, departureAddress: google.maps.GeocoderResult, returnAddress: google.maps.GeocoderResult): JSX.Element[]
 {
 
     let newMarkers: JSX.Element[] = []
 
-    
-
     if(addressColumnIndex > -1)
     {
-
         for(let i = 0; i < rows.length; i++)
         {
             let row: IRow = rows[i]
-            let label = ""
-            if(routeToDisplay === EDisplayRoute.Fastest)
-            {
-                label = (i + 1).toString()
-            }
-            else
-            {
-                label = String.fromCharCode(i + 'A'.charCodeAt(0))
-            }
+            let label = (i + 1).toString()
+
 
             if(row.cells[addressColumnIndex].geocodedAddressRes !== null)
             {

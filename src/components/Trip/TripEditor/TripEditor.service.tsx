@@ -3,7 +3,7 @@ import React from "react";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { ICell } from "../../../services/worksheet/cell.interface";
 import { IRow } from "../../../services/worksheet/row.interface";
-import { preSyncRowDataForDeletion } from "../../Sequence/SequenceTable/SequenceTable.service";
+import { preSyncRowDataForDeletion } from "../Trip.service";
 
 import AddressCell from "./cells/AddressCell/AddressCell.component";
 import ColumnDecorator from "./cells/ColumnDecorator.component";

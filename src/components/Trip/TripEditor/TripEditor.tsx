@@ -4,7 +4,7 @@ import { IRow } from "../../../services/worksheet/row.interface";
 import { ICell } from "../../../services/worksheet/cell.interface";
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSColumnVisibility, RSTripRows, RSJobColumnDesignations, RSJobFirstRowIsHeading, RSJobHeadings, RSAddresColumIndex, RSErrorMessage } from "../../../state/globalstate";
+import { RSColumnVisibility, RSTripRows, RSJobColumnDesignations, RSAddresColumIndex, RSErrorMessage } from "../../../state/globalstate";
 import { createCellTypeElementsFromRow, createColumnDecorators, CreateTableHeadingElements } from "./TripEditor.service";
 import { loadSelection } from "../../../services/worksheet/worksheet.service";
 import { addAndUpdateRows, doRowsConform } from "../Trip.service";
@@ -19,7 +19,6 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
   const [Cache_rowsToAdd, Cache_setRowsToAdd] = useState<IRow[]>([])
 
   const R_jobColumnDesignations = useRecoilValue(RSJobColumnDesignations)
-  const R_jobHeadings = useRecoilValue(RSJobHeadings)
   const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
   
   const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
@@ -108,10 +107,10 @@ const RouteEditor: React.FC<RoutedataEditorProps> = ({handleColumnDesignation, c
         {R_tripRows.length > 0 && (
           <div>      
             <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
-              {createColumnDecorators(R_jobHeadings, R_columnVisibility, handleColumnDesignation)}
+              {createColumnDecorators(R_tripRows[0], R_columnVisibility, handleColumnDesignation)}
             </Grid>
             <Grid container spacing={0.3}>
-              {CreateTableHeadingElements(R_jobHeadings, updateBodyCell, R_columnVisibility)}
+              {CreateTableHeadingElements(R_tripRows[0], updateBodyCell, R_columnVisibility)}
             </Grid>
             <div style={{padding: "5px"}}>
               <Divider/>

@@ -64,7 +64,8 @@ const DataCell: React.FC<DataCellProps> = ({cellRef, updateBodyCell}) =>
 
     return(
             <React.Fragment>
-                <Button variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start", minHeight: "2.4em"}} ref={buttonRef}>{cellRef.data}</Button>
+                <Button disableRipple variant={"contained"} 
+                  sx={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start", minHeight: "2.4em", pointerEvents: "none"}} ref={buttonRef}>{cellRef.data}</Button>
                 
                 {show && (
                 <ClickAwayListener onClickAway={()=> setShow(!show)}>
