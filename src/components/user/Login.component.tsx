@@ -100,13 +100,13 @@ export default function Login()
                     </div>
                     
                   </div>
-                  <NavLink to={'/exp'}>Experiment</NavLink>
+                  {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
                   
                   
                 </Paper>
               </Box>
               <Box sx={{marginTop: "1em"}}>
-                <Typography variant="body1" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Experimental - Beta 0.9.1</Typography>
+                <Typography variant="body1" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Experimental - Beta 0.9.2</Typography>
               </Box>
             </Stack>
             

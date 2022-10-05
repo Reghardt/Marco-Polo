@@ -104,15 +104,15 @@ const SequenceTable: React.FC = () => {
 
   function onDragEnd(result: DropResult)
   {
-      if(!result.destination)
-      {
-          return;
-      }
-
-      const newRows = reorder(R_inSequenceTripRows, result.source.index, result.destination.index)
-      recalculateRoute(R_departureAddress.formatted_address, R_returnAddress.formatted_address, newRows, R_addressColumnIndex)
-      R_setInSequenceTripRows(newRows)
+    if(!result.destination)
+    {
+        return;
     }
+
+    const newRows = reorder(R_inSequenceTripRows, result.source.index, result.destination.index)
+    recalculateRoute(R_departureAddress.formatted_address, R_returnAddress.formatted_address, newRows, R_addressColumnIndex)
+    R_setInSequenceTripRows(newRows)
+  }
 
     async function recalculateRoute(departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number)
     {
@@ -180,7 +180,6 @@ const SequenceTable: React.FC = () => {
         <DragDropContext onDragEnd={onDragEnd}>
           <Dropper droppableId="droppable">
             {R_inSequenceTripRows.map((row, idx) => {
-
               return (
                 <Dragger key={row.cells[0].y} draggableId={row.cells[0].y.toString()} index={idx}>
                   

@@ -25,6 +25,7 @@ import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 import GMap from "../Maps/GMap.component";
 import TripTabs from "./TripTabs/TripTabs.component";
 import { EDisplayRoute } from "../Maps/GMap.service";
+import MasterSequence from "../Sequence/MasterSequence/MasterSequence.component";
 
 
 
@@ -300,6 +301,8 @@ const RouteBuilder: React.FC = () =>
               <DepartureReturn/>
               
               <Divider sx={{marginTop: "0.5em", marginBottom: "0.5em"}}/>
+
+              <MasterSequence handleColumnDesignation={handleColumnDesignation}/>
 
               <TripTabs 
                 retrieveUserSelectionFromSpreadsheetAndSet={retrieveUserSelectionFromSpreadsheetAndSet} 
