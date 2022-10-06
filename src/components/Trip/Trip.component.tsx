@@ -10,7 +10,7 @@ import axios from "axios";
 import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage } from "../../state/globalstate";
+import { RSAddresColumnIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -38,7 +38,7 @@ const RouteBuilder: React.FC = () =>
 
   const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
 
-  const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
+  const R_addresColumIndex = useRecoilValue(RSAddresColumnIndex)
 
   const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
   
@@ -55,7 +55,7 @@ const RouteBuilder: React.FC = () =>
 
   //const [waypointOrder, setWaypointOrder] = useState<number[]>([])
 
-  const R_addressColumIndex = useRecoilValue(RSAddresColumIndex)
+  const R_addressColumIndex = useRecoilValue(RSAddresColumnIndex)
 
   const R_bearer = useRecoilValue(RSBearerToken)
 
@@ -257,7 +257,7 @@ const RouteBuilder: React.FC = () =>
               
               <Divider sx={{marginTop: "0.5em", marginBottom: "0.5em"}}/>
 
-              <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import Selection</Button>
+              <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import New Selection</Button>
 
               <MasterSequence handleColumnDesignation={handleColumnDesignation} calcRoute={calcFastestAndOriginalRoute}/>
 

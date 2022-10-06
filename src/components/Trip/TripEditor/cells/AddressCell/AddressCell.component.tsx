@@ -3,6 +3,7 @@ import { stat } from "fs";
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import { ICell } from "../../../../../services/worksheet/cell.interface";
+import { IRow } from "../../../../../services/worksheet/row.interface";
 import PopperContainer from "../../../../common/PopperContainer.styled";
 import AddressPopper from "./AddressPopper.component";
 
@@ -15,9 +16,10 @@ enum ESolveState{
 type AddressCellProps = {
     cellRef: ICell;
     updateBodyCell: (cell: ICell) => void;
+    recalculateRoute(departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number): Promise<void>
   }
 
-const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
+const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell, recalculateRoute}) =>
 {
   const buttonRef = useRef(null);
   const popperRef = useRef(null);
@@ -127,6 +129,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
                     closePopper={closePopper} 
                     saveAndClose={saveAndClose} 
                     cellRef={cellRef}
+                    recalculateRoute={recalculateRoute}
                     />
             </PopperContainer>
         </ClickAwayListener>)}

@@ -1,7 +1,7 @@
 import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import React, { useEffect, useRef, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumIndex, RSTripRows, RSTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress } from "../../state/globalstate";
+import { RSAddresColumnIndex, RSTripRows, RSTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress } from "../../state/globalstate";
 import { createCustomMapMarkers } from "./GMap.service"
 import GMapLegends from "./GMapLegends.component";
 
@@ -17,7 +17,7 @@ const GMap: React.FC = () => {
 
     const R_tripRows = useRecoilValue(RSTripRows)
 
-    const R_addresColumIndex = useRecoilValue(RSAddresColumIndex)
+    const R_addresColumIndex = useRecoilValue(RSAddresColumnIndex)
     const [markers, setMarkers] = useState<JSX.Element[]>([])
 
     const R_preserveViewport = useRecoilValue(RSPreserveViewport)

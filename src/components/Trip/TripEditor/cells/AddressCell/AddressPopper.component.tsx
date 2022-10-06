@@ -1,9 +1,9 @@
 import { Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material"
 import React, { useEffect, useState } from "react"
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { ICell } from "../../../../../services/worksheet/cell.interface";
 import { IRow } from "../../../../../services/worksheet/row.interface";
-import { RSTripRows } from "../../../../../state/globalstate";
+import { RSAddresColumnIndex, RSDepartureAddress, RSReturnAddress, RSTripRows, } from "../../../../../state/globalstate";
 import { geocodeAddress } from "../../../Trip.service";
 import { deleteRow } from "../../TripEditor.service";
 
@@ -13,6 +13,7 @@ interface IAddressCellPopperProps{
     closePopper : () => void;
     saveAndClose: (cell: ICell) => void;
     cellRef: ICell;
+    recalculateRoute(departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number): Promise<void>
 }
 
 const AddressPopper: React.FC<IAddressCellPopperProps> = (
@@ -21,6 +22,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
         closePopper, 
         saveAndClose, 
         cellRef,
+        recalculateRoute
     }) => {
 
     const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>([]);
@@ -30,6 +32,10 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     
     const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
     const [errorMessage, setErrorMessage] = useState("")
+
+    const R_departureAddress = useRecoilValue(RSDepartureAddress);
+    const R_returnAddress = useRecoilValue(RSReturnAddress);
+    const R_addressColumnIndex = useRecoilValue(RSAddresColumnIndex)
 
     function captureInput(input: string)
     {
@@ -92,10 +98,13 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
 
     async function handleDeleteRow(rowYCoord: number, rows: IRow[])
     {
-        
-        
         closePopper()
-        R_setTripRows(await deleteRow(rowYCoord, rows))
+        let postDeletionRows = await deleteRow(rowYCoord, rows)
+        if(R_departureAddress && R_returnAddress)
+        {
+            recalculateRoute(R_departureAddress.formatted_address, R_returnAddress.formatted_address, postDeletionRows, R_addressColumnIndex)
+        }
+        R_setTripRows(postDeletionRows)
     }
 
     //TODO delete button to remove address. View on map option to preview location

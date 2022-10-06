@@ -81,7 +81,7 @@ export function CreateTableHeadingElements_master(jobHeadings: IRow, columnVisib
       return headings
     }
 
-export function createCellTypeElementsFromRow_master(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[]) : JSX.Element
+export function createCellTypeElementsFromRow_master(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[], recalculateRoute: (departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number)=> Promise<void>) : JSX.Element
 {
     const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
 
@@ -101,6 +101,7 @@ export function createCellTypeElementsFromRow_master(row: Readonly<IRow>, nr: nu
                                 <AddressCell
                                     cellRef={cell}
                                     updateBodyCell={updateBodyCell}
+                                    recalculateRoute={recalculateRoute}
                                 />
                             </Grid>
                         )

@@ -84,22 +84,21 @@ export function createInSequenceJobRows(rows: Readonly<IRow[]>, waypointOrder: n
 
 export function createDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
 
-        var request: google.maps.DirectionsRequest = {
-          origin: departureAddress,
-          destination: returnAddress,
-          waypoints: waypoints,
-          travelMode: google.maps.TravelMode.DRIVING,
-          optimizeWaypoints: shouldOptimize,
-        };
-  
-        return new Promise<ITripDirections>((resolve) => {
-          let directionsService = new google.maps.DirectionsService();
-          directionsService.route(request, (result, status) => {
-              resolve({result, status})
-          });
-        })  
-      }
+  var request: google.maps.DirectionsRequest = {
+    origin: departureAddress,
+    destination: returnAddress,
+    waypoints: waypoints,
+    travelMode: google.maps.TravelMode.DRIVING,
+    optimizeWaypoints: shouldOptimize,
+  };
 
+  return new Promise<ITripDirections>((resolve) => {
+    let directionsService = new google.maps.DirectionsService();
+    directionsService.route(request, (result, status) => {
+        resolve({result, status})
+    });
+  })  
+}
 
       //this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status: boolean, reason: string}
@@ -196,12 +195,6 @@ export function preSyncRowDataForDeletion(row: IRow, sheet: Excel.Worksheet): vo
     for(let j = 0; j < row.cells.length; j++)
     {
         let cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
-        // if(!cell.isFormula) //if cell is not formula
-        // {
-        //     let range = sheet.getCell(cell.y - 1, cell.x - 1)
-        //     range.values = [[""]]
-        //     //range.format.autofitColumns();
-        // }
         let range = sheet.getCell(cell.y - 1, cell.x - 1)
         range.values = [[""]]
     }
@@ -238,11 +231,13 @@ function getXValuesOfRowCellsInBody(rows: IRow[]) : number[]
 
 export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: number)
   {
+    if(addressColumnIndex){}
     let writeBackRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
         
     let topYVal = getTopRowYValue(writeBackRows)
     let xCoords = getXValuesOfRowCellsInBody(writeBackRows)
 
+    //assign new coords for write back
     for(let i = 0; i < writeBackRows.length; i++)
     {
         let row = writeBackRows[i]
@@ -253,14 +248,48 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
         }
     }
 
-    writeBackRows = makeRowParentChildRelations(writeBackRows, addressColumnIndex)
+    //writeBackRows = makeRowParentChildRelations(writeBackRows, addressColumnIndex)
+    let childlessRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
 
-    Excel.run(async (context) => {
+    let rowsToDelete: IRow[] = [] 
+    for(let i = 0; i < childlessRows.length; i++)
+    {
+      let row = childlessRows[i];
+      let shouldDelete = true;
+      for(let j = 0; j < writeBackRows.length; j++)
+      {
+        if(row.cells[0].y === writeBackRows[j].cells[0].y)
+        {
+          shouldDelete = false;
+          break;
+        }
+      }
+
+      if(shouldDelete === true)
+      {
+        rowsToDelete.push(row)
+      }
+    }
+
+    console.log(rowsToDelete)
+
+    return await new Promise<IRow[]>((accept) => {
+      Excel.run(async (context) => {
         let sheet = context.workbook.worksheets.getActiveWorksheet()
         for(let i = 0; i < writeBackRows.length; i++)
         {
-            preSyncRowDataForWriteBack(writeBackRows[i], sheet)
+          preSyncRowDataForWriteBack(writeBackRows[i], sheet)
+        }
+        for(let j = 0; j < rowsToDelete.length; j++)
+        {
+          preSyncRowDataForDeletion(rowsToDelete[j], sheet)
         }
         await context.sync()
-    })
+        
+        accept(makeRowParentChildRelations(writeBackRows, addressColumnIndex))
+      })
+
+    }).then((res) => { return res})
+
+    
   }

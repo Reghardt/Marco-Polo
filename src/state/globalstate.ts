@@ -45,7 +45,7 @@ export const RSTripRows = atom<IRow[]>({
     default: []
 })
 
-export const RSAddresColumIndex = selector({
+export const RSAddresColumnIndex = selector({
     key: "addesColumIndex",
     get: ({get}) => {
         const columnDesignations = get(RSJobColumnDesignations);

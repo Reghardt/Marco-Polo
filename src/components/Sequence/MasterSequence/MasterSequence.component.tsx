@@ -6,7 +6,7 @@ import { EColumnDesignations } from "../../../services/ColumnDesignation.service
 import { ICell } from "../../../services/worksheet/cell.interface";
 import { IRow } from "../../../services/worksheet/row.interface";
 import { loadSelection } from "../../../services/worksheet/worksheet.service";
-import { RSAddresColumIndex as RSAddresColumnIndex, RSColumnVisibility, RSDepartureAddress, RSErrorMessage, RSJobColumnDesignations, RSPreserveViewport, RSReturnAddress, RSTripDirections, RSTripRows } from "../../../state/globalstate"
+import { RSAddresColumnIndex as RSAddresColumnIndex, RSColumnVisibility, RSDepartureAddress, RSErrorMessage, RSJobColumnDesignations, RSPreserveViewport, RSReturnAddress, RSTripDirections, RSTripRows } from "../../../state/globalstate"
 import Dragger from "../../experiments/DragNDrop/Dragger.component";
 import Dropper from "../../experiments/DragNDrop/Dropper.component";
 import { addAndUpdateRows, createDirections, doRowsConform, writeBackToSpreadsheet } from "../../Trip/Trip.service";
@@ -163,6 +163,13 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
       R_setTripRows(reversedRows)
     }
 
+    async function handleWriteBackToSpreadsheet()
+    {
+      let newRows = await writeBackToSpreadsheet(R_tripRows, R_addressColumnIndex)
+      console.log(newRows)
+      R_setTripRows(newRows)
+    }
+
     if(R_tripRows.length > 0 && R_columnVisibility.length > 0)
     {
         return(
@@ -186,7 +193,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
                         {R_tripRows.map((row, idx) => {
                         return (
                             <Dragger key={row.cells[0].y} draggableId={row.cells[0].y.toString()} index={idx}>
-                                {createCellTypeElementsFromRow_master(row, idx, R_jobColumnDesignations, updateBodyCell, R_columnVisibility)}
+                                {createCellTypeElementsFromRow_master(row, idx, R_jobColumnDesignations, updateBodyCell, R_columnVisibility, recalculateRoute)}
                             </Dragger>)
                         })}
                     </Dropper>                    
@@ -205,7 +212,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
                             <Button variant="outlined" onClick={() => {reverseOrder(R_tripRows)}}>Reverse Order</Button>
                         </Box>
                         <Box>
-                            <Button variant='outlined' onClick={() => {writeBackToSpreadsheet(R_tripRows, R_addressColumnIndex)}}>Write back</Button>
+                            <Button variant='outlined' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
                         </Box>
                         </Stack>
                         
@@ -223,7 +230,11 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
     }
     else
     {
-        return(<></>)
+        return(
+          <Box sx={{backgroundColor: "lightGrey", height: "10em", justifyContent:"center", alignItems: "center", display: "flex"}}>
+              <Typography align="center" variant="body1" gutterBottom sx={{paddingLeft: "0.5em", paddingRight: "0.5em"}}>No data selected. <br/>Select the desired addresses and their corresponding data in Excel then press "Import Selection" to begin</Typography>
+          </Box>
+        )
     }
     
     
