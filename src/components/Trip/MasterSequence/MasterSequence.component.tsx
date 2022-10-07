@@ -6,7 +6,7 @@ import { EColumnDesignations } from "../../../services/ColumnDesignation.service
 import { ICell } from "../../../services/worksheet/cell.interface";
 import { IRow } from "../../../services/worksheet/row.interface";
 import { loadSelection } from "../../../services/worksheet/worksheet.service";
-import { RSAddresColumnIndex as RSAddresColumnIndex, RSColumnVisibility, RSDepartureAddress, RSErrorMessage, RSJobColumnDesignations, RSPreserveViewport, RSReturnAddress, RSTripDirections, RSTripRows } from "../../../state/globalstate"
+import { RSAddresColumnIndex, RSColumnVisibility, RSDepartureAddress, RSErrorMessage, RSJobColumnDesignations, RSPreserveViewport, RSReturnAddress, RSTripDirections, RSTripRows } from "../../../state/globalstate"
 import Dragger from "../../experiments/DragNDrop/Dragger.component";
 import Dropper from "../../experiments/DragNDrop/Dropper.component";
 import { addAndUpdateRows, createDirections, doRowsConform, writeBackToSpreadsheet } from "../../Trip/Trip.service";

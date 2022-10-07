@@ -28,6 +28,8 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
     const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>([]);
     const [selectedAddress, setSelectedAddress] = useState<google.maps.GeocoderResult>()
 
+    const [errorMessage, setErrorMessage] = useState("")
+
     useEffect(() => {
       if(localAddress === "")
       {
@@ -72,11 +74,16 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
       function generateGeocodeResults()
       {
         geocodeAddress(localAddress).then(geocoded => {
-            console.log(geocoded.results)
+            console.log(geocoded)
             if(geocoded.status === "OK")
             {
                 console.log("OK")
                 setGeocodedResults(geocoded.results)
+                setErrorMessage("")
+            }
+            else
+            {
+              setErrorMessage("No results, try a more specific name or address")
             }
         })
       }
@@ -133,11 +140,15 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
                                                 onChange={(e) => handleAddressSelection(e.target.value)}
                                             >
                                                 {geocodedResults.map((elem, idx) => {
-                                                    return <FormControlLabel key={idx} value={idx} control={<Radio />} label={elem.formatted_address} />
+                                                    return <FormControlLabel key={`dep-ret-${idx}`} value={idx} control={<Radio />} label={elem.formatted_address} />
                                                     })}
                                             </RadioGroup>
                                         </FormControl>
+
                                 )}
+                                  {errorMessage && (
+                                      <p style={{color: "red"}}>{errorMessage}</p>
+                                  )}
                                 </DialogContent>
 
                                 

@@ -23,8 +23,9 @@ import { createDirections, createInSequenceJobRows, makeRowParentChildRelations,
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 import GMap from "../Maps/GMap.component";
+import MasterSequence from "./MasterSequence/MasterSequence.component";
 
-import MasterSequence from "../Sequence/MasterSequence/MasterSequence.component";
+
 
 
 
@@ -260,13 +261,6 @@ const RouteBuilder: React.FC = () =>
               <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import New Selection</Button>
 
               <MasterSequence handleColumnDesignation={handleColumnDesignation} calcRoute={calcFastestAndOriginalRoute}/>
-
-              {/* <TripTabs 
-                retrieveUserSelectionFromSpreadsheetAndSet={retrieveUserSelectionFromSpreadsheetAndSet} 
-                handleColumnDesignation={handleColumnDesignation}
-                calcRoute={calcFastestAndOriginalRoute}
-                putFirstRowAsHeading={putFirstRowAsHeading}
-              /> */}
             </Box>
           </Paper>
           <GMap/>

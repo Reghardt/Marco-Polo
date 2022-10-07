@@ -4,9 +4,9 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { ICell } from "../../../../../services/worksheet/cell.interface";
 import { IRow } from "../../../../../services/worksheet/row.interface";
 import { RSAddresColumnIndex, RSDepartureAddress, RSReturnAddress, RSTripRows, } from "../../../../../state/globalstate";
-import { geocodeAddress } from "../../../Trip.service";
-import { deleteRow } from "../../TripEditor.service";
 
+import { geocodeAddress } from "../../../../Trip/Trip.service";
+import { deleteRow } from "../../MasterSequence.service";
 
 interface IAddressCellPopperProps{
     currentAddress: string;

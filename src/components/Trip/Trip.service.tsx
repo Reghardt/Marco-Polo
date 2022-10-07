@@ -1,4 +1,3 @@
-import React from "react";
 import { IGeocoderResult, ITripDirections } from "../../interfaces/simpleInterfaces";
 import { IRow } from "../../services/worksheet/row.interface";
 
@@ -65,11 +64,6 @@ export function geocodeAddress(address: string) : Promise<IGeocoderResult>
       return geoResPromise;
     }
 
-export function createDataFromNewCollection()
-{
-  
-}
-
 //this function orders the rows according to thw waypoint orders. X and Y sheet coordinates remain the same.
 export function createInSequenceJobRows(rows: Readonly<IRow[]>, waypointOrder: number[]): IRow[]
     {
@@ -100,7 +94,7 @@ export function createDirections(departureAddress: string, returnAddress: string
   })  
 }
 
-      //this function checks if a number of rows are of equal length and if their columns align.
+//this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status: boolean, reason: string}
 {
   //

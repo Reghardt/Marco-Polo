@@ -3,11 +3,12 @@ import React from "react"
 import { EColumnDesignations } from "../../../services/ColumnDesignation.service"
 import { ICell } from "../../../services/worksheet/cell.interface"
 import { IRow } from "../../../services/worksheet/row.interface"
-import { makeRowParentChildRelations, removeRowParentChildRelations } from "../../Trip/Trip.service"
-import AddressCell from "../../Trip/TripEditor/cells/AddressCell/AddressCell.component"
-import ColumnDecorator from "../../Trip/TripEditor/cells/ColumnDecorator.component"
-import DataCell from "../../Trip/TripEditor/cells/DataCell.component"
-import HeadingCell from "../../Trip/TripEditor/cells/HeadingCell.component"
+import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../../Trip/Trip.service"
+import AddressCell from "./cells/AddressCell/AddressCell.component"
+import ColumnDecorator from "./cells/ColumnDecorator.component"
+import DataCell from "./cells/DataCell.component"
+import HeadingCell from "./cells/HeadingCell.component"
+
 
 
 
@@ -167,5 +168,33 @@ function createChildRow(row: Readonly<IRow>, updateBodyCell: (cell: ICell) => vo
     </React.Fragment>
 
     return childRow
+}
+
+export async function deleteRow(rowYCoord: number, rows: IRow[])
+{
+    for(let i = 0; i < rows.length; i++)
+    {
+        let row = rows[i]
+        if(row.cells[0].y === rowYCoord)
+        {
+            let newRows = Array.from(rows)
+            let deletedRow = newRows.splice(i, 1)
+
+            Excel.run(async (context) => {
+                let sheet = context.workbook.worksheets.getActiveWorksheet()
+                for(let j = 0; j < deletedRow.length; j++)
+                {   
+                    preSyncRowDataForDeletion(deletedRow[j], sheet)
+                }
+                    
+                
+                await context.sync()
+            })
+
+            return newRows
+        }
+    }
+
+    return rows
 }
 
