@@ -1,7 +1,6 @@
 import { Button } from "@mui/material"
 import axios from "axios";
 import React from "react"
-import { getServerUrl } from "../../services/server.service"
 
 const FormExp : React.FC = () =>{
 
@@ -16,7 +15,7 @@ const FormExp : React.FC = () =>{
             'accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
           }
 
-        axios.post(getServerUrl() + '/experiment/submit', params,{
+        axios.post('/api/experiment/submit', params,{
             headers: headers,
             
         }).then(res => {console.log(res)})
@@ -24,7 +23,7 @@ const FormExp : React.FC = () =>{
     }
 
     return(<div>
-        <form name="myForm" action={getServerUrl() + '/experiment/submit'} method="post">
+        <form name="myForm" action={'/api/experiment/submit'} method="post">
             <label htmlFor="fname">First name:</label> 
             <input type="text" id="fname" name="fname"></input><br/>
             <input type="submit"></input>

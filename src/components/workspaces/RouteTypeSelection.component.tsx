@@ -5,7 +5,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { getServerUrl } from "../../services/server.service";
 import { RSBearerToken, RSJobID, RSTokens, RSWorkspaceID } from "../../state/globalstate";
 import StandardHeader from "../common/StandardHeader.component";
 
@@ -44,7 +43,7 @@ export default function RouteTypeSelection()
 
     function getInfoAboutWorkspace()
     {
-      axios.post(getServerUrl() + "/workspace/info",
+      axios.post("/api/workspace/info",
         {
             workspaceId: R_workspaceId,
         },

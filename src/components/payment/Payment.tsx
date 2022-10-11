@@ -1,7 +1,6 @@
 import { Button, Paper } from "@mui/material";
 import md5 from "md5";
 import React, { useEffect, useState } from "react";
-import { getServerUrl } from "../../services/server.service";
 
 interface IKeyValueType{
     key: string;

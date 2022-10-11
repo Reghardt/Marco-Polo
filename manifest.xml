@@ -9,7 +9,7 @@
   <!-- Begin Basic Settings: Add-in metadata, used for all versions of Office unless override provided. -->
 
   <!-- IMPORTANT! Id must be unique for your add-in, if you reuse this manifest ensure that you change this id to a new GUID. -->
-  <Id>17aa3941-7a6b-44c5-a2c5-01994157de8d</Id>
+  <Id>1f2c4a95-1637-4582-bbab-c933d6161117</Id>
 
   <!--Version. Updates from the store only get triggered if there is a version change. -->
   <Version>1.0.0.0</Version>
@@ -140,6 +140,18 @@
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show a Taskpane" />
       </bt:LongStrings>
     </Resources>
+
+      <!-- used for SSO -->
+    <WebApplicationInfo>
+      <Id>1f2c4a95-1637-4582-bbab-c933d6161117</Id>
+      <Resource>api://localhost:3000/1f2c4a95-1637-4582-bbab-c933d6161117</Resource>
+      <Scopes>
+          <Scope>openid</Scope>
+          <Scope>user.read</Scope>
+          <!-- <Scope>files.read</Scope> -->
+          <Scope>profile</Scope>
+      </Scopes>
+    </WebApplicationInfo>
   </VersionOverrides>
   <!-- End Add-in Commands Mode integration. -->
 

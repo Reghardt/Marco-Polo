@@ -1,7 +1,6 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { getServerUrl } from '../../services/server.service';
 
 export default function CreateAccount()
 {
@@ -15,7 +14,7 @@ export default function CreateAccount()
         e.preventDefault(); // prevents whole page from refreshing
         console.log(userName, email, password, verifiedPassword)
         
-        axios.post(getServerUrl() + "/auth/register", {
+        axios.post( "/api/auth/register", {
             userName: userName,
             email: email,
             password: password

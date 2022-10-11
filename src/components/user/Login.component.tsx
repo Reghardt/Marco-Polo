@@ -1,11 +1,12 @@
 import * as React from 'react';
 import axios from 'axios';
-import { getServerUrl } from '../../services/server.service';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import {RSBearerToken, RSWorkspaceID} from "../../state/globalstate"
-import { Box, Button, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material';
+import { msLogin } from './Login.service';
+import { useMsal } from '@azure/msal-react';
 
 
 export default function Login()
@@ -13,6 +14,8 @@ export default function Login()
   const [bearer, setBearer] = useRecoilState(RSBearerToken)
   const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
   const [loginError, setLoginError] = useState<string>(null)
+  
+  const { instance, accounts } = useMsal();
   let navigate = useNavigate();
 
 
@@ -25,7 +28,7 @@ export default function Login()
       e.preventDefault(); // prevents whole page from refreshing
       console.log(email, password, )
       
-      let loginRes = await axios.post(getServerUrl() + "/auth/login", {
+      let loginRes = await axios.post("/api/auth/login", {
           email: email,
           password: password
       })
@@ -66,6 +69,13 @@ export default function Login()
       }
   }
 
+  function handleMsLogin()
+  {
+    msLogin(instance)
+    .then(res => {console.log(res)})
+    .catch(err => {console.log(err)})
+  }
+
   return(
           
           <div style={{
@@ -98,9 +108,12 @@ export default function Login()
                     <div style={{textAlign:'center'}}>
                       <NavLink to={'/register'}>Create User Account</NavLink>
                     </div>
+                    <div>
+                      <Button onClick={() => handleMsLogin()}>Microsoft Sign In</Button>
+                    </div>
                     
                   </div>
-                  {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
+                  <NavLink to={'/exp'}>Experiment</NavLink>
                   
                   
                 </Paper>

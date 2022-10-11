@@ -4,7 +4,6 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { getServerUrl } from '../../services/server.service';
 import { RSBearerToken } from '../../state/globalstate';
 import HelpTooltip from '../common/HelpTooltip.component';
 import StandardHeader, { EStandardHeaderConfig } from '../common/StandardHeader.component';
@@ -23,7 +22,7 @@ export default function WorkSpaces()
     const getWorkspaces = () =>{
         console.log("bearer test fired")
         console.log(R_bearer)
-        return axios.post(getServerUrl() + "/workspace/myWorkspaces",
+        return axios.post("/api/workspace/myWorkspaces",
         {},
         {
             headers: {authorization: R_bearer}

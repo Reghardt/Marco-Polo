@@ -3,7 +3,6 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import { getServerUrl } from "../../services/server.service";
 import { RSBearerToken} from "../../state/globalstate";
 import Payment from "../payment/Payment";
 
@@ -20,7 +19,7 @@ export default function CreateWorkspace()
         e.preventDefault(); // prevents whole page from refreshing
         console.log("bearer test fired")
         console.log(bearer)
-        axios.post(getServerUrl() + "/workspace/new",
+        axios.post("/api/workspace/new",
         {
             companyName: companyName
         },

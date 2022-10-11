@@ -7,7 +7,6 @@ import {ITripDirections } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet/worksheet.service"
 
 import axios from "axios";
-import { getServerUrl } from "../../services/server.service";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSAddresColumnIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage } from "../../state/globalstate";
@@ -208,7 +207,7 @@ const RouteBuilder: React.FC = () =>
 
     async function makeRouteOnDB(routeCost: number)
     {
-      return axios.post(getServerUrl() + "/job/makeRoute",
+      return axios.post("api/job/makeRoute",
         {
           workspaceId: R_workspaceId,
           routeCost: routeCost
