@@ -148,6 +148,7 @@
       <Scopes>
           <Scope>openid</Scope>
           <Scope>user.read</Scope>
+          <Scope>email</Scope>
           <!-- <Scope>files.read</Scope> -->
           <Scope>profile</Scope>
       </Scopes>

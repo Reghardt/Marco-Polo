@@ -1,18 +1,15 @@
 import { AuthenticationResult, IPublicClientApplication } from "@azure/msal-browser";
 import { loginRequest } from "../../msalConfig";
 
-async function ssoLogin()
+export async function ssoLogin()
     {
+        console.log("sso")
         try
         {
-            let userTokenEncoded = await Office.auth.getAccessToken({allowSignInPrompt: true});
-            //console.log(userTokenEncoded)
-            // let decoded = jwtDecode(userTokenEncoded)
-            // console.log(decoded)
+            let userTokenEncoded = await Office.auth.getAccessToken({allowSignInPrompt: false, allowConsentPrompt: true, forMSGraphAccess: true});
+            console.log(userTokenEncoded)
+
             
-            // console.log((decoded as any).name)
-            // console.log((decoded as any).preferred_username)
-            // console.log((decoded as any).oid)
             return userTokenEncoded
 
         }
@@ -41,12 +38,13 @@ async function ssoLogin()
     {
         return new Promise<{dialog: Office.Dialog, status: Office.AsyncResultStatus}>((accept) => {
             Office.context.ui.displayDialogAsync( 
-                window.location.protocol + '//' + window.location.host + '/api/auth/ms', 
+                window.location.protocol + '//' + window.location.host + '/api/auth/msLoginPopup', 
                 {height: 50, width: 30 }, (dialogResult) => {accept({dialog: dialogResult.value, status: dialogResult.status})})
         })
         
     }
 
+    //uses MSAL for login in the standalone desktop app
     async function loginStandalone()
     {
         console.log("dialog fired - Excel")
@@ -76,18 +74,16 @@ async function ssoLogin()
                     }
                 })
             }
-        })
-
-        
-            
+        })       
     }
     
-
+    //uses MSAL for login for excel online
     async function loginExcelOnline(instance: IPublicClientApplication)
     {
         console.log("Popup fired - Online")
         return new Promise<string>((accept, reject) => {
             instance.loginPopup(loginRequest).then(res => {
+                console.log(res)
                 accept(res.idToken)
             }).catch(e => {
                 reject(e)
