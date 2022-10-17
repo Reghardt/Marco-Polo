@@ -3,7 +3,7 @@ import React from "react"
 
 const GMapLegends: React.FC = () => {
     return(
-        <Stack>
+        <Stack sx={{marginBottom: "1em"}} spacing="1">
             <Box>
                 <Typography variant="h6">Map Legends </Typography>
             </Box>

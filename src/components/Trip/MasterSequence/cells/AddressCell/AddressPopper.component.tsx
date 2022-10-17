@@ -1,9 +1,10 @@
-import { Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material"
+import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ICell } from "../../../../../services/worksheet/cell.interface";
 import { IRow } from "../../../../../services/worksheet/row.interface";
 import { RSAddresColumnIndex, RSDepartureAddress, RSReturnAddress, RSTripRows, } from "../../../../../state/globalstate";
+import HelpTooltip from "../../../../common/HelpTooltip.component";
 
 import { geocodeAddress } from "../../../../Trip/Trip.service";
 import { deleteRow } from "../../MasterSequence.service";
@@ -110,7 +111,17 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     //TODO delete button to remove address. View on map option to preview location
     return(
         <Paper variant="elevation" elevation={20}>
-            <DialogTitle sx={{paddingTop: "0.5em", paddingBottom: 0}}>Address Checker</DialogTitle>
+            <DialogTitle sx={{paddingTop: "0.5em", paddingBottom: 0}}>
+                <Stack direction={"row"} alignItems="center" spacing={1}>
+                    <Box>
+                        <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Address Checker</Typography> 
+                    </Box>
+                    <Box>
+                        <HelpTooltip title={"test"}/>
+                    </Box>
+                </Stack>
+            </DialogTitle>
+            
             <DialogContent sx={{padding: "0.8em"}}>
                 <br></br>
                 <TextField 

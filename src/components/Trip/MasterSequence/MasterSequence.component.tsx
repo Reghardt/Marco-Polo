@@ -1,3 +1,4 @@
+import { PanToolOutlined } from "@mui/icons-material";
 import { Box, Button, Checkbox, Divider, FormControlLabel, Grid, Stack, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
@@ -11,6 +12,7 @@ import Dragger from "../../experiments/DragNDrop/Dragger.component";
 import Dropper from "../../experiments/DragNDrop/Dropper.component";
 import { addAndUpdateRows, createDirections, doRowsConform, writeBackToSpreadsheet } from "../../Trip/Trip.service";
 import { createCellTypeElementsFromRow_master, createColumnDecorators_master, CreateTableHeadingElements_master } from "./MasterSequence.service";
+import SequenceLegends from "./SequenceLegends.component";
 
 interface MasterSequenceProps{
     handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void;
@@ -83,7 +85,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
     function createColumnVisibilityOptions(columnNames: IRow, columnVisibility: boolean[])
     {
       let visibilityElements = 
-        <Grid container sx={{paddingBottom: "1em", paddingTop: "0.3em"}}>
+        <Grid container sx={{paddingTop: "0.3em"}}>
           {columnNames.cells.map((elem, idx) => {
             return  <Grid item xs="auto" sx={{margin: 0, padding: 0}}>
                       <FormControlLabel  control={<Checkbox sx={{paddingTop: 0, paddingBottom: 0}} checked={columnVisibility[idx]} 
@@ -174,9 +176,17 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
     {
         return(
             <div>
+                <Box sx={{marginBottom: "0.5em"}}>
+                  <Typography variant="body2">Show/Hide Columns:</Typography>
+                  {createColumnVisibilityOptions(R_tripRows[0], R_columnVisibility)}
+                </Box>
 
-                <Typography variant="body2">Show/Hide Columns:</Typography>
-                {createColumnVisibilityOptions(R_tripRows[0], R_columnVisibility)}
+                <Box sx={{marginBottom: "0.7em"}}>
+                  <SequenceLegends/>
+                </Box>
+                
+
+                
 
                 <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
                   {createColumnDecorators_master(R_tripRows[0], R_columnVisibility, handleColumnDesignation)}
@@ -199,12 +209,20 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
                     </Dropper>                    
                 </DragDropContext>
 
-                <Stack>
-                    <Box>
-                        <Stack direction={"row"} spacing={1} sx={{marginTop: "1em"}}>
-                        {/* <Box>
-                            <RowAdder/>
-                        </Box> */}
+                <Stack sx={{marginTop: "1em"}} spacing={1}>
+                  <Box>
+                    <Stack direction={"row"} spacing={1}>
+                      <Box>
+                        <Typography variant="body2">Note: drag and drop addresses to change the route sequence </Typography>
+                      </Box>
+                      <Box>
+                        <PanToolOutlined fontSize="small"/>
+                      </Box>
+                    </Stack>
+                    
+                  </Box>
+                  <Box>
+                      <Stack direction={"row"} spacing={1} >
                         <Box >
                             <Button  variant="outlined" onClick={() => {addRows()}}>Add Selection</Button>
                         </Box>
@@ -214,16 +232,16 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
                         <Box>
                             <Button variant='outlined' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
                         </Box>
-                        </Stack>
-                        
-                    </Box>
-                    <Box sx={{width: "100%"}}>
-                        <Button sx={{marginTop: "1em", width: "100%"}} onClick={() => calcRoute()} variant="outlined">Find Route</Button>
-                    </Box>
-                    <Box>
-                        <Typography variant="body1" sx={{color: "red"}}>{R_errorMessage}</Typography>
-                        
-                    </Box>
+                      </Stack>
+                      
+                  </Box>
+                  <Box sx={{width: "100%"}}>
+                      <Button sx={{ width: "100%"}} onClick={() => calcRoute()} variant="outlined">Find Route</Button>
+                  </Box>
+                  <Box>
+                      <Typography variant="body1" sx={{color: "red"}}>{R_errorMessage}</Typography>
+                      
+                  </Box>
                 </Stack>
             </div>
         )

@@ -2,6 +2,7 @@ import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "
 import React, { useEffect, useRef, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSAddresColumnIndex, RSTripRows, RSTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress } from "../../state/globalstate";
+import HelpTooltip from "../common/HelpTooltip.component";
 import Statistics from "../Statistics/Statistics.component";
 import { createCustomMapMarkers } from "./GMap.service"
 import GMapLegends from "./GMapLegends.component";
@@ -74,8 +75,7 @@ const GMap: React.FC = () => {
     return(
         <Paper sx={{padding: "0.3em", marginTop: "0.3em"}} variant="elevation" elevation={5}>
 
-            <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}} >Google Maps</Typography>
-            
+            <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}} >Google Maps</Typography>            
             <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
             <GMapLegends/>
 

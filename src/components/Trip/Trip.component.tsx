@@ -257,7 +257,7 @@ const RouteBuilder: React.FC = () =>
               
               <Divider sx={{marginTop: "0.5em", marginBottom: "0.5em"}}/>
 
-              <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Import New Selection</Button>
+              <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Use Current Selection</Button>
 
               <MasterSequence handleColumnDesignation={handleColumnDesignation} calcRoute={calcFastestAndOriginalRoute}/>
             </Box>
