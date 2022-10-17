@@ -2,6 +2,7 @@ import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "
 import React, { useEffect, useRef, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSAddresColumnIndex, RSTripRows, RSTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress } from "../../state/globalstate";
+import Statistics from "../Statistics/Statistics.component";
 import { createCustomMapMarkers } from "./GMap.service"
 import GMapLegends from "./GMapLegends.component";
 
@@ -74,33 +75,19 @@ const GMap: React.FC = () => {
         <Paper sx={{padding: "0.3em", marginTop: "0.3em"}} variant="elevation" elevation={5}>
 
             <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}} >Google Maps</Typography>
-
-            {/* <Stack direction={"row"} spacing={1} alignItems="center" sx={{marginBottom: "0.5em"}}>
-                <Box>
-                    <ToggleButtonGroup
-                        sx={{maxHeight:"100%", height: "100%"}}
-                        size="small"
-                        color="primary"
-                        value={R_routeToDisplay}
-                        exclusive
-                        onChange={(_e, v) => {handleRouteToDisplay(v, true)}}
-                        aria-label="Address Type"
-                        >
-                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Original}>Original Route</ToggleButton>
-                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDisplayRoute.Fastest}>Fastest Route</ToggleButton>
-                    </ToggleButtonGroup>
-                </Box>
-            </Stack> */}
-
             
             <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
             <GMapLegends/>
+
+            <Statistics/>
 
             {markers.length > 0 && (
                 markers.map((marker) => {
                     return marker
                 })
             )}
+
+
         </Paper>
     )
 }
