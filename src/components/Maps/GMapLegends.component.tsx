@@ -8,10 +8,7 @@ const GMapLegends: React.FC = () => {
                 <Typography variant="h6">Map Legends </Typography>
             </Box>
             <Box>
-                <Typography variant="body2">A, B, C.. = In Sequence Of Original Route </Typography>
-            </Box>
-            <Box>
-                <Typography variant="body2">1, 2, 3.. = In Sequence Of Fastest Route </Typography>
+                <Typography variant="body2">1, 2, 3.. = Address Visit Sequence </Typography>
             </Box>
             <Box>
                 <Typography variant="body2">DEP = Departure, RET = Return, D+R = Departure + Return Address </Typography>
