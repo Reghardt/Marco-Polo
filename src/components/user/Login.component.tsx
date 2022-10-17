@@ -142,7 +142,7 @@ export default function Login()
             </Box>
           </Stack>
 
-          <NavLink to={'/exp'}>Experiment</NavLink>
+          {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
           
         </Paper>
       </Grid>            
