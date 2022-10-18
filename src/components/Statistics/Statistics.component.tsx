@@ -196,7 +196,7 @@ const Statistics: React.FC = () => {
 
             return(
                 <React.Fragment>
-                    <Stack>
+                    <Stack sx={{marginBottom: "0.5em"}}>
                         <Box>
                             <Typography variant="body1">Round Trip Distance: {Math.floor(roundTripDistance / 1000) + "km"}</Typography>
                         </Box>
@@ -232,6 +232,8 @@ const Statistics: React.FC = () => {
     return(
         <Box sx={{marginBottom: "20em"}}>
             <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}} >Trip Statistics</Typography>
+
+            {calculateSimpleStatistics()}
 
             <ToggleButtonGroup
                 sx={{maxHeight:"100%", height: "100%", marginBottom: "0.5em"}}

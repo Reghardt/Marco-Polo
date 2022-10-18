@@ -117,7 +117,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
                         <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Address Checker</Typography> 
                     </Box>
                     <Box>
-                        <HelpTooltip title={"test"}/>
+                        <HelpTooltip title={"Check the given address against Google Maps to confirm its validity and existence"}/>
                     </Box>
                 </Stack>
             </DialogTitle>

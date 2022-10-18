@@ -176,14 +176,17 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
     {
         return(
             <div>
+
+                <Box sx={{marginBottom: "0.8em"}}>
+                  <SequenceLegends/>
+                </Box>
+
                 <Box sx={{marginBottom: "0.5em"}}>
                   <Typography variant="body2">Show/Hide Columns:</Typography>
                   {createColumnVisibilityOptions(R_tripRows[0], R_columnVisibility)}
                 </Box>
 
-                <Box sx={{marginBottom: "0.7em"}}>
-                  <SequenceLegends/>
-                </Box>
+                
                 
 
                 
@@ -213,7 +216,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
                   <Box>
                     <Stack direction={"row"} spacing={1}>
                       <Box>
-                        <Typography variant="body2">Note: drag and drop addresses to change the route sequence </Typography>
+                        <Typography variant="body2">Note: drag and drop rows to change the route sequence </Typography>
                       </Box>
                       <Box>
                         <PanToolOutlined fontSize="small"/>
