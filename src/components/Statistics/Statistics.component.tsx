@@ -1,9 +1,10 @@
 import { Box, Checkbox, FormControlLabel, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
+import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
 import React, { useEffect, useState } from "react"
-import { Line } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import {useRecoilValue } from "recoil";
 import { RSTripDirections } from "../../state/globalstate";
+import CostGraph from "./CostGraph.component";
 
 
 enum EGraphStatistic{
@@ -16,6 +17,9 @@ const Statistics: React.FC = () => {
 
     const R_tripDirections = useRecoilValue(RSTripDirections)
     const [graphStatistic, setGraphStatistic] = useState<EGraphStatistic>(EGraphStatistic.Distance)
+
+    const [petrolPrice, setPetrolPrice] = useState("")
+    const [litersKm, setLitersKm] = useState("")
 
     function createDistanceGraph()
     {
@@ -35,8 +39,8 @@ const Statistics: React.FC = () => {
                 dataValues.push(totalVal)
    
             }
-            labels.push("R")
-            labels[0] = "D"
+            labels.push("Return")
+            labels[0] = "Depart"
 
             const options = {
                 responsive: true,
@@ -107,8 +111,8 @@ const Statistics: React.FC = () => {
                 dataValues.push(totalVal)
    
             }
-            labels.push("R")
-            labels[0] = "D"
+            labels.push("Return")
+            labels[0] = "Depart"
 
             const options = {
                 responsive: true,
@@ -172,6 +176,7 @@ const Statistics: React.FC = () => {
         }
     }
 
+
     function secondsToH_M(value: number)
     {
         let minutes = value / 60
@@ -224,14 +229,14 @@ const Statistics: React.FC = () => {
     // }, [R_tripDirections])
     
 
-    ChartJS.register(CategoryScale, LinearScale,PointElement, LineElement, Title, Tooltip, Legend)
+    ChartJS.register(CategoryScale, LinearScale,PointElement, LineElement, BarElement, Title, Tooltip, Legend)
 
 
 
     console.log("fire stats")
     return(
         <Box sx={{marginBottom: "20em"}}>
-            <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}} >Trip Statistics</Typography>
+            <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Trip Statistics</Typography>
 
             {calculateSimpleStatistics()}
 
@@ -250,14 +255,11 @@ const Statistics: React.FC = () => {
                 }}
                 aria-label="Address Type"
                 >
-                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Distance}>Distance</ToggleButton>
                 <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Time}>Time</ToggleButton>
-                <ToggleButton disabled sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Cost}>Cost</ToggleButton>
+                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Distance}>Distance</ToggleButton>
+                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Cost}>Cost</ToggleButton>
             </ToggleButtonGroup>
 
-            
-
-            {/* {calculateSimpleStatistics()} */}
 
             {graphStatistic === EGraphStatistic.Distance && (
                 createDistanceGraph()
@@ -267,8 +269,10 @@ const Statistics: React.FC = () => {
                 createTimeGraph()
             )}
 
-            
-            
+            {graphStatistic === EGraphStatistic.Cost && (
+                <CostGraph tripDirections={R_tripDirections} petrolPrice={petrolPrice} litersKm={litersKm} setPetrolPrice={setPetrolPrice} setLitersKm={setLitersKm}/>
+            )}
+
         </Box>
     )
 }
