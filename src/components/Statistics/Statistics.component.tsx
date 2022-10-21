@@ -16,7 +16,7 @@ enum EGraphStatistic{
 const Statistics: React.FC = () => {
 
     const R_tripDirections = useRecoilValue(RSTripDirections)
-    const [graphStatistic, setGraphStatistic] = useState<EGraphStatistic>(EGraphStatistic.Distance)
+    const [graphStatistic, setGraphStatistic] = useState<EGraphStatistic>(EGraphStatistic.Time)
 
     const [petrolPrice, setPetrolPrice] = useState("")
     const [litersKm, setLitersKm] = useState("")
