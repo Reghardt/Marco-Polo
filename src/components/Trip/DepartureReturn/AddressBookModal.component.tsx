@@ -1,5 +1,5 @@
 import { DeleteOutline } from "@mui/icons-material"
-import { Box, Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material"
+import { Box, Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, TextField, Tooltip, Typography } from "@mui/material"
 import axios from "axios"
 import React, { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
@@ -174,9 +174,12 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
                                                         </Button>
                                                     </Box>
                                                     <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%"}}>
-                                                        <IconButton onClick={() => {deleteAddressBookEntry(entry._id); console.log("pressed")}}>
-                                                            <DeleteOutline color="error"/>
-                                                        </IconButton>
+                                                        <Tooltip title={"Delete Entry"}>
+                                                            <IconButton onClick={() => {deleteAddressBookEntry(entry._id); console.log("pressed")}}>
+                                                                <DeleteOutline color="error"/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        
                                                     </Box>
                                                 </Stack>
                                             </Paper>

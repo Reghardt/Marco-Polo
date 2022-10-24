@@ -57,7 +57,7 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
         }
     }
 
-    if(departureAddress === returnAddress)
+    if(departureAddress && returnAddress && departureAddress.formatted_address === returnAddress.formatted_address)
     {
         if(departureAddress)
         {
@@ -75,10 +75,6 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
         {
             newMarkers.push(<CustomMarker label={"Ret"} map={map.current} position={returnAddress.geometry.location} backgroundColor={"primary"}/>)
         }
-        
-
-        
-        
     }
 
     
