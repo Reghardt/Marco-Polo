@@ -1,6 +1,7 @@
-import { Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, TextField } from "@mui/material"
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Modal, Paper, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { geocodeAddress } from "../Trip.service";
+import AddressBookModal from "./AddressBookModal.component";
 
 interface IAddressSelectorPopup{
     title: string;
@@ -11,53 +12,64 @@ interface IAddressSelectorPopup{
 
 const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, addressSetter, toggleShow}) => {
     
-    const [localAddress, setLocalAddress] = useState<string>(address === null ? "" : address.formatted_address)
+    const [physicalAddressStr, setPhysicalAddressStr] = useState<string>(address === null ? "" : address.formatted_address)
     const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>([]);
-    const [selectedAddress, setSelectedAddress] = useState<google.maps.GeocoderResult>(null)
+    const [selectedAddressIdx, setSelectedAddressIdx] = useState(0)
 
     const [errorMessage, setErrorMessage] = useState("")
 
-    useEffect(() => {
-        if(localAddress === "")
-        {
-          setLocalAddress("Specify Address")
-        }
-      }, [])
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
-    function generateGeocodeResults()
+    // useEffect(() => {
+    //     if(physicalAddressStr === "")
+    //     {
+    //       setPhysicalAddressStr("Specify Address")
+    //     }
+    //   }, [])
+
+    function generateGeocodeResults(address: string)
     {
-      geocodeAddress(localAddress).then(geocoded => {
-          console.log(geocoded)
-          if(geocoded.status === "OK")
-          {
-              console.log("OK")
-              setGeocodedResults(geocoded.results)
-              setErrorMessage("")
-          }
-          else
-          {
-            setErrorMessage("No results, try a more specific name or address")
-          }
-          setSelectedAddress(null)
-      })
+      if(address)
+        {
+          geocodeAddress(address).then(geocoded => {
+            console.log(geocoded)
+            if(geocoded.status === "OK")
+            {
+                console.log("OK")
+                setGeocodedResults(geocoded.results)
+                setErrorMessage("")
+            }
+            else
+            {
+              setErrorMessage("No results, try a more specific name or address")
+            }
+            setSelectedAddressIdx(0)
+          })
+        }
+        else
+        {
+          setErrorMessage("Please enter an address")
+        }
+
+      
     }
 
     function handleAddressSelection(index: string)
     {
       console.log(geocodedResults[parseInt(index)])
-      setSelectedAddress(geocodedResults[parseInt(index)]);
+      setSelectedAddressIdx(parseInt(index));
     }
 
     function captureInput(input: string)
       {
-          setLocalAddress(input)
+          setPhysicalAddressStr(input)
       }
 
       function saveAddress()
       {
-        if(selectedAddress)
+        if(geocodedResults.length > 0)
         {
-          addressSetter(selectedAddress)
+          addressSetter(geocodedResults[selectedAddressIdx])
           setGeocodedResults([])
           toggleShow()
         }
@@ -71,43 +83,79 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
     {
       toggleShow()
     }
+
+    function applyAddressBookSelection(address: string)
+    {
+      console.log("address book selection fired", address)
+      setIsModalOpen(!isModalOpen);
+      generateGeocodeResults(address);
+      setPhysicalAddressStr(address)
+    }
+
     
     return(
-        <Paper className="paper">
-            <DialogTitle>{title}</DialogTitle>
+        <Paper elevation={15}>
+            <DialogTitle><Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>{title}</Typography></DialogTitle>
             <DialogContent>
-                <br></br>
-                <TextField defaultValue={address === null ? "" : address.formatted_address} onChange={(e)=> captureInput(e.target.value)} size="medium" label="Address" fullWidth></TextField>
-                <br/>
-                <Button onClick={()=> generateGeocodeResults()}>Search</Button>
-                <br/>
+              <Stack spacing={1}>
+                <Box>
+                  <Button variant="outlined" onClick={() => setIsModalOpen(!isModalOpen)}>Address Book</Button>
+                </Box>
+                <Box>
+                  <TextField value={physicalAddressStr} onChange={(e)=> captureInput(e.target.value)} size="medium" label="Address" fullWidth></TextField>
+                </Box>
 
-                {geocodedResults.length > 0 &&  
-                    (<FormControl>
-                        <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
-                        <RadioGroup
-                            aria-labelledby="demo-radio-buttons-group-label"
-                            defaultValue="female"
-                            name="radio-buttons-group"
-                            onChange={(e) => handleAddressSelection(e.target.value)}
-                        >
-                            {geocodedResults.map((elem, idx) => {
-                                return <FormControlLabel key={`dep-ret-${idx}`} value={idx} control={<Radio />} label={elem.formatted_address} />
-                                })}
-                        </RadioGroup>
+                <Box>
+                  <Button onClick={()=> generateGeocodeResults(physicalAddressStr)}>Search</Button>
+                </Box>
+
+                {geocodedResults.length > 0 && (
+                  <Box>
+                    <FormControl>
+                      <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
+                      <RadioGroup
+                          aria-labelledby="demo-radio-buttons-group-label"
+                          name="radio-buttons-group"
+                          onChange={(e) => handleAddressSelection(e.target.value)}
+                          value={selectedAddressIdx}
+                      >
+                          {geocodedResults.map((elem, idx) => {
+                              return <FormControlLabel key={`dep-ret-${idx}`} value={idx} control={<Radio />} label={elem.formatted_address} />
+                              })}
+                      </RadioGroup>
                     </FormControl>
-
-            )}
-                {errorMessage && (
-                    <p style={{color: "red"}}>{errorMessage}</p>
+                  </Box>
                 )}
+
+                {errorMessage && (
+                  <Box>
+                    <p style={{color: "red"}}>{errorMessage}</p>
+                  </Box> 
+                )}
+
+              </Stack>
+
+              <Dialog
+               PaperProps={{sx: {width: "80%"}}}
+                open={isModalOpen}
+                scroll={"body"}
+                //onClose={}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+              >
+                <AddressBookModal setIsModalOpen={setIsModalOpen} applyAddressBookSelection={applyAddressBookSelection}/>
+              </Dialog>
+
+                
+
+                
             </DialogContent>
 
             
 
             <DialogActions>
-                <Button onClick={() => saveAddress()}>Save</Button>
-                <Button onClick={() => {handleCancel()}}>Cancel</Button>
+                <Button variant="outlined" onClick={() => saveAddress()}>Save</Button>
+                <Button variant="outlined" onClick={() => {handleCancel()}}>Cancel</Button>
             </DialogActions>
         </Paper>
     )

@@ -15,6 +15,7 @@ const PopperContainer = styled.div`
     position: absolute;
     width: 10px;
     height: 20px;
+    
 
     &:before {
       content: "";
@@ -26,14 +27,20 @@ const PopperContainer = styled.div`
       height: 10px;
       background-color: white;
       box-shadow: none;
+      
+      /* border-style: solid;
+      border-width: "0.1em"; */
+
     }
   }
 
   &[data-popper-placement^='top'] > .arrow {
     bottom: -1.25em;
     :after {
-        border-width: 0 1em 1em 1em;
-        border-color: transparent transparent blue transparent;
+        /* border-width: 0 1em 1em 1em;
+        border-color: transparent transparent blue transparent; */
+        
+        
     }
   }
 `

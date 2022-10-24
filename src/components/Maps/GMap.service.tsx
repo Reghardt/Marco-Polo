@@ -52,7 +52,7 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
             if(row.cells[addressColumnIndex].geocodedAddressRes !== null)
             {
                 let addressRes = row.cells[addressColumnIndex].geocodedAddressRes
-                newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location} backgroundColor={"primary"}/>)
+                newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location} backgroundColor={"green"}/>)
             }
         }
     }
@@ -61,7 +61,7 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
     {
         if(departureAddress)
         {
-            newMarkers.unshift(<CustomMarker label={"D+R"} map={map.current} position={departureAddress.geometry.location} backgroundColor={"green"}/>)
+            newMarkers.unshift(<CustomMarker label={"D+R"} map={map.current} position={departureAddress.geometry.location} backgroundColor={"primary"}/>)
         }
         
     }
@@ -69,11 +69,11 @@ export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number,
     {
         if(departureAddress)
         {
-            newMarkers.unshift(<CustomMarker label={"Dep"} map={map.current} position={departureAddress.geometry.location} backgroundColor={"green"}/>)
+            newMarkers.unshift(<CustomMarker label={"Dep"} map={map.current} position={departureAddress.geometry.location} backgroundColor={"primary"}/>)
         }
         if(returnAddress)
         {
-            newMarkers.push(<CustomMarker label={"Ret"} map={map.current} position={returnAddress.geometry.location} backgroundColor={"green"}/>)
+            newMarkers.push(<CustomMarker label={"Ret"} map={map.current} position={returnAddress.geometry.location} backgroundColor={"primary"}/>)
         }
         
 

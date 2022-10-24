@@ -1,4 +1,5 @@
 import { Button, ClickAwayListener } from "@mui/material";
+import { width } from "@mui/system";
 import { stat } from "fs";
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
@@ -120,7 +121,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell, recal
         <ClickAwayListener onClickAway={()=> closePopper()}>
             <PopperContainer 
                 ref={popperRef}
-                style={styles.popper}
+                style={{...styles.popper, width: "80%"}}
                 {...attributes.popper}
                 >
                   <div ref={setArrowRef} style={styles.arrow} className="arrow"/>

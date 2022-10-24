@@ -27,7 +27,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     }) => {
 
     const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>([]);
-    const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(-1)
+    const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(0)
 
     const [textboxContent, setTextboxContent] = useState(currentAddress)
     
@@ -53,11 +53,11 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
               console.log("OK")
               setGeocodedResults(geocoded.results)
               setErrorMessage("")
-              setSelectedGeocodedAddressIndex(-1)
+            //   setSelectedGeocodedAddressIndex(-1)
           }
           else
           {
-            setSelectedGeocodedAddressIndex(-1)
+            // setSelectedGeocodedAddressIndex(-1)
             setGeocodedResults([])
             setErrorMessage("No results, try a more specific name or address")
           }
@@ -77,7 +77,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
 
     function handleSaveAndClose()
     {
-        if(selectedGeocodedAddressIndex > -1)
+        if(geocodedResults.length > -1)
         {
             const tempCell = JSON.parse(JSON.stringify(cellRef)) as ICell;
             tempCell.data = geocodedResults[selectedGeocodedAddressIndex].formatted_address;
@@ -85,10 +85,6 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
             tempCell.geocodedResults = geocodedResults;
             tempCell.selectedGeocodedAddressIndex = selectedGeocodedAddressIndex;
             saveAndClose(tempCell)
-        }
-        else if(geocodedResults.length > 0)
-        {
-            setErrorMessage("Please select an address option ")
         }
         else
         {
@@ -123,34 +119,46 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
             </DialogTitle>
             
             <DialogContent sx={{padding: "0.8em"}}>
-                <br></br>
-                <TextField 
-                    onChange={(e)=> captureInput(e.target.value)}  
-                    defaultValue={textboxContent} 
-                    size="medium" 
-                    label="Address"
-                    sx={{width: "33em"}}
-                />
-                <br/>
-                <Button onClick={()=> generateGeocodeResults(textboxContent)}>Search</Button>
-                <br/>
 
-                {geocodedResults.length > 0 &&  
-                (<FormControl>
-                    <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
-                    <RadioGroup
-                        aria-labelledby="demo-radio-buttons-group-label"
-                        name="radio-buttons-group"
-                        onChange={(e) => handleAddressSelection(e.target.value)}
-                        value={selectedGeocodedAddressIndex}
-                    >
-                        {geocodedResults.map((elem, idx) => {
-                            return <FormControlLabel key={idx} value={idx} control={<Radio />} label={elem.formatted_address} />
-                            })}
-                    </RadioGroup>
-                </FormControl>)}
+                <Stack spacing={1} sx={{paddingTop: "1em"}}>
+                    <Box>
+                        <TextField 
+                            onChange={(e)=> captureInput(e.target.value)}  
+                            defaultValue={textboxContent} 
+                            size="medium" 
+                            label="Address"
+                            fullWidth
+                        />
+                    </Box>
+                    <Box>
+                        <Button onClick={()=> generateGeocodeResults(textboxContent)}>Search</Button>
+                    </Box>
+                </Stack>
+
+                {geocodedResults.length > 0 && (
+                    <Box>
+                        <FormControl>
+                            <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
+                            <RadioGroup
+                                aria-labelledby="demo-radio-buttons-group-label"
+                                name="radio-buttons-group"
+                                onChange={(e) => handleAddressSelection(e.target.value)}
+                                value={selectedGeocodedAddressIndex}
+                            >
+                                {geocodedResults.map((elem, idx) => {
+                                    return <FormControlLabel key={idx} value={idx} control={<Radio />} label={elem.formatted_address} />
+                                    })}
+                            </RadioGroup>
+                        </FormControl>
+                    </Box>
+                    
+                )}
+
                 {errorMessage && (
+                    <Box>
                         <p style={{color: "red"}}>{errorMessage}</p>
+                    </Box>
+                        
                     )}
             </DialogContent>
 

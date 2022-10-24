@@ -58,14 +58,14 @@ const DepartureReturn: React.FC = () => {
                 <React.Fragment>
                     
 
-                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Depart & Return Address"}/>
+                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Departure & Return Address"}/>
                 </React.Fragment>
             )}
 
             {R_departReturnState === EDepartReturn.different && (
                 <React.Fragment>
 
-                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Depart Address"}/>
+                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Departure Address"}/>
                     <AddressSelector address={R_returnAddress} addressSetter={R_setReturnAddress} title={"Return Address"}/>
                 </React.Fragment>
             )}

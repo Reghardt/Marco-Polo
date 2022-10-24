@@ -17,7 +17,7 @@
     "allowUnusedLabels": false,
     "noImplicitReturns": true,
     "noUnusedParameters": true,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     
     "pretty": true,
     "typeRoots": [
