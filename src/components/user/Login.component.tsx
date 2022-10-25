@@ -88,8 +88,6 @@ export default function Login()
       {
         navigate("/workspaces", {replace: true})
       }
-
-
     })
     .catch(err => {console.log(err)})
   }
@@ -138,7 +136,7 @@ export default function Login()
             </Box>
 
             <Box sx={{marginTop: "1em"}}>
-              <Typography variant="body1" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Experimental - Beta 0.11.0</Typography>
+              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.12.0</Typography>
             </Box>
           </Stack>
 

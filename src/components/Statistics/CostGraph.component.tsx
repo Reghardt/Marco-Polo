@@ -1,7 +1,10 @@
 import { Box, InputAdornment, Stack, TextField, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { Bar } from "react-chartjs-2"
+import { useRecoilValue } from "recoil";
 import { ITripDirections } from "../../interfaces/simpleInterfaces"
+import { RSSelectedVehicle } from "../../state/globalstate";
+import VehicleList from "../VehicleList/VehicleList.component";
 
 interface ICostGraph{
     tripDirections: ITripDirections;
@@ -13,13 +16,21 @@ interface ICostGraph{
 
 const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm, setPetrolPrice, setLitersKm}) => {
 
-    
+   const R_selectedVehicle = useRecoilValue(RSSelectedVehicle)
 
 
     const [graphData, setGraphData] = useState<any>(null)
 
     const [roundTripCost, setRoundTripCost] = useState(0)
     const [averageCost, setAverageCost] = useState(0)
+
+    //TODO move this use effect to parent?
+    useEffect(() => {
+        if(R_selectedVehicle)
+        {
+            setLitersKm(R_selectedVehicle.litersPer100km.toString())
+        }
+    }, [R_selectedVehicle])
 
     function isFloat(val: string)
     {
@@ -124,12 +135,30 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm,
             <Stack spacing={1}>
                 <Box>
                     <Typography variant="body1">Total cost: R{(roundTripCost).toFixed(2)}</Typography>
-                    <Typography variant="body1">Average cost: R{(averageCost).toFixed(2)}</Typography>
+                    <Typography variant="body1">Average cost per Address: R{(averageCost).toFixed(2)}</Typography>
                 </Box>
 
                 {graphData !== null && (
                     <Box>
                         <Bar options={options} data={graphData} />
+                    </Box>
+                )}
+
+                <VehicleList/>
+
+                {R_selectedVehicle && (
+                    <Box>
+                        <Typography variant="body1">Current Vehicle:</Typography>
+                        <Typography variant="body1">{R_selectedVehicle.vehicleDescription} - {R_selectedVehicle.vehicleLicencePlate} - {R_selectedVehicle.vehicleClass}</Typography>
+
+                    </Box>
+                )}
+
+                {R_selectedVehicle === null && (
+                    <Box>
+                        <Typography variant="body1">Current Vehicle:</Typography>
+                        <Typography variant="body1" sx={{fontStyle: "italic"}}>none</Typography>
+
                     </Box>
                 )}
 

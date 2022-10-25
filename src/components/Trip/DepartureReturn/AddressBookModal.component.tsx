@@ -114,6 +114,7 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
                 setErrorMessage("")
                 setGeocodedResults([])
                 setSelectedAddressIdx(-1)
+                setAddressDescription("")
                 getAddressBook()
               }).catch(err => {
                 console.error(err)
@@ -235,7 +236,7 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
                         {selectedAddressIdx > -1 && (
                             <React.Fragment>
                                 <Box>
-                                    <TextField defaultValue={""} onChange={(e)=> captureAddressDescription(e.target.value)} size="medium" label="Descriptive Address Name" fullWidth></TextField>
+                                    <TextField value={addressDescription} onChange={(e)=> captureAddressDescription(e.target.value)} size="medium" label="Descriptive Address Name" fullWidth></TextField>
                                 </Box>
                                 <Box>
                                     <Button onClick={() => {saveAddressToAddressBook()}} >Save To Address Book</Button>

@@ -9,7 +9,7 @@ import {loadSelection} from "../../services/worksheet/worksheet.service"
 import axios from "axios";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumnIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSJobID, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage } from "../../state/globalstate";
+import { RSAddresColumnIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -48,12 +48,9 @@ const RouteBuilder: React.FC = () =>
   const R_departureAddress = useRecoilValue(RSDepartureAddress);
   const R_returnAddress = useRecoilValue(RSReturnAddress);
 
-  //const [R_tripStatisticsData, R_setTripStatisticsData] = useRecoilState(RSTripStatisticsData)
-  
-  const jobId = useRecoilValue(RSJobID)
   const R_workspaceId = useRecoilValue(RSWorkspaceID)
 
-  //const [waypointOrder, setWaypointOrder] = useState<number[]>([])
+
 
   const R_addressColumIndex = useRecoilValue(RSAddresColumnIndex)
 
@@ -69,6 +66,22 @@ const RouteBuilder: React.FC = () =>
   const [R_errorMessage, R_setErrorMessage] = useRecoilState(RSErrorMessage)
 
     console.log("refresh")
+
+    // useEffect(() => {
+    //   axios.post( "/api/workspace/deleteAddressBookEntry", {
+    //     workspaceId: R_workspaceId,
+    //     userId: entryId
+    //   },
+    //   {
+    //     headers: {authorization: bearer}
+    //   }).then(res => {
+    //     console.log(res)
+    //     getAddressBook()
+    //   }).catch(err => {
+    //     console.error(err)
+    //   }
+    // )
+    // })
 
     //START: useEffects
     useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates

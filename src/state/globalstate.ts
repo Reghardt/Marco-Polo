@@ -1,5 +1,6 @@
 import { atom, selector } from "recoil";
 import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
+import { IVehicleListEntry } from "../components/VehicleList/VehicleListDialog.component";
 import { ITripDirections } from "../interfaces/simpleInterfaces";
 
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
@@ -15,10 +16,10 @@ export const RSWorkspaceID = atom({
     default: ""
 });
 
-export const RSJobID = atom<{jobId: string, shouldFetch: boolean}>({
-    key: "jobId",
-    default: {jobId: "", shouldFetch: false}
-})
+// export const RSJobID = atom<{jobId: string, shouldFetch: boolean}>({
+//     key: "jobId",
+//     default: {jobId: "", shouldFetch: false}
+// })
 
 export const RSDepartureAddress = atom<google.maps.GeocoderResult>({
     key: "departureAddress",
@@ -95,6 +96,11 @@ export const RSPreserveViewport = atom<boolean>({
 export const RSErrorMessage = atom<string>({
     key: "errorMessage",
     default: ""
+})
+
+export const RSSelectedVehicle = atom<IVehicleListEntry | null>({
+    key: "selectedVehicle",
+    default: null
 })
 
 

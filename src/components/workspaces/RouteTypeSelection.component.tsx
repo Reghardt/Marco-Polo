@@ -5,14 +5,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSBearerToken, RSJobID, RSTokens, RSWorkspaceID } from "../../state/globalstate";
+import { RSBearerToken, RSTokens, RSWorkspaceID } from "../../state/globalstate";
 import StandardHeader from "../common/StandardHeader.component";
-
-
-interface IJobData {
-  jobName: string;
-  jobId: string
-}
 
 const RouteMenuStyle = styled.div`
   .hoverDiv{
@@ -57,7 +51,7 @@ export default function RouteTypeSelection()
               setWorkspaceName(res.data.workspaceName)
               R_setTokens(res.data.tokens)
             }
-            else
+            else //if the workspace does not exist
             {
               console.log("no content")
               navigate("/workspaces", {replace: true})
