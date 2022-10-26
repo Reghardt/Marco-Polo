@@ -1,31 +1,6 @@
 import { AuthenticationResult, IPublicClientApplication } from "@azure/msal-browser";
 import { loginRequest } from "../../msalConfig";
 
-export async function ssoLogin()
-    {
-        console.log("sso")
-        try
-        {
-            let userTokenEncoded = await Office.auth.getAccessToken({allowSignInPrompt: false, allowConsentPrompt: true, forMSGraphAccess: true});
-            console.log(userTokenEncoded)
-
-            
-            return userTokenEncoded
-
-        }
-        catch(err)
-        {
-            if (err.code === 13003) {
-                console.log("SSO is not supported for domain user accounts, only Microsoft 365 Education or work account, or a Microsoft account.")
-                return ""
-                
-            } else {
-                console.log(err)
-                return ""
-            }
-        }
-    }
-
     function handlePopupLogout(instance: IPublicClientApplication)
     {
         instance.logoutPopup({
@@ -78,7 +53,7 @@ export async function ssoLogin()
     }
     
     //uses MSAL for login for excel online
-    async function loginExcelOnline(instance: IPublicClientApplication)
+    async function loginExcelOnline(instance: IPublicClientApplication): Promise<string>
     {
         console.log("Popup fired - Online")
         return new Promise<string>((accept, reject) => {
@@ -93,7 +68,7 @@ export async function ssoLogin()
         
     }
 
-    export function msLogin(instance: IPublicClientApplication)
+    export function msLogin(instance: IPublicClientApplication): Promise<string>
     {
         if(window.top === window){ // the add-in is not running in Excel Online
             

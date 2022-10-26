@@ -1,22 +1,23 @@
-import { Box, InputAdornment, Stack, TextField, Typography } from "@mui/material"
+import { Box, Button, InputAdornment, Stack, TextField, Typography } from "@mui/material"
+import axios from "axios";
 import React, { useEffect, useState } from "react"
 import { Bar } from "react-chartjs-2"
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { ITripDirections } from "../../interfaces/simpleInterfaces"
-import { RSSelectedVehicle } from "../../state/globalstate";
+import { RSBearerToken, RSSelectedVehicle, RSWorkspaceID } from "../../state/globalstate";
 import VehicleList from "../VehicleList/VehicleList.component";
 
 interface ICostGraph{
     tripDirections: ITripDirections;
-    petrolPrice: string;
+    fuelPrice: string;
     litersKm: string;
-    setPetrolPrice: React.Dispatch<React.SetStateAction<string>>;
+    setFuelPrice: React.Dispatch<React.SetStateAction<string>>;
     setLitersKm: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm, setPetrolPrice, setLitersKm}) => {
+const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, setFuelPrice, setLitersKm}) => {
 
-   const R_selectedVehicle = useRecoilValue(RSSelectedVehicle)
+   const [R_selectedVehicle, R_setSelectedVehicle] = useRecoilState(RSSelectedVehicle)
 
 
     const [graphData, setGraphData] = useState<any>(null)
@@ -24,24 +25,25 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm,
     const [roundTripCost, setRoundTripCost] = useState(0)
     const [averageCost, setAverageCost] = useState(0)
 
-    //TODO move this use effect to parent?
-    useEffect(() => {
-        if(R_selectedVehicle)
-        {
-            setLitersKm(R_selectedVehicle.litersPer100km.toString())
-        }
-    }, [R_selectedVehicle])
+    const R_workspaceId = useRecoilValue(RSWorkspaceID)
+    const R_bearer = useRecoilValue(RSBearerToken)
+
+    function handleSetLitersKm(litersKm: string)
+    {
+        setLitersKm(litersKm)
+        R_setSelectedVehicle(null)
+    }
 
     function isFloat(val: string)
     {
         if(val === "")
         {
-            return false
+            return true
         }
         else
         {
             const regex = /^\d+\.?(\d+)?$/
-            return !regex.test(val)
+            return regex.test(val)
         }  
     }
 
@@ -91,7 +93,7 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm,
             let totalCost = 0
             for(let i = 0; i < legs.length; i++)
             {
-                let cost = (legs[i].distance.value / 1000) * pricePerKm(petrolPrice, litersKm)
+                let cost = (legs[i].distance.value / 1000) * pricePerKm(fuelPrice, litersKm)
                 console.log(i, legs[i].distance, cost)
                 
                 
@@ -125,9 +127,31 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm,
             setGraphData(data)
         }
 
-    }, [tripDirections, petrolPrice, litersKm])
+    }, [tripDirections, fuelPrice, litersKm])
 
+    function saveFuelPrice()
+    {
+        console.log("save price", fuelPrice, isFloat(fuelPrice))
+        if(isFloat(fuelPrice))
+        {
+            axios.post
+            ("/api/workspace/saveFuelPrice", {
+                workspaceId: R_workspaceId,
+                fuelPrice: fuelPrice
+            },
+            {
+                headers: {authorization: R_bearer} //for user id
+            }).then(res => {
+                console.log(res)
 
+            }).catch(err => {
+                console.error(err)
+            }
+            )
+        }
+
+        
+    }
 
 
     return (
@@ -157,24 +181,10 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm,
                 {R_selectedVehicle === null && (
                     <Box>
                         <Typography variant="body1">Current Vehicle:</Typography>
-                        <Typography variant="body1" sx={{fontStyle: "italic"}}>none</Typography>
+                        <Typography variant="body1" sx={{fontStyle: "italic"}}>custom</Typography>
 
                     </Box>
                 )}
-
-                <Box>
-                    <TextField
-                    label="Petrol Price"
-                    id="outlined-size-small"
-                    //defaultValue=""
-                    size="small"
-                    sx={{width: '25ch'}}
-                    onChange={(e) => setPetrolPrice(e.target.value)}
-                    value={petrolPrice}
-                    error={isFloat(petrolPrice)}
-                    InputProps={{startAdornment: <InputAdornment position="start">R</InputAdornment>}}
-                    />
-                </Box>
 
                 <Box>
                     <TextField
@@ -183,12 +193,36 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, petrolPrice, litersKm,
                     //defaultValue=""
                     size="small"
                     sx={{width: '25ch'}}
-                    onChange={(e) => setLitersKm(e.target.value)}
+                    onChange={(e) => handleSetLitersKm(e.target.value)}
                     value={litersKm}
-                    error={isFloat(litersKm)}
+                    error={!isFloat(litersKm)}
                     InputProps={{startAdornment: <InputAdornment position="start">l/100km:</InputAdornment>}}
                     />
                 </Box>
+
+                <Box>
+                    <Stack direction={"row"} spacing={1}>
+                        <Box>
+                            <TextField
+                            label="Fuel Price"
+                            id="outlined-size-small"
+                            //defaultValue=""
+                            size="small"
+                            sx={{width: '25ch'}}
+                            onChange={(e) => setFuelPrice(e.target.value)}
+                            value={fuelPrice}
+                            error={!isFloat(fuelPrice)}
+                            InputProps={{startAdornment: <InputAdornment position="start">R</InputAdornment>}}
+                            />
+                        </Box>
+                        <Box>
+                            <Button onClick={() => saveFuelPrice()} sx={{height: "100%"}} variant="outlined">Save Price</Button>
+                        </Box>
+                    </Stack>
+                    
+                </Box>
+
+                
             </Stack>
         </div>
     )

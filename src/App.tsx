@@ -3,9 +3,6 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-
-import RouteTypeSelection from './components/workspaces/RouteTypeSelection.component';
-
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
@@ -17,6 +14,7 @@ import AdminPanel from './components/admin/AdminPanel.component';
 import RouteBuilder from './components/Trip/Trip.component';
 
 import SignOnExperiment from './components/experiments/SSO/SignOnExperiment.component';
+import PostLoginConfig from './components/PostLoginConfig/PostLoginConfig.component';
 
 
 
@@ -35,7 +33,7 @@ function App() {
           <Route path="/register" element={<CreateAccount/>}/>
           <Route path="/workspaces" element={<WorkSpaces/>}/>
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
-          <Route path="/routeMenu" element={<RouteTypeSelection/>}/>
+          <Route path="/postLoginConfig" element={<PostLoginConfig/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/success" element={<Success/>}/>
           <Route path="/exp" element={<SignOnExperiment/>}/>

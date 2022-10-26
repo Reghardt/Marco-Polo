@@ -164,15 +164,36 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
         )
     }
 
+
+
+    function setLastUsedVehicle(vehicleId: string)
+    {
+        axios.post( "/api/workspace/setLastUsedVehicle", {
+            workspaceId: R_workspaceId,
+            vehicleId: vehicleId
+          },
+          {
+            headers: {authorization: bearer}
+          }).then(res => {
+            console.log(res)
+
+          }).catch(err => {
+            console.error(err)
+          }
+        )
+    }
+
     function selectVehicle(vehicle: IVehicleListEntry)
     {
-        setIsModalOpen((current) => {return !current})
+        
         R_setSelectedVehicle(vehicle)
+        setLastUsedVehicle(vehicle._id)
+        setIsModalOpen((current) => {return !current})
     }
 
     return(
         <React.Fragment>
-            <DialogTitle><Typography color={"primary"} variant="h5">Vehicle List</Typography></DialogTitle>
+            <DialogTitle color={"primary"} variant="h5">Vehicle List</DialogTitle>
             <DialogContent>
 
                 <Stack spacing={1}>
@@ -255,7 +276,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
                                 />
                             </Box>
                             <Box>
-                                <HelpTooltip title="Will be used when vehicle GPS route tracking is implemented in the future."/>
+                                <HelpTooltip title="Will be used when GPS tracking is implemented in the future to uniquely identify the vehicle."/>
                             </Box>
                         </Stack>
                         

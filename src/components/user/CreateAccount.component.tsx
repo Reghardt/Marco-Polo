@@ -58,7 +58,7 @@ export default function CreateAccount()
 
     function createUser()
     {
-        axios.post( "/api/auth/register", {
+        axios.post( "/api/auth/registerCM", {
             userName: userName,
             email: email,
             password: password

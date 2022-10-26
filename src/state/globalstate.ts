@@ -1,7 +1,7 @@
 import { atom, selector } from "recoil";
 import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
 import { IVehicleListEntry } from "../components/VehicleList/VehicleListDialog.component";
-import { ITripDirections } from "../interfaces/simpleInterfaces";
+import { IMember, ITripDirections } from "../interfaces/simpleInterfaces";
 
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
 import { IRow } from "../services/worksheet/row.interface";
@@ -20,6 +20,11 @@ export const RSWorkspaceID = atom({
 //     key: "jobId",
 //     default: {jobId: "", shouldFetch: false}
 // })
+
+export const RSMemberData = atom<IMember | null>({
+    key: "memberData",
+    default: null
+})
 
 export const RSDepartureAddress = atom<google.maps.GeocoderResult>({
     key: "departureAddress",

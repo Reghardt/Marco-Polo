@@ -5,13 +5,13 @@ import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import {RSBearerToken, RSWorkspaceID} from "../../state/globalstate"
 import { Box, Button, Chip, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
-import { msLogin, ssoLogin } from './Login.service';
+import { msLogin } from './Login.service';
 import { useMsal } from '@azure/msal-react';
 import MSLogo from './MSLogo.component';
 
 export default function Login()
 {
-  const [bearer, setBearer] = useRecoilState(RSBearerToken)
+  const [R_bearer, R_setBearer] = useRecoilState(RSBearerToken)
   const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
   const [loginError, setLoginError] = useState<string>(null)
   
@@ -22,72 +22,43 @@ export default function Login()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-
-  async function loginUser()
+  async function loginCM()
   {
       //e.preventDefault(); // prevents whole page from refreshing
-      console.log(email, password, )
+      console.log(email, password)
       
-      let loginRes = await axios.post("/api/auth/loginCM", { //login custom
+      axios.post("/api/auth/loginCM", { //login custom
           email: email,
           password: password
       })
-
-      const authToken = loginRes.headers.authorization
-      console.log(authToken)
-
-      console.log(loginRes.data.lastUsedWorkspaceId) //ID token may be used here
-
-      if(authToken)
-      {
-        setEmail("")
-        setPassword("")
-
-        
-        setBearer(authToken)
-        if(loginRes.data.lastUsedWorkspaceId)
-        {
-          R_setWorkspaceId(loginRes.data.lastUsedWorkspaceId)
-          navigate("/routeMenu", {replace: true})
-        }
-        else
-        {
-          navigate("/workspaces", {replace: true})
-        }
-      }
-      else
-      {
-        const loginResData = loginRes.data
-        if(loginResData.status >= 400 && loginResData.status < 500)
-        {
-          setLoginError(loginResData.status + " " + loginResData.message)
-        }
-      }
+      .then(res => {
+        console.log("Res",res)
+        R_setBearer(res.headers.authorization)
+        R_setWorkspaceId(res.data.lastUsedWorkspaceId)
+        navigate("/postLoginConfig", {replace: true})
+      })
+      .catch(err => {
+        console.log("Err", err)
+      })
   }
 
-
-
-  async function handleMsLogin()
+  async function loginMS()
   {
     msLogin(instance)
-    .then(async (msalToken) => {
-      console.log(msalToken)
+    .then(async (msIdToken) => {
 
-      let loginRes = await axios.post("/api/auth/loginMS",
+      axios.post("/api/auth/loginMS",
       {
-        userToken: msalToken
+        msIdToken: msIdToken
       })
-      const authToken = loginRes.headers.authorization
-      setBearer(authToken)
-      if(loginRes.data.lastUsedWorkspaceId)
-      {
-        R_setWorkspaceId(loginRes.data.lastUsedWorkspaceId)
-        navigate("/routeMenu", {replace: true})
-      }
-      else
-      {
-        navigate("/workspaces", {replace: true})
-      }
+      .then(res => {
+        R_setBearer(res.headers.authorization)
+        R_setWorkspaceId(res.data.lastUsedWorkspaceId)
+        navigate("/postLoginConfig", {replace: true})
+      })
+      .catch(err => {
+        console.log(err)
+      })
     })
     .catch(err => {console.log(err)})
   }
@@ -120,7 +91,7 @@ export default function Login()
             )}
             
             <Box> 
-              <Button variant="contained" type="submit" sx={{width:'100%', borderRadius: 0}} onClick={() => loginUser()}>Sign In</Button>
+              <Button variant="contained" type="submit" sx={{width:'100%', borderRadius: 0}} onClick={() => loginCM()}>Sign In</Button>
             </Box>
 
             <Box justifyContent={"center"} display="flex">
@@ -132,7 +103,7 @@ export default function Login()
             </Box>
 
             <Box justifyContent={"center"} display="flex">
-              <Button onClick={() => handleMsLogin()} sx={{padding: 0, margin: 0}}><MSLogo/></Button>
+              <Button onClick={() => loginMS()} sx={{padding: 0, margin: 0}}><MSLogo/></Button>
             </Box>
 
             <Box sx={{marginTop: "1em"}}>

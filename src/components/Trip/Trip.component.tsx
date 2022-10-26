@@ -3,13 +3,13 @@
 import { Box, Button, Divider, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
-import {ITripDirections } from "../../interfaces/simpleInterfaces";
+import {IMember, ITripDirections, IVehicleListEntry } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet/worksheet.service"
 
 import axios from "axios";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { RSAddresColumnIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage } from "../../state/globalstate";
+import { RSAddresColumnIndex, RSBearerToken, RSColumnVisibility, RSDepartureAddress, RSTripRows, RSJobColumnDesignations, RSReturnAddress, RSTokens, RSWorkspaceID, RSTripDirections, RSPreserveViewport, RSErrorMessage, RSMemberData } from "../../state/globalstate";
 
 
 import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } from "../../services/ColumnDesignation.service";
@@ -65,23 +65,15 @@ const RouteBuilder: React.FC = () =>
 
   const [R_errorMessage, R_setErrorMessage] = useRecoilState(RSErrorMessage)
 
+  const [R_memberData, R_setMemberData] = useRecoilState(RSMemberData)
+
     console.log("refresh")
 
-    // useEffect(() => {
-    //   axios.post( "/api/workspace/deleteAddressBookEntry", {
-    //     workspaceId: R_workspaceId,
-    //     userId: entryId
-    //   },
-    //   {
-    //     headers: {authorization: bearer}
-    //   }).then(res => {
-    //     console.log(res)
-    //     getAddressBook()
-    //   }).catch(err => {
-    //     console.error(err)
-    //   }
-    // )
-    // })
+    useEffect(() => {
+
+      getUserWorkspaceAndMemberData()
+    }, [])
+
 
     //START: useEffects
     useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates
@@ -168,6 +160,30 @@ const RouteBuilder: React.FC = () =>
      
     }
 
+
+    function getUserWorkspaceAndMemberData()
+    {
+        axios.post<{userWorkspaceAndMemberData: {workspaceName: string, tokens: number, member: IMember}}>
+        ("/api/workspace/userWorkspaceAndMemberData", {
+            workspaceId: R_workspaceId,
+          },
+          {
+            headers: {authorization: R_bearer} //for user id
+          }).then(res => {
+
+            if(res.data.userWorkspaceAndMemberData)
+            {
+              R_setTokens(res.data.userWorkspaceAndMemberData.tokens)
+              const member = res.data.userWorkspaceAndMemberData.member
+              console.log(member)
+              R_setMemberData(member)
+             }
+
+          }).catch(err => {
+            console.error(err)
+          }
+        )
+    }
 
 
 
@@ -260,7 +276,7 @@ const RouteBuilder: React.FC = () =>
 
     return(
         <div>
-          <StandardHeader title="Trip Builder" backNavStr="/routeMenu"/> {/*Trip? Job? Route?*/}
+          <StandardHeader title="Trip Builder" backNavStr="/workspaces"/> {/*Trip? Job? Route?*/}
 
           <Paper elevation={10}>
 

@@ -1,9 +1,11 @@
 import { Box, Checkbox, FormControlLabel, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import axios from "axios";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
 import React, { useEffect, useState } from "react"
 import { Bar, Line } from "react-chartjs-2";
-import {useRecoilValue } from "recoil";
-import { RSTripDirections } from "../../state/globalstate";
+import {useRecoilState, useRecoilValue } from "recoil";
+import { IMember, IVehicleListEntry } from "../../interfaces/simpleInterfaces";
+import { RSBearerToken, RSMemberData, RSSelectedVehicle, RSTripDirections, RSWorkspaceID } from "../../state/globalstate";
 import CostGraph from "./CostGraph.component";
 
 
@@ -18,8 +20,17 @@ const Statistics: React.FC = () => {
     const R_tripDirections = useRecoilValue(RSTripDirections)
     const [graphStatistic, setGraphStatistic] = useState<EGraphStatistic>(EGraphStatistic.Time)
 
-    const [petrolPrice, setPetrolPrice] = useState("")
+    const [fuelPrice, setFuelPrice] = useState("")
     const [litersKm, setLitersKm] = useState("")
+
+    const R_bearer = useRecoilValue(RSBearerToken)
+    const R_workspaceId = useRecoilValue(RSWorkspaceID)
+
+    const R_memberData = useRecoilValue(RSMemberData)
+
+    const [R_selectedVehicle, R_setSelectedVehicle] = useRecoilState(RSSelectedVehicle)
+
+    ChartJS.register(CategoryScale, LinearScale,PointElement, LineElement, BarElement, Title, Tooltip, Legend)
 
     function createDistanceGraph()
     {
@@ -32,7 +43,6 @@ const Statistics: React.FC = () => {
             let totalVal = 0
             for(let i = 0; i < legs.length; i++)
             {
-                //console.log(legs[i])
                 labels.push(i.toString())
 
                 totalVal += legs[i].distance.value / 1000
@@ -63,7 +73,6 @@ const Statistics: React.FC = () => {
                 }
               };
         
-        
             const data = {
                 labels,
                 datasets: [
@@ -74,17 +83,12 @@ const Statistics: React.FC = () => {
                     backgroundColor: 'rgba(53, 162, 235, 0.5)',
                     },
                 ],
-
-
             };
 
             return (
                 <div>
-                    
-                    
                     <Line options={options} data={data} />
                 </div>
- 
             )
         }
         else
@@ -109,7 +113,6 @@ const Statistics: React.FC = () => {
 
                 totalVal += legs[i].duration.value
                 dataValues.push(totalVal)
-   
             }
             labels.push("Return")
             labels[0] = "Depart"
@@ -145,8 +148,6 @@ const Statistics: React.FC = () => {
                 },
                 
               };
-        
-        
             const data = {
                 labels,
                 datasets: [
@@ -157,17 +158,12 @@ const Statistics: React.FC = () => {
                     backgroundColor: 'rgba(53, 162, 235, 0.5)',
                     },
                 ],
-
-
             };
 
             return (
                 <div>
-                    
-                    
                     <Line options={options} data={data} />
                 </div>
- 
             )
         }
         else
@@ -223,13 +219,50 @@ const Statistics: React.FC = () => {
 
     
 
-    // useEffect(() => {
-    //     //console.log(R_tripDirections)
-        
-    // }, [R_tripDirections])
-    
+    function handleMostRecentVehicleAndFuelPrice(member: IMember)
+    {
+      if(member.lastUsedFuelPrice)
+      {
+        //TODO set fuel price
+        setFuelPrice(member.lastUsedFuelPrice.toString())
+      }
 
-    ChartJS.register(CategoryScale, LinearScale,PointElement, LineElement, BarElement, Title, Tooltip, Legend)
+      if(member.lastUsedVehicleId)
+      {
+        axios.post<{vehicle: IVehicleListEntry}>
+        ("/api/workspace/getVehicleById", {
+            workspaceId: R_workspaceId,
+            vehicleId: member.lastUsedVehicleId
+          },
+          {
+            headers: {authorization: R_bearer} //for user id
+          }
+        )
+        .then(res => {
+          console.log(res.data.vehicle)
+          R_setSelectedVehicle(res.data.vehicle)
+          
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      }
+    }
+
+    useEffect(() => {
+        if(R_memberData)
+        {
+            handleMostRecentVehicleAndFuelPrice(R_memberData)
+        }
+    },[R_memberData])
+
+    useEffect(() => {
+        if(R_selectedVehicle)
+        {
+            setLitersKm(R_selectedVehicle.litersPer100km.toString())
+        }
+        
+    }, [R_selectedVehicle])
 
 
 
@@ -250,8 +283,7 @@ const Statistics: React.FC = () => {
                     if(v !== null)
                     {
                         setGraphStatistic(v)
-                    }
-                    
+                    } 
                 }}
                 aria-label="Address Type"
                 >
@@ -270,7 +302,7 @@ const Statistics: React.FC = () => {
             )}
 
             {graphStatistic === EGraphStatistic.Cost && (
-                <CostGraph tripDirections={R_tripDirections} petrolPrice={petrolPrice} litersKm={litersKm} setPetrolPrice={setPetrolPrice} setLitersKm={setLitersKm}/>
+                <CostGraph tripDirections={R_tripDirections} fuelPrice={fuelPrice} litersKm={litersKm} setFuelPrice={setFuelPrice} setLitersKm={setLitersKm}/>
             )}
 
         </Box>
