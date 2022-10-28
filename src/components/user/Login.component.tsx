@@ -1,117 +1,121 @@
 import * as React from 'react';
 import axios from 'axios';
-import { getServerUrl } from '../../services/server.service';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import {RSBearerToken, RSWorkspaceID} from "../../state/globalstate"
-import { Box, Button, Paper, Stack, TextField, Tooltip, Typography } from '@mui/material';
-
+import { Box, Button, Chip, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
+import { msLogin } from './Login.service';
+import { useMsal } from '@azure/msal-react';
+import MSLogo from './MSLogo.component';
 
 export default function Login()
 {
-  const [bearer, setBearer] = useRecoilState(RSBearerToken)
+  const [R_bearer, R_setBearer] = useRecoilState(RSBearerToken)
   const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
   const [loginError, setLoginError] = useState<string>(null)
+  
+  const { instance, accounts } = useMsal();
   let navigate = useNavigate();
 
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-
-  async function loginUser(e: React.FormEvent)
+  async function loginCM()
   {
-      e.preventDefault(); // prevents whole page from refreshing
-      console.log(email, password, )
+      //e.preventDefault(); // prevents whole page from refreshing
+      console.log(email, password)
       
-      let loginRes = await axios.post(getServerUrl() + "/auth/login", {
+      axios.post("/api/auth/loginCM", { //login custom
           email: email,
           password: password
       })
+      .then(res => {
+        console.log("Res",res)
+        R_setBearer(res.headers.authorization)
+        R_setWorkspaceId(res.data.lastUsedWorkspaceId)
+        navigate("/postLoginConfig", {replace: true})
+      })
+      .catch(err => {
+        console.log("Err", err)
+      })
+  }
 
-      const authToken = loginRes.headers.authorization
-      console.log(authToken)
-      console.log(loginRes.data)
-      console.log(loginRes.data.lastUsedWorkspaceId)
+  async function loginMS()
+  {
+    msLogin(instance)
+    .then(async (msIdToken) => {
 
-
-
-      if(authToken)
+      axios.post("/api/auth/loginMS",
       {
-        setEmail("")
-        setPassword("")
-
-        
-        setBearer(authToken)
-        if(loginRes.data.lastUsedWorkspaceId)
-        {
-          R_setWorkspaceId(loginRes.data.lastUsedWorkspaceId)
-          navigate("/routeMenu", {replace: true})
-        }
-        else
-        {
-          navigate("/workspaces", {replace: true})
-        }
-        
-      }
-      else
-      {
-        console.log(loginRes.data)
-        const loginResData = loginRes.data
-        if(loginResData.status >= 400 && loginResData.status < 500)
-        {
-          setLoginError(loginResData.status + " " + loginResData.message)
-        }
-      }
+        msIdToken: msIdToken
+      })
+      .then(res => {
+        R_setBearer(res.headers.authorization)
+        R_setWorkspaceId(res.data.lastUsedWorkspaceId)
+        navigate("/postLoginConfig", {replace: true})
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    })
+    .catch(err => {console.log(err)})
   }
 
   return(
           
-          <div style={{
-            position: 'absolute', left: '50%', top: '50%',
-            transform: 'translate(-50%, -50%)'
-        }}>
-            <Stack>
-              <Box>
-                <Typography variant="h3" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Marco Polo</Typography>
-              </Box>
-              <Box>
-                <Paper sx={{width: '100%', padding: '1em'}} variant="elevation" elevation={5}>
-                  <div style={{width:"100%", textAlign:'center'}}>
-                    <Typography variant="h4" gutterBottom sx={{textAlign:'center'}}>Login</Typography>
-                      <Box component={"form"} onSubmit={(e) => loginUser(e)} sx={{ m: 1, width: '100%'}}>
-                          
-                          <TextField id="email" label="Email" variant="standard"  value={email} onChange={(e) => setEmail(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
-                          
-                          <TextField type="password" id="pass" label="Password" variant="standard"  value={password} onChange={(e) => setPassword(e.target.value)} sx={{width:'90%', marginBottom:'1em'}}/>
-                          <div style={{color: 'red', paddingBottom: '1em'}}>
-                            {loginError}
-                          </div>
-                          
-                          <div>
-                            <Button variant="contained" type="submit" sx={{width:'90%', borderRadius: 8}}>Sign In</Button>
-                          </div>
-                          
-                      </Box>
-                    {/* <Button variant="contained" onClick={() => navigate("/register", {replace: true})}>Create New User Account</Button> */}
-                    <div style={{textAlign:'center'}}>
-                      <NavLink to={'/register'}>Create User Account</NavLink>
-                    </div>
-                    
-                  </div>
-                  {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
-                  
-                  
-                </Paper>
-              </Box>
-              <Box sx={{marginTop: "1em"}}>
-                <Typography variant="body1" gutterBottom sx={{textAlign:'center', color:'#3f51b5'}}>Experimental - Beta 0.9.2</Typography>
-              </Box>
-            </Stack>
+    <Grid container spacing={0}
+    direction="column"
+    alignItems="center"
+    justifyContent="center"
+    style={{ minHeight: '100vh' }}>
+      <Grid item xs={12} sx={{maxWidth: "80%"}}>
+        <Paper sx={{width: '25em', padding: '1em'}} variant="elevation" elevation={5}>
+          <Stack spacing={1}>
+            <Box justifyContent={"center"} display="flex">
+              <Typography variant="h3" gutterBottom sx={{ color:'#1976d2'}}>Marco Polo</Typography>
+            </Box>
             
-                        
-          </div>
+            <Box justifyContent={"center"} display="flex">
+              <TextField id="email" label="Email" variant="outlined" value={email} onChange={(e) => setEmail(e.target.value)} sx={{width:'100%'}}/>
+            </Box>  
+            <Box justifyContent={"center"} display="flex">
+              <TextField type="password" id="pass" label="Password" variant="outlined"  value={password} onChange={(e) => setPassword(e.target.value)} sx={{width:'100%'}}/>
+            </Box>  
+
+            {loginError && (
+              <Box sx={{color: "red"}}>
+                {loginError}
+            </Box>
+            )}
+            
+            <Box> 
+              <Button variant="contained" type="submit" sx={{width:'100%', borderRadius: 0}} onClick={() => loginCM()}>Sign In</Button>
+            </Box>
+
+            <Box justifyContent={"center"} display="flex">
+              <NavLink to={'/register'}>Create User Account</NavLink>
+            </Box>
+
+            <Box>
+              <Divider sx={{marginTop: "1em", marginBottom: "1em"}}>OR</Divider>
+            </Box>
+
+            <Box justifyContent={"center"} display="flex">
+              <Button onClick={() => loginMS()} sx={{padding: 0, margin: 0}}><MSLogo/></Button>
+            </Box>
+
+            <Box sx={{marginTop: "1em"}}>
+              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.13.2</Typography>
+            </Box>
+          </Stack>
+
+          {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
+          
+        </Paper>
+      </Grid>            
+    </Grid>
 
 
   )

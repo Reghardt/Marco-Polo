@@ -1,4 +1,3 @@
-import React from "react";
 import { IGeocoderResult, ITripDirections } from "../../interfaces/simpleInterfaces";
 import { IRow } from "../../services/worksheet/row.interface";
 
@@ -65,11 +64,6 @@ export function geocodeAddress(address: string) : Promise<IGeocoderResult>
       return geoResPromise;
     }
 
-export function createDataFromNewCollection()
-{
-  
-}
-
 //this function orders the rows according to thw waypoint orders. X and Y sheet coordinates remain the same.
 export function createInSequenceJobRows(rows: Readonly<IRow[]>, waypointOrder: number[]): IRow[]
     {
@@ -84,24 +78,23 @@ export function createInSequenceJobRows(rows: Readonly<IRow[]>, waypointOrder: n
 
 export function createDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
 
-        var request: google.maps.DirectionsRequest = {
-          origin: departureAddress,
-          destination: returnAddress,
-          waypoints: waypoints,
-          travelMode: google.maps.TravelMode.DRIVING,
-          optimizeWaypoints: shouldOptimize,
-        };
-  
-        return new Promise<ITripDirections>((resolve) => {
-          let directionsService = new google.maps.DirectionsService();
-          directionsService.route(request, (result, status) => {
-              resolve({result, status})
-          });
-        })  
-      }
+  var request: google.maps.DirectionsRequest = {
+    origin: departureAddress,
+    destination: returnAddress,
+    waypoints: waypoints,
+    travelMode: google.maps.TravelMode.DRIVING,
+    optimizeWaypoints: shouldOptimize,
+  };
 
+  return new Promise<ITripDirections>((resolve) => {
+    let directionsService = new google.maps.DirectionsService();
+    directionsService.route(request, (result, status) => {
+        resolve({result, status})
+    });
+  })  
+}
 
-      //this function checks if a number of rows are of equal length and if their columns align.
+//this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status: boolean, reason: string}
 {
   //
@@ -163,7 +156,134 @@ export function addAndUpdateRows(rows: IRow[], rowsToAdd: IRow[], addressColumnI
     console.log(newRows)
     
     return makeRowParentChildRelations(newRows, addressColumnIndex)
-  
-
-  
 }
+
+export function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): void
+{
+    for(let j = 0; j < row.cells.length; j++)
+    {
+        let cell = row.cells[j]
+        if(cell.formula !== "") //if cell is formula
+        {
+            //write formula
+            let range = sheet.getCell(cell.y - 1, cell.x - 1)
+            range.formulas = [[cell.formula]]
+            //range.format.autofitColumns();
+        }
+        else //cell only has data
+        {
+            //write data
+            let range = sheet.getCell(cell.y - 1, cell.x - 1)
+            range.values = [[cell.data]]
+        }
+    }
+
+    for(let i = 0; i < row.children.length; i++)
+    {
+        preSyncRowDataForWriteBack(row.children[i], sheet)
+    }
+}
+
+export function preSyncRowDataForDeletion(row: IRow, sheet: Excel.Worksheet): void
+{
+    for(let j = 0; j < row.cells.length; j++)
+    {
+        let cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
+        let range = sheet.getCell(cell.y - 1, cell.x - 1)
+        range.values = [[""]]
+    }
+
+    for(let i = 0; i < row.children.length; i++)
+    {
+        preSyncRowDataForDeletion(row.children[i], sheet)
+    }
+}
+
+function getTopRowYValue(rows: IRow[]): number
+{
+    let topRowNr = rows[0].cells[0].y
+    for(let i = 0; i<  rows.length; i++)
+    {
+        if(rows[i].cells[0].y < topRowNr)
+        {
+            topRowNr = rows[i].cells[0].y
+        }
+    }
+    return topRowNr
+}
+
+function getXValuesOfRowCellsInBody(rows: IRow[]) : number[]
+{
+    let row = rows[0]
+    let cellXVals: number[] = []
+    for(let i = 0; i < row.cells.length; i++)
+    {
+        cellXVals.push(row.cells[i].x)
+    }
+    return cellXVals
+}
+
+export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: number)
+  {
+    if(addressColumnIndex){}
+    let writeBackRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
+        
+    let topYVal = getTopRowYValue(writeBackRows)
+    let xCoords = getXValuesOfRowCellsInBody(writeBackRows)
+
+    //assign new coords for write back
+    for(let i = 0; i < writeBackRows.length; i++)
+    {
+        let row = writeBackRows[i]
+        for(let j = 0; j < row.cells.length; j++)
+        {
+            row.cells[j].x = xCoords[j]
+            row.cells[j].y = topYVal + i
+        }
+    }
+
+    //writeBackRows = makeRowParentChildRelations(writeBackRows, addressColumnIndex)
+    let childlessRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
+
+    let rowsToDelete: IRow[] = [] 
+    for(let i = 0; i < childlessRows.length; i++)
+    {
+      let row = childlessRows[i];
+      let shouldDelete = true;
+      for(let j = 0; j < writeBackRows.length; j++)
+      {
+        if(row.cells[0].y === writeBackRows[j].cells[0].y)
+        {
+          shouldDelete = false;
+          break;
+        }
+      }
+
+      if(shouldDelete === true)
+      {
+        rowsToDelete.push(row)
+      }
+    }
+
+    console.log(rowsToDelete)
+
+    return await new Promise<IRow[]>((accept) => {
+      Excel.run(async (context) => {
+        let sheet = context.workbook.worksheets.getActiveWorksheet()
+        for(let i = 0; i < writeBackRows.length; i++)
+        {
+          preSyncRowDataForWriteBack(writeBackRows[i], sheet)
+        }
+        for(let j = 0; j < rowsToDelete.length; j++)
+        {
+          preSyncRowDataForDeletion(rowsToDelete[j], sheet)
+        }
+        await context.sync()
+        
+        accept(makeRowParentChildRelations(writeBackRows, addressColumnIndex))
+      })
+
+    }).then((res) => { return res})
+
+    
+  }

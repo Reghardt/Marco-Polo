@@ -1,13 +1,16 @@
-import { Box, Grid, Typography } from "@mui/material";
-import React from "react";
-import { EColumnDesignations } from "../../../services/ColumnDesignation.service";
-import { ICell } from "../../../services/worksheet/cell.interface";
-import { IRow } from "../../../services/worksheet/row.interface";
-import { preSyncRowDataForDeletion } from "../../Sequence/SequenceTable/SequenceTable.service";
+import { Box, Grid, Typography } from "@mui/material"
+import React from "react"
+import { EColumnDesignations } from "../../../services/ColumnDesignation.service"
+import { ICell } from "../../../services/worksheet/cell.interface"
+import { IRow } from "../../../services/worksheet/row.interface"
+import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../../Trip/Trip.service"
+import AddressCell from "./cells/AddressCell/AddressCell.component"
+import ColumnDecorator from "./cells/ColumnDecorator.component"
+import DataCell from "./cells/DataCell.component"
+import HeadingCell from "./cells/HeadingCell.component"
 
-import AddressCell from "./cells/AddressCell/AddressCell.component";
-import ColumnDecorator from "./cells/ColumnDecorator.component";
-import DataCell from "./cells/DataCell.component";
+
+
 
 
 const labelSize = 0.5;
@@ -25,7 +28,7 @@ function numberOfVisibleColumns(columnVisibility: boolean[]): number
     return num
 }
 
-export function createColumnDecorators(jobHeadings: IRow, columnVisibility: boolean[], handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void) : JSX.Element
+export function createColumnDecorators_master(jobHeadings: IRow, columnVisibility: boolean[], handleColumnDesignation: (colIdx: number, colValue: EColumnDesignations) => void) : JSX.Element
 {
 
     const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility)
@@ -53,7 +56,7 @@ export function createColumnDecorators(jobHeadings: IRow, columnVisibility: bool
 
 }
 
-export function CreateTableHeadingElements(jobHeadings: IRow, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[])
+export function CreateTableHeadingElements_master(jobHeadings: IRow, columnVisibility: boolean[])
     {
       const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility)
       let headings =
@@ -66,9 +69,7 @@ export function CreateTableHeadingElements(jobHeadings: IRow, updateBodyCell: (c
             {
                 return(
                     <Grid item xs={elementSize}>
-                        <DataCell
-                        cellRef={cell}
-                        updateBodyCell={updateBodyCell}/>
+                        <HeadingCell colNumber={cell.x}/>
                     </Grid>
                 )
             }
@@ -81,14 +82,15 @@ export function CreateTableHeadingElements(jobHeadings: IRow, updateBodyCell: (c
       return headings
     }
 
-export function createCellTypeElementsFromRow(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[]) : JSX.Element
-    {
-        const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
+export function createCellTypeElementsFromRow_master(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[], recalculateRoute: (departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number)=> Promise<void>) : JSX.Element
+{
+    const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
 
-        let rowWithChildren = 
-        <React.Fragment>
+    let rowWithChildren = 
+    <React.Fragment>
+        <Grid container spacing={"0.2em"} justifyContent="flex-end">
             <Grid item xs={labelSize}>
-                <Box sx={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white"}} variant="body1">{String.fromCharCode(nr + 'A'.charCodeAt(0))}</Typography></Box>
+                <Box sx={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white"}} variant="body1">{nr + 1}</Typography></Box>
             </Grid>
             {row.cells.map((cell, index) => {
                 if(columnVisibility[index] === true)
@@ -100,6 +102,7 @@ export function createCellTypeElementsFromRow(row: Readonly<IRow>, nr: number, c
                                 <AddressCell
                                     cellRef={cell}
                                     updateBodyCell={updateBodyCell}
+                                    recalculateRoute={recalculateRoute}
                                 />
                             </Grid>
                         )
@@ -115,7 +118,6 @@ export function createCellTypeElementsFromRow(row: Readonly<IRow>, nr: number, c
                             </Grid>
                         )
                     }
-                    
                 }
                 else
                 {
@@ -126,10 +128,15 @@ export function createCellTypeElementsFromRow(row: Readonly<IRow>, nr: number, c
             {row.children.map((row) => {
                 return createChildRow(row, updateBodyCell, columnVisibility)
             })}
-        </React.Fragment>
+        </Grid>
+        {/* <Divider sx={{margin: "0.2em"}}/> */}
+    </React.Fragment>
+    
+        
 
-        return rowWithChildren;
-    }
+
+    return rowWithChildren;
+}
 
 function createChildRow(row: Readonly<IRow>, updateBodyCell: (cell: ICell) => void, columnVisibility: boolean[])
 {

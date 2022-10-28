@@ -3,25 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@azure/msal-browser": "^2.29.0",
+    "@azure/msal-react": "^1.4.8",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@mui/icons-material": "^5.10.2",
     "@mui/material": "^5.8.3",
     "@popperjs/core": "^2.11.5",
-    "@types/office-js": "^1.0.259",
-    "@types/react-beautiful-dnd": "^13.1.2",
     "axios": "^0.27.2",
+    "chart.js": "^3.9.1",
     "es6-promise": "^4.2.8",
     "eslint": "^8.23.1",
+    "http-proxy-middleware": "^2.0.6",
+    "jwt-decode": "^3.1.2",
     "md5": "^2.3.0",
     "nth-check": "^2.1.1",
     "react": "^17.0.2",
     "react-beautiful-dnd": "^13.1.1",
+    "react-chartjs-2": "^4.3.1",
     "react-dom": "^17.0.2",
     "react-popper": "^2.3.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "recoil": "^0.7.4",
+    "save": "^2.9.0",
     "typescript": "^4.7.3"
   },
   "devDependencies": {
@@ -29,7 +34,9 @@
     "@types/md5": "^2.3.2",
     "@types/node": "^16.11.39",
     "@types/react": "17.0.2",
-    "@types/react-dom": "^17.0.11"
+    "@types/react-dom": "^17.0.11",
+    "@types/office-js": "^1.0.259",
+    "@types/react-beautiful-dnd": "^13.1.2"
   },
   "scripts": {
     "start": "set HTTPS=true&&set SSL_CRT_FILE=./ssl/server.crt&&set SSL_KEY_FILE=./ssl/server.key&& react-scripts start",
@@ -41,7 +48,11 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "prefer-const": 0,
+      "no-unused-vars": 1
+    }
   },
   "browserslist": [
     "ie 11"

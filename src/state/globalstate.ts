@@ -1,7 +1,7 @@
 import { atom, selector } from "recoil";
-import { EDisplayRoute } from "../components/Maps/GMap.service";
 import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
-import { ITripDirections } from "../interfaces/simpleInterfaces";
+import { IVehicleListEntry } from "../components/VehicleList/VehicleListDialog.component";
+import { IMember, ITripDirections } from "../interfaces/simpleInterfaces";
 
 import { EColumnDesignations } from "../services/ColumnDesignation.service";
 import { IRow } from "../services/worksheet/row.interface";
@@ -16,9 +16,14 @@ export const RSWorkspaceID = atom({
     default: ""
 });
 
-export const RSJobID = atom<{jobId: string, shouldFetch: boolean}>({
-    key: "jobId",
-    default: {jobId: "", shouldFetch: false}
+// export const RSJobID = atom<{jobId: string, shouldFetch: boolean}>({
+//     key: "jobId",
+//     default: {jobId: "", shouldFetch: false}
+// })
+
+export const RSMemberData = atom<IMember | null>({
+    key: "memberData",
+    default: null
 })
 
 export const RSDepartureAddress = atom<google.maps.GeocoderResult>({
@@ -41,28 +46,12 @@ export const RSJobColumnDesignations = atom<EColumnDesignations[]>({
     default: []
 })
 
-export const RSJobHeadings = atom<IRow>({
-    key: "jobHeadings",
-    default: null
-})
-
-export const RSJobFirstRowIsHeading = atom<boolean>({
-    key: "jobFirstRowIsHeaing",
-    default: false
-})
-
 export const RSTripRows = atom<IRow[]>({
     key: "jobBody",
     default: []
 })
 
-export const RSInSequenceTripRows = atom<IRow[]>({
-    key: "inSequenceJobRows",
-    default: []
-})
-
-
-export const RSAddresColumIndex = selector({
+export const RSAddresColumnIndex = selector({
     key: "addesColumIndex",
     get: ({get}) => {
         const columnDesignations = get(RSJobColumnDesignations);
@@ -98,13 +87,8 @@ export const RSTokens = atom<number>({
 })
 
 
-export const RSShortestTripDirections = atom<ITripDirections>({
-    key: "shortestTripDirections",
-    default: null
-})
-
-export const RSOriginalTripDirections = atom<ITripDirections>({
-    key: "originalTripDirections",
+export const RSTripDirections = atom<ITripDirections>({
+    key: "tripDirections",
     default: null
 })
 
@@ -113,19 +97,15 @@ export const RSPreserveViewport = atom<boolean>({
     default: false
 })
 
-export const RSRouteToDisplay = atom<EDisplayRoute>({
-    key: "routeToDisplay",
-    default: EDisplayRoute.Original
-})
-
-export const RSTripTabValue = atom<number>({
-    key: "tripTabsValue",
-    default: 0
-})
 
 export const RSErrorMessage = atom<string>({
     key: "errorMessage",
     default: ""
+})
+
+export const RSSelectedVehicle = atom<IVehicleListEntry | null>({
+    key: "selectedVehicle",
+    default: null
 })
 
 

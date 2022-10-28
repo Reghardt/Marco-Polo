@@ -1,8 +1,10 @@
 import { Button, ClickAwayListener } from "@mui/material";
+import { width } from "@mui/system";
 import { stat } from "fs";
 import React, { useEffect, useRef, useState } from "react";
 import { usePopper } from "react-popper";
 import { ICell } from "../../../../../services/worksheet/cell.interface";
+import { IRow } from "../../../../../services/worksheet/row.interface";
 import PopperContainer from "../../../../common/PopperContainer.styled";
 import AddressPopper from "./AddressPopper.component";
 
@@ -15,9 +17,10 @@ enum ESolveState{
 type AddressCellProps = {
     cellRef: ICell;
     updateBodyCell: (cell: ICell) => void;
+    recalculateRoute(departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number): Promise<void>
   }
 
-const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
+const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell, recalculateRoute}) =>
 {
   const buttonRef = useRef(null);
   const popperRef = useRef(null);
@@ -111,13 +114,14 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
 
     return(
         <React.Fragment>
-        <Button sx={{background: getStateColor(solveState), ":hover": {backgroundColor: getStateColor(solveState, true)}}} variant={"contained"} style={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} ref={buttonRef} onClick={()=> closePopper()}>{cellRef.data}</Button>
+        <Button sx={{background: getStateColor(solveState), ":hover": {backgroundColor: getStateColor(solveState, true)}, width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start"}} variant={"contained"} 
+          ref={buttonRef} onClick={()=> closePopper()}>{cellRef.data}</Button>
         
         {show && (
         <ClickAwayListener onClickAway={()=> closePopper()}>
             <PopperContainer 
                 ref={popperRef}
-                style={styles.popper}
+                style={{...styles.popper, width: "80%"}}
                 {...attributes.popper}
                 >
                   <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
@@ -126,6 +130,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, updateBodyCell}) =>
                     closePopper={closePopper} 
                     saveAndClose={saveAndClose} 
                     cellRef={cellRef}
+                    recalculateRoute={recalculateRoute}
                     />
             </PopperContainer>
         </ClickAwayListener>)}

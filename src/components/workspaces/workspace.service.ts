@@ -1,11 +1,10 @@
 import axios from "axios"
-import { getServerUrl } from "../../services/server.service"
 import { ICell } from "../../services/worksheet/cell.interface"
 import { IRow } from "../../services/worksheet/row.interface"
 
 export function updateLastUsedWorkspaceId(bearer: string, workspaceId: string)
 {
-    axios.post(getServerUrl() + "/workspace/updateLastUsedWorkspaceId",
+    axios.post("/api/workspace/updateLastUsedWorkspaceId",
         {
             workspaceId: workspaceId
         },

@@ -21,7 +21,7 @@ export default function WorkSpaceCard({name, id}: CardProps)
         R_setWorkspaceId(id);
         console.log("Bearer token is:", R_bearer)
         updateLastUsedWorkspaceId(R_bearer, id)
-        navigate("/routeMenu", {replace: true})
+        navigate("/jobEditor", {replace: true})
     }
     
     return(

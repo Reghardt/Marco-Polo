@@ -17,11 +17,14 @@
     "allowUnusedLabels": false,
     "noImplicitReturns": true,
     "noUnusedParameters": true,
+
+    "strictNullChecks": false,
+    "allowUnreachableCode": false,
     
     "pretty": true,
     "typeRoots": [
       "node_modules/@types"
-    ]
+    ],
   },
   "exclude": [
     "node_modules"

@@ -1,5 +1,5 @@
 import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useRecoilState } from "recoil"
 import { RSDepartReturnState, RSDepartureAddress, RSReturnAddress } from "../../../state/globalstate"
 import HelpTooltip from "../../common/HelpTooltip.component"
@@ -36,7 +36,13 @@ const DepartureReturn: React.FC = () => {
                         color="primary"
                         value={R_departReturnState}
                         exclusive
-                        onChange={(_e, v) => {R_setDepartReturnState(v)}}
+                        onChange={(_e, v) => {
+                            if(v !== null)
+                            {
+                                R_setDepartReturnState(v)
+                            }
+                            
+                        }}
                         aria-label="Address Type"
                         >
                         <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDepartReturn.return}>Return Trip</ToggleButton>
@@ -48,20 +54,18 @@ const DepartureReturn: React.FC = () => {
                 </Box>
             </Stack>
 
-            
-
             {R_departReturnState === EDepartReturn.return && (
                 <React.Fragment>
                     
 
-                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Depart & Return Address"}/>
+                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Departure & Return Address"}/>
                 </React.Fragment>
             )}
 
             {R_departReturnState === EDepartReturn.different && (
                 <React.Fragment>
 
-                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Depart Address"}/>
+                    <AddressSelector address={R_departureAddress} addressSetter={R_setDepartureAddress} title={"Departure Address"}/>
                     <AddressSelector address={R_returnAddress} addressSetter={R_setReturnAddress} title={"Return Address"}/>
                 </React.Fragment>
             )}

@@ -2,7 +2,6 @@ import { Box, Button, Paper, Stack, TextField } from "@mui/material"
 import axios from "axios"
 import React, { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
-import { getServerUrl } from "../../services/server.service"
 import { RSBearerToken, RSWorkspaceID } from "../../state/globalstate"
 import StandardHeader from "../common/StandardHeader.component"
 
@@ -25,7 +24,7 @@ const AdminPanel: React.FC = () => {
 
     function getAllMembers()
     {
-      axios.post<IMember[]>(getServerUrl() + "/admin/members",
+      axios.post<IMember[]>("/api/admin/members",
         {
             workspaceId: R_workspaceId,
         },
@@ -43,7 +42,7 @@ const AdminPanel: React.FC = () => {
 
     function addMember()
     {
-      axios.post(getServerUrl() + "/admin/addMember",
+      axios.post("/api/admin/addMember",
         {
             workspaceId: R_workspaceId,
             memberEmail: memberEmail

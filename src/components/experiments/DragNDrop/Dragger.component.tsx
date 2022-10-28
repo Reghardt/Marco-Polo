@@ -27,7 +27,7 @@ const Dragger: React.FC<IDraggerProps> = ({draggableId, index, children}) => {
                     ref={provided.innerRef} 
                     {...provided.draggableProps} 
                     {...provided.dragHandleProps} 
-                    style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                    style={{...getItemStyle(snapshot.isDragging, provided.draggableProps.style), padding: 0, marginBottom: "0.2em"}}
                 >
                     {children}
                 </div>

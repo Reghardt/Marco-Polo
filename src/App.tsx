@@ -3,24 +3,25 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-
-import RouteTypeSelection from './components/workspaces/RouteTypeSelection.component';
-
 import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
 import WorkSpaces from './components/workspaces/Workspaces.component';
 import Success from './components/payment/Success';
-import PopperExperiment from './components/experiments/PopperExperiment.component';
+
 import AdminPanel from './components/admin/AdminPanel.component';
-import TabsExperiment from './components/experiments/TabsExperiment';
-import CustomOverlayMap from './components/experiments/CustomOverlay/CustomOverlayMap.component';
+
 import RouteBuilder from './components/Trip/Trip.component';
-import DragAndDrop from './components/experiments/DragNDrop/DragAndDropExp.component';
+
+import SignOnExperiment from './components/experiments/SSO/SignOnExperiment.component';
+import PostLoginConfig from './components/PostLoginConfig/PostLoginConfig.component';
 
 
 
 function App() {
+
+  console.log(process.env)
+  
 
   return (
     <div style={{height: '100%', textTransform: "none"}}>
@@ -32,10 +33,10 @@ function App() {
           <Route path="/register" element={<CreateAccount/>}/>
           <Route path="/workspaces" element={<WorkSpaces/>}/>
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
-          <Route path="/routeMenu" element={<RouteTypeSelection/>}/>
+          <Route path="/postLoginConfig" element={<PostLoginConfig/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/success" element={<Success/>}/>
-          <Route path="/exp" element={<DragAndDrop/>}/>
+          <Route path="/exp" element={<SignOnExperiment/>}/>
           <Route path="/admin" element={<AdminPanel/>}/>
         </Routes>
       </BrowserRouter>

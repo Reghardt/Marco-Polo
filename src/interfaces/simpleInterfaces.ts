@@ -22,3 +22,20 @@ export interface ICellAndRange
     range: Excel.Range
 }
 
+export interface IMember{
+    _id: string;
+    userId: string;
+    role: string
+    lastUsedVehicleId: string;
+    lastUsedFuelPrice: number;
+}
+
+export interface IVehicleListEntry{
+    _id: string;
+    vehicleDescription: string;
+    vehicleLicencePlate: string;
+    litersPer100km: number;
+    additionalCost: number;
+    additionalCostType: number; // 1 = R/hr, 2 = R/100km
+    vehicleClass: string;
+}
