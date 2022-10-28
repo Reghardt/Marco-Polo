@@ -107,7 +107,7 @@ export default function Login()
             </Box>
 
             <Box sx={{marginTop: "1em"}}>
-              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.13.1</Typography>
+              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.13.2</Typography>
             </Box>
           </Stack>
 

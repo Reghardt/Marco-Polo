@@ -50,7 +50,8 @@
       "react-app/jest"
     ],
     "rules": {
-      "prefer-const": 0
+      "prefer-const": 0,
+      "no-unused-vars": 1
     }
   },
   "browserslist": [
