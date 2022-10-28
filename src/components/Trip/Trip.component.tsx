@@ -16,13 +16,14 @@ import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } 
 import { IRow } from "../../services/worksheet/row.interface";
 
 import StandardHeader from "../common/StandardHeader.component";
-import { createBasicHeadingCell } from "../workspaces/workspace.service";
+
 
 import { createDirections, createInSequenceJobRows, makeRowParentChildRelations, removeRowParentChildRelations, doRowsConform } from "./Trip.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
 
 import GMap from "../Maps/GMap.component";
 import MasterSequence from "./MasterSequence/MasterSequence.component";
+
 
 
 
@@ -61,7 +62,7 @@ const RouteBuilder: React.FC = () =>
   const [, R_setTripDirections] = useRecoilState(RSTripDirections)
 
 
-  const [Cache_tripDirections, Cache_setTripDirections] = useState<ITripDirections[]>([])
+  const [Cache_tripDirections, Cache_setTripDirections] = useState<ITripDirections | null>(null)
 
   const [, R_setErrorMessage] = useRecoilState(RSErrorMessage)
 
@@ -92,24 +93,18 @@ const RouteBuilder: React.FC = () =>
           return;
         }
 
-        //create data for headings nad column designations
-        const tempHeadings: IRow = { cells: [], children: []}
         const tempColumnDesignations: number[] = []
         const colVisibility: boolean[] = []
         for(let k = 0; k < Cache_rowsToImport[0].cells.length; k++)
         {
-          tempHeadings.cells.push(createBasicHeadingCell("C" + k, k ))
+
           tempColumnDesignations.push(0) 
           colVisibility.push(true)
         }
-
-
         R_setJobColumnDesignations(tempColumnDesignations)
         R_setTripRows(Cache_rowsToImport)
         R_setColumnVisibility(colVisibility)
-
         R_setTripDirections(null)
-
       } 
     }, [Cache_rowsToImport]) //why does this throw a warning when the function is not in the dependency array?
 
@@ -133,14 +128,14 @@ const RouteBuilder: React.FC = () =>
     }, [R_addresColumIndex])
 
     useEffect(() => {
-      if(Cache_tripDirections.length > 0)
+      if(Cache_tripDirections)
       {
           //TODO cgeck if status is OK
           
           //This line reorders the rows according to what the fastest sequence is
           R_setPreserveViewport(false)
-          R_setTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0]?.result?.routes[0].waypoint_order ?? []))
-          R_setTripDirections(Cache_tripDirections[0])
+          R_setTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections?.result?.routes[0].waypoint_order ?? []))
+          R_setTripDirections(Cache_tripDirections)
           R_setErrorMessage("")
           
       }
@@ -214,10 +209,8 @@ const RouteBuilder: React.FC = () =>
           //TODO check if there are enought tokens available
           makeRouteOnDB(5)
 
-          Promise.all(
-            [createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, true), 
-              createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, false)
-            ]).then(res => {
+        createDirections(R_departureAddress.formatted_address, R_returnAddress.formatted_address, waypoints, true)
+        .then(res => {
             Cache_setTripDirections(res)
           })
         }

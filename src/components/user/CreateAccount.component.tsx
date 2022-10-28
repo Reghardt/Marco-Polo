@@ -12,7 +12,7 @@ export default function CreateAccount()
 
     const [errorMessage, setErrorMessage] = useState("")
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     const checkAndCreateUser = () =>
     {

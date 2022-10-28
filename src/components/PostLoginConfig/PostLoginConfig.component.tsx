@@ -11,7 +11,7 @@ const PostLoginConfig: React.FC = () => {
     const R_workspaceId = useRecoilValue(RSWorkspaceID)
     const R_bearer = useRecoilValue(RSBearerToken)
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     console.log(R_workspaceId)
 

@@ -33,7 +33,7 @@ export function createColumnDecorators_master(jobHeadings: IRow, columnVisibilit
 
     const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility)
 
-    let decorators =
+    const decorators =
     <React.Fragment>
         <Grid item xs={labelSize}>
             <Box sx={{height: "100%", width: "100%"}}></Box>
@@ -59,7 +59,7 @@ export function createColumnDecorators_master(jobHeadings: IRow, columnVisibilit
 export function CreateTableHeadingElements_master(jobHeadings: IRow, columnVisibility: boolean[])
     {
       const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility)
-      let headings =
+      const headings =
       <React.Fragment>
         <Grid item xs={labelSize}>
             <Box sx={{height: "100%", width: "100%"}}></Box>
@@ -86,7 +86,7 @@ export function createCellTypeElementsFromRow_master(row: Readonly<IRow>, nr: nu
 {
     const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
 
-    let rowWithChildren = 
+    const rowWithChildren = 
     <React.Fragment>
         <Grid container spacing={"0.2em"} justifyContent="flex-end">
             <Grid item xs={labelSize}>
@@ -142,7 +142,7 @@ function createChildRow(row: Readonly<IRow>, updateBodyCell: (cell: ICell) => vo
 {
     const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
 
-    let childRow =
+    const childRow =
     <React.Fragment>
         <Grid item xs={labelSize}>
             <Box sx={{height: "100%", width: "100%"}}></Box>
@@ -174,14 +174,14 @@ export async function deleteRow(rowYCoord: number, rows: IRow[])
 {
     for(let i = 0; i < rows.length; i++)
     {
-        let row = rows[i]
+        const row = rows[i]
         if(row.cells[0].y === rowYCoord)
         {
-            let newRows = Array.from(rows)
-            let deletedRow = newRows.splice(i, 1)
+            const newRows = Array.from(rows)
+            const deletedRow = newRows.splice(i, 1)
 
             Excel.run(async (context) => {
-                let sheet = context.workbook.worksheets.getActiveWorksheet()
+                const sheet = context.workbook.worksheets.getActiveWorksheet()
                 for(let j = 0; j < deletedRow.length; j++)
                 {   
                     preSyncRowDataForDeletion(deletedRow[j], sheet)

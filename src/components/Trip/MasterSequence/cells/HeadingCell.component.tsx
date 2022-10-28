@@ -9,7 +9,7 @@ type HeadingCellProps = {
 const HeadingCell: React.FC<HeadingCellProps> = ({colNumber}) =>
 {
 
-  let col = String.fromCharCode(colNumber - 1 + 'A'.charCodeAt(0))
+  const col = String.fromCharCode(colNumber - 1 + 'A'.charCodeAt(0))
 
     
     return(

@@ -14,7 +14,7 @@ export default function CreateWorkspace()
     
 
     const R_bearer = useRecoilValue(RSBearerToken)
-    let navigate = useNavigate();
+    const navigate = useNavigate();
     
     const createNewWorkspace = () =>{
         console.log("bearer test fired")
