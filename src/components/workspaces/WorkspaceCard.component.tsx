@@ -12,7 +12,7 @@ type CardProps = {
 
 export default function WorkSpaceCard({name, id}: CardProps)
 {
-    const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
+    const [, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
     const R_bearer = useRecoilValue(RSBearerToken)
     let navigate = useNavigate();
 

@@ -3,7 +3,7 @@
 import { Box, Button, Divider, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
-import {IMember, ITripDirections, IVehicleListEntry } from "../../interfaces/simpleInterfaces";
+import {IMember, ITripDirections } from "../../interfaces/simpleInterfaces";
 import {loadSelection} from "../../services/worksheet/worksheet.service"
 
 import axios from "axios";
@@ -16,7 +16,7 @@ import { EColumnDesignations, handleSetColumnAsAddress, handleSetColumnAsData } 
 import { IRow } from "../../services/worksheet/row.interface";
 
 import StandardHeader from "../common/StandardHeader.component";
-import { createBasicHeadingCell, createBasicHeadingRow } from "../workspaces/workspace.service";
+import { createBasicHeadingCell } from "../workspaces/workspace.service";
 
 import { createDirections, createInSequenceJobRows, makeRowParentChildRelations, removeRowParentChildRelations, doRowsConform } from "./Trip.service";
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component";
@@ -34,13 +34,13 @@ const RouteBuilder: React.FC = () =>
   const [Cache_rowsToImport, Cache_setRowsToImport] = useState<IRow[]>([])
   
 
-  const [R_jobColumnDesignations, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
+  const [, R_setJobColumnDesignations] = useRecoilState(RSJobColumnDesignations)
 
   const [R_tripRows, R_setTripRows] = useRecoilState(RSTripRows)
 
   const R_addresColumIndex = useRecoilValue(RSAddresColumnIndex)
 
-  const [R_columnVisibility, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
+  const [, R_setColumnVisibility] = useRecoilState(RSColumnVisibility)
   
   const [,R_setPreserveViewport] = useRecoilState(RSPreserveViewport)
   
@@ -56,16 +56,16 @@ const RouteBuilder: React.FC = () =>
 
   const R_bearer = useRecoilValue(RSBearerToken)
 
-  const [R_tokens, R_setTokens] = useRecoilState(RSTokens)
+  const [, R_setTokens] = useRecoilState(RSTokens)
 
   const [, R_setTripDirections] = useRecoilState(RSTripDirections)
 
 
   const [Cache_tripDirections, Cache_setTripDirections] = useState<ITripDirections[]>([])
 
-  const [R_errorMessage, R_setErrorMessage] = useRecoilState(RSErrorMessage)
+  const [, R_setErrorMessage] = useRecoilState(RSErrorMessage)
 
-  const [R_memberData, R_setMemberData] = useRecoilState(RSMemberData)
+  const [, R_setMemberData] = useRecoilState(RSMemberData)
 
     console.log("refresh")
 
@@ -79,7 +79,7 @@ const RouteBuilder: React.FC = () =>
     useEffect(() => { //is this use effect neccesary? Yes: async functions dont batch setStates
       if(Cache_rowsToImport.length > 0)
       {
-        let conformRes = doRowsConform(Cache_rowsToImport)
+        const conformRes = doRowsConform(Cache_rowsToImport)
         if(conformRes.status === false)
         {
           console.error(conformRes.reason)
@@ -93,9 +93,9 @@ const RouteBuilder: React.FC = () =>
         }
 
         //create data for headings nad column designations
-        let tempHeadings: IRow = { cells: [], children: []}
-        let tempColumnDesignations: number[] = []
-        let colVisibility: boolean[] = []
+        const tempHeadings: IRow = { cells: [], children: []}
+        const tempColumnDesignations: number[] = []
+        const colVisibility: boolean[] = []
         for(let k = 0; k < Cache_rowsToImport[0].cells.length; k++)
         {
           tempHeadings.cells.push(createBasicHeadingCell("C" + k, k ))
@@ -117,16 +117,16 @@ const RouteBuilder: React.FC = () =>
 
     
     useEffect(() => {
-      let jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_tripRows))
+      const jobBodyState: IRow[] = JSON.parse(JSON.stringify(R_tripRows))
       if(R_addresColumIndex === -1)
       {
-        let removedRelationsRows = removeRowParentChildRelations(jobBodyState)
+        const removedRelationsRows = removeRowParentChildRelations(jobBodyState)
         R_setTripRows(removedRelationsRows)
       }
       else
       {
-        let removedRelationsRows = removeRowParentChildRelations(jobBodyState) //remove relations as address column may have changed
-        let parentWithChildrenRows = makeRowParentChildRelations(removedRelationsRows, R_addresColumIndex) //re-add relations as per new address col
+        const removedRelationsRows = removeRowParentChildRelations(jobBodyState) //remove relations as address column may have changed
+        const parentWithChildrenRows = makeRowParentChildRelations(removedRelationsRows, R_addresColumIndex) //re-add relations as per new address col
         R_setTripRows(parentWithChildrenRows)
       }
 
@@ -193,7 +193,7 @@ const RouteBuilder: React.FC = () =>
     {
       if(R_departureAddress !== null && R_returnAddress !== null) //test if not "none"
       {
-        let waypoints: google.maps.DirectionsWaypoint[]  = [];
+        const waypoints: google.maps.DirectionsWaypoint[]  = [];
 
         if(R_addressColumIndex > -1)
         {

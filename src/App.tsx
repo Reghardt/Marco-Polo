@@ -13,7 +13,7 @@ import AdminPanel from './components/admin/AdminPanel.component';
 
 import RouteBuilder from './components/Trip/Trip.component';
 
-import SignOnExperiment from './components/experiments/SSO/SignOnExperiment.component';
+
 import PostLoginConfig from './components/PostLoginConfig/PostLoginConfig.component';
 
 
@@ -36,7 +36,6 @@ function App() {
           <Route path="/postLoginConfig" element={<PostLoginConfig/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/success" element={<Success/>}/>
-          <Route path="/exp" element={<SignOnExperiment/>}/>
           <Route path="/admin" element={<AdminPanel/>}/>
         </Routes>
       </BrowserRouter>

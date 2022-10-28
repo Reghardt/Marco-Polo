@@ -1,7 +1,7 @@
 import { Box, Button, Paper, Stack, TextField } from "@mui/material"
 import axios from "axios"
 import React, { useEffect, useState } from "react"
-import { useRecoilState, useRecoilValue } from "recoil"
+import { useRecoilValue } from "recoil"
 import { RSBearerToken, RSWorkspaceID } from "../../state/globalstate"
 import StandardHeader from "../common/StandardHeader.component"
 
@@ -13,7 +13,7 @@ interface IMember{
 
 const AdminPanel: React.FC = () => {
 
-    const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
+    const R_workspaceId = useRecoilValue(RSWorkspaceID)
     const R_bearer = useRecoilValue(RSBearerToken)
     const [memberEmail, setMemberEmail] = useState("")
     const [members, setMembers] = useState<IMember[]>([])

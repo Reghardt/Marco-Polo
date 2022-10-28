@@ -1,6 +1,6 @@
 import { MenuItem, Select } from "@mui/material"
 import React from "react"
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import { EColumnDesignations } from "../../../../services/ColumnDesignation.service";
 import { RSAddresColumnIndex, RSJobColumnDesignations } from "../../../../state/globalstate";
 

@@ -1,8 +1,7 @@
-import { Box, Paper, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
+import { Paper, Typography } from "@mui/material"
 import React, { useEffect, useRef, useState } from "react"
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import { RSAddresColumnIndex, RSTripRows, RSTripDirections, RSPreserveViewport, RSDepartureAddress, RSReturnAddress } from "../../state/globalstate";
-import HelpTooltip from "../common/HelpTooltip.component";
 import Statistics from "../Statistics/Statistics.component";
 import { createCustomMapMarkers } from "./GMap.service"
 import GMapLegends from "./GMapLegends.component";
@@ -10,7 +9,7 @@ import GMapLegends from "./GMapLegends.component";
 
 const GMap: React.FC = () => {
 
-    const [R_tripDirections, R_setTripDirections] = useRecoilState(RSTripDirections)
+    const R_tripDirections = useRecoilValue(RSTripDirections)
     
     const map = useRef<google.maps.Map>()
     // const directionsService = useRef<google.maps.DirectionsService>()

@@ -4,18 +4,18 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import {RSBearerToken, RSWorkspaceID} from "../../state/globalstate"
-import { Box, Button, Chip, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
 import { msLogin } from './Login.service';
 import { useMsal } from '@azure/msal-react';
 import MSLogo from './MSLogo.component';
 
 export default function Login()
 {
-  const [R_bearer, R_setBearer] = useRecoilState(RSBearerToken)
-  const [R_workspaceId, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
+  const [, R_setBearer] = useRecoilState(RSBearerToken)
+  const [, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
   const [loginError, setLoginError] = useState<string>(null)
   
-  const { instance, accounts } = useMsal();
+  const { instance, /* accounts */} = useMsal();
   let navigate = useNavigate();
 
 
@@ -24,7 +24,7 @@ export default function Login()
 
   async function loginCM()
   {
-      //e.preventDefault(); // prevents whole page from refreshing
+      //TODO make server throw unauthorized 
       console.log(email, password)
       
       axios.post("/api/auth/loginCM", { //login custom
@@ -39,6 +39,7 @@ export default function Login()
       })
       .catch(err => {
         console.log("Err", err)
+        setLoginError("Email or Password Incorrect")
       })
   }
 
@@ -58,9 +59,13 @@ export default function Login()
       })
       .catch(err => {
         console.log(err)
+        setLoginError("Microsoft Login Failed")
       })
     })
-    .catch(err => {console.log(err)})
+    .catch(err => {
+      console.log(err)
+      setLoginError("Microsoft Login Failed")
+    })
   }
 
   return(
@@ -107,7 +112,7 @@ export default function Login()
             </Box>
 
             <Box sx={{marginTop: "1em"}}>
-              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.13.2</Typography>
+              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.13.3</Typography>
             </Box>
           </Stack>
 

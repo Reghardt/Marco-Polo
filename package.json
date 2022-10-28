@@ -50,8 +50,10 @@
       "react-app/jest"
     ],
     "rules": {
-      "prefer-const": 0,
-      "no-unused-vars": 1
+      "prefer-const": 1,
+      "@typescript-eslint/no-unused-vars": 2,
+      "no-unused-vars": 0
+      
     }
   },
   "browserslist": [

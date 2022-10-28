@@ -1,13 +1,13 @@
 import { AuthenticationResult, IPublicClientApplication } from "@azure/msal-browser";
 import { loginRequest } from "../../msalConfig";
 
-    function handlePopupLogout(instance: IPublicClientApplication)
-    {
-        instance.logoutPopup({
-            postLogoutRedirectUri: "/",
-            mainWindowRedirectUri: "/"
-        });
-    }
+    // function handlePopupLogout(instance: IPublicClientApplication)
+    // {
+    //     instance.logoutPopup({
+    //         postLogoutRedirectUri: "/",
+    //         mainWindowRedirectUri: "/"
+    //     });
+    // }
 
     function openOfficeDialog()
     {

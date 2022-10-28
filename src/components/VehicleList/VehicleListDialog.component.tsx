@@ -1,5 +1,5 @@
 import { DeleteOutline } from "@mui/icons-material";
-import { Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, Stack, Tab, Tabs, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, Stack, Tab, Tabs, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import React, { useEffect, useState } from "react"
@@ -38,7 +38,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
 
     const [tabValue, setTabValue] = useState(0)
 
-    const [R_selectedVehicle, R_setSelectedVehicle] = useRecoilState(RSSelectedVehicle)
+    const [, R_setSelectedVehicle] = useRecoilState(RSSelectedVehicle)
 
     const [vehicleList, setVehicleList] = useState<IVehicleListEntry[]>([])
 

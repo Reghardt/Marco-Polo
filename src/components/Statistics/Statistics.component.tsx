@@ -1,13 +1,12 @@
-import { Box, Checkbox, FormControlLabel, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import axios from "axios";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
 import React, { useEffect, useState } from "react"
-import { Bar, Line } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import {useRecoilState, useRecoilValue } from "recoil";
 import { IMember, IVehicleListEntry } from "../../interfaces/simpleInterfaces";
 import { RSBearerToken, RSMemberData, RSSelectedVehicle, RSTripDirections, RSWorkspaceID } from "../../state/globalstate";
 import CostGraph from "./CostGraph.component";
-
 
 enum EGraphStatistic{
     Distance,

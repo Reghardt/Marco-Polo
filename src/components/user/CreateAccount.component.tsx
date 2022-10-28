@@ -1,8 +1,7 @@
-import { Box, Button, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
 import axios from 'axios';
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
 
 export default function CreateAccount()
 {

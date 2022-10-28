@@ -2,10 +2,9 @@ import { Box, Button, Stack, TextField } from "@mui/material";
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { RSBearerToken} from "../../state/globalstate";
 import StandardHeader, { EStandardHeaderConfig } from "../common/StandardHeader.component";
-import Payment from "../payment/Payment";
 
 
 export default function CreateWorkspace()
@@ -14,12 +13,12 @@ export default function CreateWorkspace()
     const [errorMessage, setErrorMessage] = useState("")
     
 
-    const [bearer, setBearer] = useRecoilState(RSBearerToken)
+    const R_bearer = useRecoilValue(RSBearerToken)
     let navigate = useNavigate();
     
     const createNewWorkspace = () =>{
         console.log("bearer test fired")
-        console.log(bearer)
+        console.log(R_bearer)
         if(companyName.length === 0)
         {
             setErrorMessage("Please provide a name for the workspace")
@@ -30,7 +29,7 @@ export default function CreateWorkspace()
             companyName: companyName
         },
         {
-            headers: {authorization: bearer}
+            headers: {authorization: R_bearer}
         }).then((res) => {
             console.log("Workspace Created:", res.data)
             //setWorkspaceIdString(res.data)

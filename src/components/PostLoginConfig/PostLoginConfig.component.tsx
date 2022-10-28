@@ -1,9 +1,8 @@
 import axios from "axios"
 import React, { useEffect } from "react"
 import { useNavigate } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil"
-import { IMember } from "../../interfaces/simpleInterfaces";
-import { RSBearerToken, RSTokens, RSWorkspaceID } from "../../state/globalstate"
+import { useRecoilValue } from "recoil"
+import { RSBearerToken, RSWorkspaceID } from "../../state/globalstate"
 
 
 

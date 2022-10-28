@@ -40,7 +40,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
     useEffect(() => {
         console.log(Cache_rowsToAdd)
     
-        let conformRes = doRowsConform(Cache_rowsToAdd, R_tripRows[0])
+        const conformRes = doRowsConform(Cache_rowsToAdd, R_tripRows[0])
         if(conformRes.status === false)
         {
           console.error(conformRes.reason)
@@ -57,17 +57,17 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
     function updateBodyCell(cell: ICell)
     {
       R_setTripRows((bodyData) => {
-        let tempBodyData = JSON.parse(JSON.stringify(bodyData))
+        const tempBodyData = JSON.parse(JSON.stringify(bodyData))
         cell.data = cell.data.trim();
         for(let i = 0; i < tempBodyData.length; i++) //loops over rows
         {
-          let row = tempBodyData[i]
+          const row = tempBodyData[i]
           if(row.cells[0].y === cell.y) //if the row of the desired cell is found, loop over row until the desired cell is found
           {
   
             for(let j = 0; j < row.cells.length; j++) //loops over cells
             {
-              let cellInRow = row.cells[j]
+              const cellInRow = row.cells[j]
               if(cellInRow.x === cell.x) //if x coordinate of cell matches, cell is found
               {
                 console.log("cell found")
@@ -84,13 +84,13 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
 
     function createColumnVisibilityOptions(columnNames: IRow, columnVisibility: boolean[])
     {
-      let visibilityElements = 
+      const visibilityElements = 
         <Grid container sx={{paddingTop: "0.3em"}}>
           {columnNames.cells.map((elem, idx) => {
             return  <Grid item xs="auto" sx={{margin: 0, padding: 0}}>
                       <FormControlLabel  control={<Checkbox sx={{paddingTop: 0, paddingBottom: 0}} checked={columnVisibility[idx]} 
                         onChange={(_e) => {R_setColumnVisibility((visibility) => {
-                          let newVisibility = [...visibility]
+                          const newVisibility = [...visibility]
                           newVisibility[idx] = _e.target.checked
                           return newVisibility
                         })}}/>} label={String.fromCharCode(elem.x - 1 + 'A'.charCodeAt(0))} />
@@ -138,7 +138,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
     {
       if(departureAddress !== "" && returnAddress !== "") //test if not "none"
       {
-        let waypoints: google.maps.DirectionsWaypoint[]  = [];
+        const waypoints: google.maps.DirectionsWaypoint[]  = [];
 
         if(addressColumnIndex > -1)
         {
@@ -147,7 +147,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
             waypoints.push({location: rows[i].cells[addressColumnIndex].data, stopover: true})
           }
         }
-         let directions = await createDirections(departureAddress, returnAddress, waypoints, false)
+        const directions = await createDirections(departureAddress, returnAddress, waypoints, false)
           R_setPreserveViewport(true)
           //TODO cgeck if status is OK
           R_setTripDirections(directions)
@@ -156,7 +156,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
 
     function reverseOrder(rows: IRow[])
     {
-      let reversedRows = Array.from(rows).reverse()
+      const reversedRows = Array.from(rows).reverse()
       if(R_departureAddress && R_returnAddress)
       {
         recalculateRoute(R_departureAddress.formatted_address, R_returnAddress.formatted_address, reversedRows, R_addressColumnIndex)
@@ -167,7 +167,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
 
     async function handleWriteBackToSpreadsheet()
     {
-      let newRows = await writeBackToSpreadsheet(R_tripRows, R_addressColumnIndex)
+      const newRows = await writeBackToSpreadsheet(R_tripRows, R_addressColumnIndex)
       console.log(newRows)
       R_setTripRows(newRows)
     }
