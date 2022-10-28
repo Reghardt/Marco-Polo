@@ -62,8 +62,8 @@ const DistanceGraph : React.FC<ICostGraph> = ({tripDirections}) =>
                     {
                     label: 'Distance in Km',
                     data: dataValues.map((val) => {return val}),
-                    borderColor: 'rgb(53, 162, 235)',
-                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    borderColor: "#1976d2",
+                    backgroundColor: "#1976d2",
                     },
                 ],
             };
