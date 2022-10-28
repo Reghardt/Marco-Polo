@@ -139,7 +139,7 @@ const RouteBuilder: React.FC = () =>
           
           //This line reorders the rows according to what the fastest sequence is
           R_setPreserveViewport(false)
-          R_setTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0].result.routes[0].waypoint_order))
+          R_setTripRows(createInSequenceJobRows(Array.from(R_tripRows), Cache_tripDirections[0]?.result?.routes[0].waypoint_order ?? []))
           R_setTripDirections(Cache_tripDirections[0])
           R_setErrorMessage("")
           
@@ -201,7 +201,7 @@ const RouteBuilder: React.FC = () =>
           {
             if(R_tripRows[i].cells[R_addressColumIndex].geocodedAddressRes !== null)
             {
-              waypoints.push({location: R_tripRows[i].cells[R_addressColumIndex].geocodedAddressRes.formatted_address, stopover: true})
+              waypoints.push({location: R_tripRows[i].cells[R_addressColumIndex].geocodedAddressRes?.formatted_address, stopover: true})
             }
             else
             {

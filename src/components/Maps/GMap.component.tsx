@@ -29,7 +29,7 @@ const GMap: React.FC = () => {
     useEffect(() => {
 
         setMarkers(createCustomMapMarkers(R_tripRows, R_addresColumIndex, map, R_departureAddress, R_returnAddress))
-        
+
     }, [R_tripRows, R_addresColumIndex, R_departureAddress, R_returnAddress])
 
     //Creates map on mount
@@ -49,8 +49,8 @@ const GMap: React.FC = () => {
         }
         else
         {
-            fastestRouteDirectionsRenderer.current.setMap(null)
-            originalRouteDirectionsRenderer.current.setMap(null)
+            fastestRouteDirectionsRenderer?.current?.setMap(null)
+            originalRouteDirectionsRenderer?.current?.setMap(null)
         }
     }, [R_tripDirections])
 
@@ -58,14 +58,14 @@ const GMap: React.FC = () => {
     {
         if(R_tripDirections)
         {
-            fastestRouteDirectionsRenderer.current.setMap(null)
+            fastestRouteDirectionsRenderer?.current?.setMap(null)
             fastestRouteDirectionsRenderer.current = new google.maps.DirectionsRenderer({
             map: map.current,
             suppressMarkers: true,
             preserveViewport: preserveViewport,
             directions: R_tripDirections.result
             })
-            originalRouteDirectionsRenderer.current.setMap(null)
+            originalRouteDirectionsRenderer?.current?.setMap(null)
         }
 
     }

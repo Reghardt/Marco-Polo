@@ -8,7 +8,7 @@ import PopperContainer from "../../common/PopperContainer.styled";
 import AddressSelectorPopup from "./AddressSelectorPopup.component";
 
 interface IAddressSelectorProps{
-    address: google.maps.GeocoderResult;
+    address: google.maps.GeocoderResult | null;
     addressSetter: React.Dispatch<React.SetStateAction<google.maps.GeocoderResult>>;
     title: string;
 

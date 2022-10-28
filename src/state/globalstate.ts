@@ -26,12 +26,12 @@ export const RSMemberData = atom<IMember | null>({
     default: null
 })
 
-export const RSDepartureAddress = atom<google.maps.GeocoderResult>({
+export const RSDepartureAddress = atom<google.maps.GeocoderResult | null>({
     key: "departureAddress",
     default: null
 })
 
-export const RSReturnAddress = atom<google.maps.GeocoderResult>({
+export const RSReturnAddress = atom<google.maps.GeocoderResult | null>({
     key: "returnAddress",
     default: null
 })
@@ -87,7 +87,7 @@ export const RSTokens = atom<number>({
 })
 
 
-export const RSTripDirections = atom<ITripDirections>({
+export const RSTripDirections = atom<ITripDirections | null>({
     key: "tripDirections",
     default: null
 })

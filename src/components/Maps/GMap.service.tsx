@@ -4,7 +4,7 @@ import CustomMarker from "../experiments/CustomOverlay/CustomMarker.component";
 
 export function createMapMarkers(rows: IRow[], currentMapMarkers: google.maps.Marker[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>)
 {
-    let newMarkers: google.maps.Marker[] = [];
+    const newMarkers: google.maps.Marker[] = [];
 
     for(let i = 0; i < currentMapMarkers.length; i++)
     {
@@ -16,17 +16,21 @@ export function createMapMarkers(rows: IRow[], currentMapMarkers: google.maps.Ma
         
         for(let i = 0; i < rows.length; i++)
         {
-            let row = rows[i]
+            const row = rows[i]
             if(row.cells[addressColumnIndex].geocodedAddressRes !== null)
             {
-                let cell = row.cells[addressColumnIndex]
+                const cell = row.cells[addressColumnIndex]
                 console.log("label generatable")
-                newMarkers.push(
-                    new google.maps.Marker({
-                        position: cell.geocodedAddressRes.geometry.location,
-                        map: map.current
-                    })
-                )
+                if(cell.geocodedAddressRes)
+                {
+                    newMarkers.push(
+                        new google.maps.Marker({
+                            position: cell.geocodedAddressRes.geometry.location,
+                            map: map.current
+                        })
+                    )
+                }
+                
             }
         }
     }
@@ -36,23 +40,33 @@ export function createMapMarkers(rows: IRow[], currentMapMarkers: google.maps.Ma
 
 
 
-export function createCustomMapMarkers(rows: IRow[], addressColumnIndex: number, map: React.MutableRefObject<google.maps.Map>, departureAddress: google.maps.GeocoderResult, returnAddress: google.maps.GeocoderResult): JSX.Element[]
+export function createCustomMapMarkers(
+    rows: IRow[], 
+    addressColumnIndex: number, 
+    map: React.MutableRefObject<google.maps.Map | undefined>, 
+    departureAddress: google.maps.GeocoderResult | null, 
+    returnAddress: google.maps.GeocoderResult | null
+    ): JSX.Element[]
 {
 
-    let newMarkers: JSX.Element[] = []
+    const newMarkers: JSX.Element[] = []
 
     if(addressColumnIndex > -1)
     {
         for(let i = 0; i < rows.length; i++)
         {
-            let row: IRow = rows[i]
-            let label = (i + 1).toString()
+            const row: IRow = rows[i]
+            const label = (i + 1).toString()
 
 
             if(row.cells[addressColumnIndex].geocodedAddressRes !== null)
             {
-                let addressRes = row.cells[addressColumnIndex].geocodedAddressRes
-                newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location} backgroundColor={"green"}/>)
+                const addressRes = row.cells[addressColumnIndex].geocodedAddressRes
+                if(addressRes)
+                {
+                    newMarkers.push(<CustomMarker label={label} map={map.current} position={addressRes.geometry.location} backgroundColor={"green"}/>)
+                }
+                
             }
         }
     }

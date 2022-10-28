@@ -50,8 +50,8 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
     function pricePerKm(petrol: string, liters: string)
     {
 
-            let tempPetrol = parseFloat(petrol)
-            let tempLiters = parseFloat(liters)
+            const tempPetrol = parseFloat(petrol)
+            const tempLiters = parseFloat(liters)
             if(isNaN(tempPetrol) || isNaN(tempLiters))
             {
                 return 0
@@ -86,30 +86,34 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
     useEffect(() => {
         if(tripDirections && tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            let legs = tripDirections.result.routes[0].legs
-            let labels: string[] = []
-            let dataValues: number[] = [];
+            const legs = tripDirections?.result?.routes[0].legs
+            const labels: string[] = []
+            const dataValues: number[] = [];
 
             let totalCost = 0
-            for(let i = 0; i < legs.length; i++)
+            if(legs)
             {
-                let cost = (legs[i].distance.value / 1000) * pricePerKm(fuelPrice, litersKm)
-                console.log(i, legs[i].distance, cost)
+                for(let i = 0; i < legs.length; i++)
+                {
+                    const cost = (legs[i]?.distance?.value ?? 0 / 1000) * pricePerKm(fuelPrice, litersKm)
+                    console.log(i, legs[i].distance, cost)
+                    
+                    
+                    totalCost += cost;
+                    labels.push(i.toString())
+                    dataValues.push(cost)
+    
+                }
+                labels.shift()
+                console.log(labels)
+                setRoundTripCost(totalCost)
+                setAverageCost(totalCost / legs.length)
+                labels.push("Return")
+                //labels[0] = "D"
                 
-                
-                totalCost += cost;
-                labels.push(i.toString())
-                dataValues.push(cost)
-   
+                console.log(dataValues)
             }
-            labels.shift()
-            console.log(labels)
-            setRoundTripCost(totalCost)
-            setAverageCost(totalCost / legs.length)
-            labels.push("Return")
-            //labels[0] = "D"
             
-            console.log(dataValues)
             const data = {
                 labels: labels,
                 datasets: [

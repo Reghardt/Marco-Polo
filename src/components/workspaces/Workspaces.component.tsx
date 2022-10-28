@@ -8,11 +8,16 @@ import HelpTooltip from '../common/HelpTooltip.component';
 import StandardHeader, { EStandardHeaderConfig } from '../common/StandardHeader.component';
 import WorkSpaceCard from './WorkspaceCard.component';
 
+interface IWorkspace{
+    _id: string;
+    workspaceName: string;
+}
+
 function getWorkspaces(bearer: string)
 {
     console.log("bearer test fired")
     console.log(bearer)
-    return axios.post("/api/workspace/myWorkspaces",
+    return axios.post<IWorkspace[]>("/api/workspace/userWorkspaceList",
     {},
     {
         headers: {authorization: bearer}
@@ -30,16 +35,16 @@ export default function WorkSpaces()
 {
     const R_bearer = useRecoilValue(RSBearerToken)
     
-    const [workspaces, setWorkspaces] = useState([])
+    const [workspaces, setWorkspaces] = useState<IWorkspace[]>([])
     const [doesBelongToWorkspace, setDoesBelongToWorkspace] = useState(true)
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
 
 
     useEffect(() => {
         console.log("fetch data")
         getWorkspaces(R_bearer)
-        .then((res: any[]) => {
+        .then((res) => {
             console.log(res)
             setWorkspaces(res)
             if(res.length === 0)

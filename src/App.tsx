@@ -7,7 +7,6 @@ import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
 import WorkSpaces from './components/workspaces/Workspaces.component';
-import Success from './components/payment/Success';
 
 import AdminPanel from './components/admin/AdminPanel.component';
 
@@ -35,7 +34,6 @@ function App() {
           <Route path="/createWorkspace" element={<CreateWorkspace/>}/>
           <Route path="/postLoginConfig" element={<PostLoginConfig/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
-          <Route path="/success" element={<Success/>}/>
           <Route path="/admin" element={<AdminPanel/>}/>
         </Routes>
       </BrowserRouter>

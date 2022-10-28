@@ -4,13 +4,13 @@ import { ICell } from "../services/worksheet/cell.interface";
 
 export interface IGeocoderResult
 {
-    results: google.maps.GeocoderResult[];
+    results: google.maps.GeocoderResult[] | null;
     status: google.maps.GeocoderStatus;
 }
 
 export interface ITripDirections
 {
-    result: google.maps.DirectionsResult;
+    result: google.maps.DirectionsResult | null;
     status: google.maps.DirectionsStatus;
 }
 

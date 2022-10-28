@@ -51,7 +51,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
           if(geocoded.status === "OK")
           {
               console.log("OK")
-              setGeocodedResults(geocoded.results)
+              setGeocodedResults(geocoded?.results ?? [])
               setErrorMessage("")
             //   setSelectedGeocodedAddressIndex(-1)
           }

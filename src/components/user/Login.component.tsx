@@ -13,7 +13,7 @@ export default function Login()
 {
   const [, R_setBearer] = useRecoilState(RSBearerToken)
   const [, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
-  const [loginError, setLoginError] = useState<string>(null)
+  const [loginError, setLoginError] = useState<string>("")
   
   const { instance, /* accounts */} = useMsal();
   let navigate = useNavigate();

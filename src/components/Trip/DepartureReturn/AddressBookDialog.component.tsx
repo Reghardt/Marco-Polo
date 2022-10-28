@@ -76,7 +76,7 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
                 if(geocoded.status === "OK")
                 {
                     console.log("OK")
-                    setGeocodedResults(geocoded.results)
+                    setGeocodedResults(geocoded.results ?? [])
                     setErrorMessage("")
                 }
                 else

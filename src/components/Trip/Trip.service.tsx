@@ -95,7 +95,7 @@ export function createDirections(departureAddress: string, returnAddress: string
 }
 
 //this function checks if a number of rows are of equal length and if their columns align.
-export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status: boolean, reason: string}
+export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : {status: boolean, reason: string}
 {
   //
   if(referenceRow === null) //reference row to test against, otherwise use the first row of the rows

@@ -4,8 +4,8 @@ export interface ICell
     y: number;
     data: string;
     origionalData: string;
-    geocodedAddressRes: google.maps.GeocoderResult; 
+    geocodedAddressRes: google.maps.GeocoderResult | null; 
     geocodedResults: google.maps.GeocoderResult[];
-    selectedGeocodedAddressIndex: number; // default -1
+    selectedGeocodedAddressIndex: number | null;
     formula: string; // default ""
 }

@@ -35,19 +35,23 @@ const Statistics: React.FC = () => {
     {
         if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            let legs = R_tripDirections.result.routes[0].legs
-            let labels: string[] = []
-            let dataValues: number[] = [];
+            const legs = R_tripDirections?.result?.routes[0].legs
+            const labels: string[] = []
+            const dataValues: number[] = [];
             dataValues.push(0)
             let totalVal = 0
-            for(let i = 0; i < legs.length; i++)
+            if(legs)
             {
-                labels.push(i.toString())
+                for(let i = 0; i < legs.length; i++)
+                {
+                    labels.push(i.toString())
 
-                totalVal += legs[i].distance.value / 1000
-                dataValues.push(totalVal)
-   
+                    totalVal += legs[i]?.distance?.value ?? 0 / 1000
+                    dataValues.push(totalVal)
+    
+                }
             }
+            
             labels.push("Return")
             labels[0] = "Depart"
 
@@ -100,21 +104,25 @@ const Statistics: React.FC = () => {
     {
         if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            let legs = R_tripDirections.result.routes[0].legs
-            let labels: string[] = []
-            let dataValues: number[] = [];
+            const legs = R_tripDirections?.result?.routes[0].legs
+            const labels: string[] = []
+            const dataValues: number[] = [];
             dataValues.push(0)
             let totalVal = 0
-            for(let i = 0; i < legs.length; i++)
+            if(legs)
             {
-                //console.log(legs[i])
-                labels.push(i.toString())
+                for(let i = 0; i < legs.length; i++)
+                {
+                    //console.log(legs[i])
+                    labels.push(i.toString())
 
-                totalVal += legs[i].duration.value
-                dataValues.push(totalVal)
+                    totalVal += legs[i]?.duration?.value ?? 0
+                    dataValues.push(totalVal)
+                }
+                labels.push("Return")
+                labels[0] = "Depart"
             }
-            labels.push("Return")
-            labels[0] = "Depart"
+            
 
             const options = {
                 responsive: true,
@@ -174,10 +182,10 @@ const Statistics: React.FC = () => {
 
     function secondsToH_M(value: number)
     {
-        let minutes = value / 60
+        const minutes = value / 60
         
-        let hours = Math.floor(minutes / 60)
-        let remainingMinutes = Math.floor(minutes % 60)
+        const hours = Math.floor(minutes / 60)
+        const remainingMinutes = Math.floor(minutes % 60)
         return hours + "h:" + remainingMinutes + "m"
     }
 
@@ -185,14 +193,20 @@ const Statistics: React.FC = () => {
     {
         if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            let legs = R_tripDirections.result.routes[0].legs
+            const legs = R_tripDirections?.result?.routes[0].legs
             let roundTripDistance = 0;
             let roundTripTime = 0;
-            for(let i = 0; i < legs.length; i++)
+
+            if(legs)
             {
-                roundTripDistance += legs[i].distance.value
-                roundTripTime += legs[i].duration.value
+                for(let i = 0; i < legs.length; i++)
+                {
+                    roundTripDistance += legs[i]?.distance?.value ?? 0
+                    roundTripTime += legs[i]?.duration?.value ?? 0
+                }
             }
+
+            
 
             return(
                 <React.Fragment>
@@ -305,7 +319,7 @@ const Statistics: React.FC = () => {
                 createTimeGraph()
             )}
 
-            {graphStatistic === EGraphStatistic.Cost && (
+            {graphStatistic === EGraphStatistic.Cost && R_tripDirections && (
                 <CostGraph tripDirections={R_tripDirections} fuelPrice={fuelPrice} litersKm={litersKm} setFuelPrice={setFuelPrice} setLitersKm={setLitersKm}/>
             )}
 
