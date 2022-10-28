@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Modal, Paper, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { geocodeAddress } from "../Trip.service";
-import AddressBookModal from "./AddressBookModal.component";
+import AddressBookDialog from "./AddressBookDialog.component";
 
 interface IAddressSelectorPopup{
     title: string;
@@ -95,7 +95,7 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
     
     return(
         <Paper elevation={15}>
-            <DialogTitle><Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>{title}</Typography></DialogTitle>
+            <DialogTitle variant="h5" gutterBottom sx={{color:"#1976d2"}}>{title}</DialogTitle>
             <DialogContent>
               <Stack spacing={1}>
                 <Box>
@@ -136,14 +136,14 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
               </Stack>
 
               <Dialog
-               PaperProps={{sx: {width: "80%"}}}
+               PaperProps={{sx: {width: "80%", minHeight: "90%"}}}
                 open={isModalOpen}
                 scroll={"body"}
                 //onClose={}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
               >
-                <AddressBookModal setIsModalOpen={setIsModalOpen} applyAddressBookSelection={applyAddressBookSelection}/>
+                <AddressBookDialog setIsModalOpen={setIsModalOpen} applyAddressBookSelection={applyAddressBookSelection}/>
               </Dialog>
 
                 

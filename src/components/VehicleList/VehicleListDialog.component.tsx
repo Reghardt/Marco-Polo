@@ -1,11 +1,12 @@
 import { DeleteOutline } from "@mui/icons-material";
-import { Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, Stack, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, Stack, Tab, Tabs, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import React, { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil";
 import { RSBearerToken, RSSelectedVehicle, RSWorkspaceID } from "../../state/globalstate";
 import HelpTooltip from "../common/HelpTooltip.component";
+import TabPanel, { a11yProps } from "../Tabs/TabPanel.component";
 
 enum EVehicleClass{
     class1 = "Class 1",
@@ -34,6 +35,8 @@ interface IVehicleListDialog{
 }
 
 const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
+
+    const [tabValue, setTabValue] = useState(0)
 
     const [R_selectedVehicle, R_setSelectedVehicle] = useRecoilState(RSSelectedVehicle)
 
@@ -123,6 +126,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
             setAdditionalCost("")
             setAdditionalCostType(EAdditionalCostType.R_hr)
             setVehicleClass(EVehicleClass.class1)
+            setTabValue(0)
 
           }).catch(err => {
             console.error(err)
@@ -168,6 +172,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
 
     function setLastUsedVehicle(vehicleId: string)
     {
+        console.log("set last used vehicle fired", R_workspaceId, vehicleId)
         axios.post( "/api/workspace/setLastUsedVehicle", {
             workspaceId: R_workspaceId,
             vehicleId: vehicleId
@@ -196,180 +201,186 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
             <DialogTitle color={"primary"} variant="h5">Vehicle List</DialogTitle>
             <DialogContent>
 
-                <Stack spacing={1}>
-                    <Box>
-                        <Typography color={"primary"} variant="h6">Saved Vehicles:</Typography>
-                    </Box>
+                <Tabs value={tabValue} onChange={(_e, v) => {setTabValue(v)}} aria-label="basic tabs example">
+                    <Tab label={"Saved Vehicles"} {...a11yProps(0)}/>
+                    <Tab label={"Create New Vehicle"} {...a11yProps(1)}/>
 
-                    {vehicleList.length > 0 && (
-                        <Box>
-                            <Stack spacing={1}>
-                                {vehicleList.map((vehicle, index) => {
-                                return(
-                                    <Box key={`addressBookEntry-${index}`}>
-                                        
-                                        <Paper  sx={{width: "100%"}} elevation={0} > 
-                                            <Stack direction={"row"} alignItems="center">
-                                                
-                                                <Box sx={{width: "90%"}}>
-                                                    <Button onClick={() => {selectVehicle(vehicle)}} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", p: "0.2em", ":hover": {backgroundColor: "#8d8d8d11"}}}>
-                                                        <Paper sx={{background: "transparent", width: "100%", height: "100%"}} elevation={0}>
-                                                            <Stack>
-                                                                <Typography variant="subtitle1" sx={{color:"#1976d2"}}>{vehicle.vehicleDescription}</Typography>
-                                                                <Typography variant="body2">Licence Plate - {vehicle.vehicleLicencePlate}</Typography>
-                                                                <Typography variant="body2">l/100km - {vehicle.litersPer100km}</Typography>
-                                                                <Typography variant="body2">{vehicle.vehicleClass}</Typography>
-                                                            </Stack>
-                                                        </Paper>
-                                                    </Button>
-                                                </Box>
-                                                <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%"}}>
-                                                    <Tooltip title={"Delete Entry"}>
-                                                        <IconButton onClick={() => {deleteVehicleFromList(vehicle._id)}}>
-                                                            <DeleteOutline color="error"/>
-                                                        </IconButton>
-                                                    </Tooltip>
+                </Tabs>
+
+                <TabPanel value={tabValue} index={0}>
+                    <Stack spacing={1}>
+                        {/* <Box>
+                            <Typography color={"primary"} variant="h6">Saved Vehicles:</Typography>
+                        </Box> */}
+
+                        {vehicleList.length > 0 && (
+                            <Box>
+                                <Stack spacing={1}>
+                                    {vehicleList.map((vehicle, index) => {
+                                    return(
+                                        <Box key={`addressBookEntry-${index}`}>
+                                            
+                                            <Paper  sx={{width: "100%"}} elevation={0} > 
+                                                <Stack direction={"row"} alignItems="center">
                                                     
-                                                </Box>
-                                            </Stack>
-                                        </Paper>
-                                    </Box>
+                                                    <Box sx={{width: "90%"}}>
+                                                        <Button onClick={() => {selectVehicle(vehicle)}} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", p: "0.2em", ":hover": {backgroundColor: "#8d8d8d11"}}}>
+                                                            <Paper sx={{background: "transparent", width: "100%", height: "100%"}} elevation={0}>
+                                                                <Stack>
+                                                                    <Typography variant="subtitle1" sx={{color:"#1976d2"}}>{vehicle.vehicleDescription}</Typography>
+                                                                    <Typography variant="body2">Licence Plate - {vehicle.vehicleLicencePlate}</Typography>
+                                                                    <Typography variant="body2">l/100km - {vehicle.litersPer100km}</Typography>
+                                                                    <Typography variant="body2">{vehicle.vehicleClass}</Typography>
+                                                                </Stack>
+                                                            </Paper>
+                                                        </Button>
+                                                    </Box>
+                                                    <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%"}}>
+                                                        <Tooltip title={"Delete Entry"}>
+                                                            <IconButton onClick={() => {deleteVehicleFromList(vehicle._id)}}>
+                                                                <DeleteOutline color="error"/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        
+                                                    </Box>
+                                                </Stack>
+                                            </Paper>
+                                        </Box>
+                                        )}
                                     )}
-                                )}
-                            </Stack>
-                        </Box> 
-                    )}
+                                </Stack>
+                            </Box> 
+                        )}
 
-                    {vehicleList.length === 0 && (
-                        
+                        {vehicleList.length === 0 && (
+                            
+                            <Box>
+                                <Typography variant="subtitle1">No saved vehicles, click on "Create New Vehicle" to add one.</Typography>
+                            </Box>
+                            
+                        )}
+                    </Stack>
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                    <Stack spacing={1.5}>
                         <Box>
-                            <Typography variant="subtitle1">No saved vehicles, create one below</Typography>
+                            <Typography color={"primary"} variant="body1">New Vehicle Details:</Typography>
                         </Box>
-                        
-                    )}
-                </Stack>
 
-                <Divider sx={{marginTop: "2em", marginBottom: "1em"}}></Divider>
-
-                <Stack spacing={1.5}>
-
-                    <Box>
-                        <Typography color={"primary"} variant="h6">Create New Vehicle</Typography>
-                    </Box>
-
-                    <Box>
-                        <TextField 
-                            size="small" 
-                            label="Descriptive Vehicle Name"
-                            value={vehicleDescription}
-                            onChange={(e) => setVehicleDescription(e.target.value)}
-                        />
-                    </Box>
-                    <Box>
-                        <Stack direction={"row"} spacing={1} alignItems="center">
-                            <Box>
-                                <TextField 
-                                    size="small" 
-                                    label="Vehicle Licence Plate"
-                                    value={vehicleLicencePlate}
-                                    onChange={(e) => setVehicleLicencePlate(e.target.value)}
-                                />
-                            </Box>
-                            <Box>
-                                <HelpTooltip title="Will be used when GPS tracking is implemented in the future to uniquely identify the vehicle."/>
-                            </Box>
-                        </Stack>
-                        
-                    </Box>
-                    <Box>
-                        <TextField 
-                            size="small" 
-                            label="Liters P100km" 
-                            InputProps={{startAdornment: <InputAdornment position="start">l/100km:</InputAdornment>}}
-                            value={litersPer100km}
-                            onChange={(e) => setLitersPer100km(e.target.value)}
-                            error={!isValidNumber(litersPer100km)}
-                            />
-                    </Box>
-                    <Box>
-                        <Stack direction={"row"} spacing={1}>
-                            <Box>
-                                <TextField 
+                        <Box>
+                            <TextField 
                                 size="small" 
-                                label="Additional Cost"
-                                InputProps={{startAdornment: <InputAdornment position="start">{additionalCostType === EAdditionalCostType.R_hr ? "R/hr" : "R/100km"}</InputAdornment>}}
-                                value={additionalCost}
-                                onChange={(e) => {setAdditionalCost(e.target.value)}}
-                                error={!isValidNumber(additionalCost)}
-                                />
-                            </Box>
-                            <Box>
-                                <ToggleButtonGroup
-                                    value={additionalCostType}
-                                    sx={{maxHeight:"100%", height: "100%"}}
-                                    exclusive
-                                    size="small"
-                                    color="primary"
-                                    onChange={(_e, v) => {
-                                        if(v !== null)
-                                        {
-                                            setAdditionalCostType(v)
-                                        }
-                                    }}
-                                    >
-                                    <ToggleButton value={EAdditionalCostType.R_hr}>R/hr</ToggleButton>
-                                    <ToggleButton value={EAdditionalCostType.R_100km}>R/100km</ToggleButton>
-                                </ToggleButtonGroup>
-                            </Box>
-                        </Stack>
-                        
-                    </Box>
-                    <Box>
-                        <Stack direction={"row"} spacing={1} alignItems="center">
-                            <Box>   
-                                <FormControl size="small">
-                                    <InputLabel id="demo-simple-select-label">Vehicle Class</InputLabel>
-                                    <Select
-                                    
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    value={vehicleClass}
-                                    label="Vehicle Class"
-                                    onChange={(e) => setVehicleClass(e.target.value as EVehicleClass)}
-                                    >
-                                    <MenuItem value={EVehicleClass.class1}>Class 1</MenuItem>
-                                    <MenuItem value={EVehicleClass.class2}>Class 2</MenuItem>
-                                    <MenuItem value={EVehicleClass.class3}>Class 3</MenuItem>
-                                    <MenuItem value={EVehicleClass.class4}>Class 4</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                            <Box>
-                                <HelpTooltip title={<p>
-                                        Will be used to calculate Toll Fees in the future. <br/>
-                                        Class 1: Light vehicles <br/>
-                                        Class 2: Heavy vehicles with 2 axles (8-16 ton) <br/>
-                                        Class 3: Heavy vehicle with 3-4 axles (24-32 ton) <br/>
-                                        Class 4: Heavy vehicle with 5 and more axles (up to 56 ton) <br/>
-                                    </p>}/>
-                            </Box>
-                        </Stack>
-                        
-                    </Box>
-
-                    {errorMessage && (
-                        <Box>
-                            <p style={{color: "red"}}>{errorMessage}</p>
+                                label="Descriptive Vehicle Name"
+                                value={vehicleDescription}
+                                onChange={(e) => setVehicleDescription(e.target.value)}
+                            />
                         </Box>
-                    )}
+                        <Box>
+                            <Stack direction={"row"} spacing={1} alignItems="center">
+                                <Box>
+                                    <TextField 
+                                        size="small" 
+                                        label="Vehicle Licence Plate"
+                                        value={vehicleLicencePlate}
+                                        onChange={(e) => setVehicleLicencePlate(e.target.value)}
+                                    />
+                                </Box>
+                                <Box>
+                                    <HelpTooltip title="Will be used when GPS tracking is implemented in the future to uniquely identify the vehicle."/>
+                                </Box>
+                            </Stack>
+                            
+                        </Box>
+                        <Box>
+                            <TextField 
+                                size="small" 
+                                label="Liters P100km" 
+                                InputProps={{startAdornment: <InputAdornment position="start">l/100km:</InputAdornment>}}
+                                value={litersPer100km}
+                                onChange={(e) => setLitersPer100km(e.target.value)}
+                                error={!isValidNumber(litersPer100km)}
+                                />
+                        </Box>
+                        <Box>
+                            <Stack direction={"row"} spacing={1}>
+                                <Box>
+                                    <TextField 
+                                    size="small" 
+                                    label="Additional Cost"
+                                    InputProps={{startAdornment: <InputAdornment position="start">{additionalCostType === EAdditionalCostType.R_hr ? "R/hr" : "R/100km"}</InputAdornment>}}
+                                    value={additionalCost}
+                                    onChange={(e) => {setAdditionalCost(e.target.value)}}
+                                    error={!isValidNumber(additionalCost)}
+                                    />
+                                </Box>
+                                <Box>
+                                    <ToggleButtonGroup
+                                        value={additionalCostType}
+                                        sx={{maxHeight:"100%", height: "100%"}}
+                                        exclusive
+                                        size="small"
+                                        color="primary"
+                                        onChange={(_e, v) => {
+                                            if(v !== null)
+                                            {
+                                                setAdditionalCostType(v)
+                                            }
+                                        }}
+                                        >
+                                        <ToggleButton value={EAdditionalCostType.R_hr}>R/hr</ToggleButton>
+                                        <ToggleButton value={EAdditionalCostType.R_100km}>R/100km</ToggleButton>
+                                    </ToggleButtonGroup>
+                                </Box>
+                            </Stack>
+                            
+                        </Box>
+                        <Box>
+                            <Stack direction={"row"} spacing={1} alignItems="center">
+                                <Box>   
+                                    <FormControl size="small">
+                                        <InputLabel id="demo-simple-select-label">Vehicle Class</InputLabel>
+                                        <Select
+                                        
+                                        labelId="demo-simple-select-label"
+                                        id="demo-simple-select"
+                                        value={vehicleClass}
+                                        label="Vehicle Class"
+                                        onChange={(e) => setVehicleClass(e.target.value as EVehicleClass)}
+                                        >
+                                        <MenuItem value={EVehicleClass.class1}>Class 1</MenuItem>
+                                        <MenuItem value={EVehicleClass.class2}>Class 2</MenuItem>
+                                        <MenuItem value={EVehicleClass.class3}>Class 3</MenuItem>
+                                        <MenuItem value={EVehicleClass.class4}>Class 4</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                                <Box>
+                                    <HelpTooltip title={<p>
+                                            Will be used to calculate Toll Fees in the future. <br/>
+                                            Class 1: Light vehicles <br/>
+                                            Class 2: Heavy vehicles with 2 axles (8-16 ton) <br/>
+                                            Class 3: Heavy vehicle with 3-4 axles (24-32 ton) <br/>
+                                            Class 4: Heavy vehicle with 5 and more axles (up to 56 ton) <br/>
+                                        </p>}/>
+                                </Box>
+                            </Stack>
+                            
+                        </Box>
 
-                    <Box>
-                        <Button variant="outlined" onClick={() => saveVehicleToVehicleList()}>Save Vehicle</Button>
-                    </Box>
-                </Stack>
+                        {errorMessage && (
+                            <Box>
+                                <p style={{color: "red"}}>{errorMessage}</p>
+                            </Box>
+                        )}
+
+                        <Box>
+                            <Button variant="outlined" onClick={() => saveVehicleToVehicleList()}>Save Vehicle</Button>
+                        </Box>
+                    </Stack>
+                </TabPanel>
             </DialogContent>
 
-            <DialogActions>
+            <DialogActions sx={{position: "relative", right: "1.6em", bottom: "1em"}}>
                 <Button variant="outlined" onClick={() => {setIsModalOpen((current) => {return !current})}}>Cancel</Button>
             </DialogActions>
         </React.Fragment>

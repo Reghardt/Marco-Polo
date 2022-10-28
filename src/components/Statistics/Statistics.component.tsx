@@ -221,6 +221,7 @@ const Statistics: React.FC = () => {
 
     function handleMostRecentVehicleAndFuelPrice(member: IMember)
     {
+        
       if(member.lastUsedFuelPrice)
       {
         //TODO set fuel price
@@ -239,8 +240,12 @@ const Statistics: React.FC = () => {
           }
         )
         .then(res => {
-          console.log(res.data.vehicle)
-          R_setSelectedVehicle(res.data.vehicle)
+            console.log(res)
+          if(res.data.vehicle)
+          {
+            R_setSelectedVehicle(res.data.vehicle)
+          }
+          
           
         })
         .catch(err => {

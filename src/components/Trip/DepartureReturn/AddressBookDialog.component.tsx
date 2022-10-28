@@ -1,12 +1,13 @@
 import { DeleteOutline } from "@mui/icons-material"
-import { Box, Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, TextField, Tooltip, Typography } from "@mui/material"
+import { Box, Button, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material"
 import axios from "axios"
 import React, { useEffect, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
 import { RSBearerToken, RSWorkspaceID } from "../../../state/globalstate"
+import TabPanel, { a11yProps } from "../../Tabs/TabPanel.component"
 import { geocodeAddress } from "../Trip.service"
 
-interface IAddressBookModalProps{
+interface IAddressBookDialogProps{
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     applyAddressBookSelection: (address: string) => void
 }
@@ -17,8 +18,10 @@ interface IAddressBookEntry{
     addressDescription: string;
 }
 
-const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, applyAddressBookSelection}) => {
+const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, applyAddressBookSelection}) => {
     //TODO read up on top, left and translate, and their interactions with each other
+
+    const [tabValue, setTabValue] = useState(0)
 
     const R_workspaceId = useRecoilValue(RSWorkspaceID)
     const bearer = useRecoilValue(RSBearerToken)
@@ -147,8 +150,16 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
     return(
         <React.Fragment>
             
-                <DialogTitle><Typography color={"primary"} variant="h5">Address Book</Typography></DialogTitle>
+                <DialogTitle color={"primary"} variant="h5">Address Book</DialogTitle>
                 <DialogContent>
+
+                <Tabs value={tabValue} onChange={(_e, v) => {setTabValue(v)}} aria-label="basic tabs example">
+                    <Tab label={"Saved Addresses"} {...a11yProps(0)}/>
+                    <Tab label={"Create Address"} {...a11yProps(1)}/>
+
+                </Tabs>
+
+                <TabPanel value={tabValue} index={0}>
                     <Stack spacing={1}>
                         <Box>
                             <Typography color={"primary"} variant="h6">Saved Addresses:</Typography>
@@ -180,7 +191,6 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
                                                                 <DeleteOutline color="error"/>
                                                             </IconButton>
                                                         </Tooltip>
-                                                        
                                                     </Box>
                                                 </Stack>
                                             </Paper>
@@ -194,12 +204,15 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
                         {addressBookEntries.length === 0 && (
                             
                             <Box>
-                                <Typography variant="subtitle1">No saved addresses, create one below</Typography>
+                                <Typography variant="subtitle1">No saved addresses, click on "Create New Address"</Typography>
                             </Box>
                             
                         )}
                     </Stack>
-                    <Divider sx={{marginTop: "2em", marginBottom: "1em"}}></Divider>
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={1}>
+                    {/* <Divider sx={{marginTop: "2em", marginBottom: "1em"}}></Divider> */}
                     <Stack spacing={1}>
 
                         <Box>
@@ -251,6 +264,10 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
                             </Box>
                         )}
                     </Stack>
+                </TabPanel>
+
+ 
+                    
                 </DialogContent>
 
                 <DialogActions>
@@ -261,4 +278,4 @@ const AddressBookModal: React.FC<IAddressBookModalProps> = ({setIsModalOpen, app
     )
 }
 
-export default AddressBookModal
+export default AddressBookDialog

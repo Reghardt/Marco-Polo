@@ -11,7 +11,7 @@ const VehicleList: React.FC = () => {
             <Button variant="outlined" onClick={() => {setIsModalOpen(!isModalOpen)}}>Vehicle List</Button>
 
             <Dialog
-               PaperProps={{sx: {width: "80%"}}}
+               PaperProps={{sx: {width: "80%", minHeight: "90%"}}}
                 open={isModalOpen}
                 scroll={"body"}
                 //onClose={}

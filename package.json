@@ -10,8 +10,6 @@
     "@mui/icons-material": "^5.10.2",
     "@mui/material": "^5.8.3",
     "@popperjs/core": "^2.11.5",
-    "@types/office-js": "^1.0.259",
-    "@types/react-beautiful-dnd": "^13.1.2",
     "axios": "^0.27.2",
     "chart.js": "^3.9.1",
     "es6-promise": "^4.2.8",
@@ -36,7 +34,9 @@
     "@types/md5": "^2.3.2",
     "@types/node": "^16.11.39",
     "@types/react": "17.0.2",
-    "@types/react-dom": "^17.0.11"
+    "@types/react-dom": "^17.0.11",
+    "@types/office-js": "^1.0.259",
+    "@types/react-beautiful-dnd": "^13.1.2"
   },
   "scripts": {
     "start": "set HTTPS=true&&set SSL_CRT_FILE=./ssl/server.crt&&set SSL_KEY_FILE=./ssl/server.key&& react-scripts start",
@@ -48,7 +48,10 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "prefer-const": 0
+    }
   },
   "browserslist": [
     "ie 11"
