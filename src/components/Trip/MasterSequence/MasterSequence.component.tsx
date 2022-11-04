@@ -11,7 +11,7 @@ import { RSAddresColumnIndex, RSColumnVisibility, RSDepartureAddress, RSErrorMes
 import Dragger from "../../experiments/DragNDrop/Dragger.component";
 import Dropper from "../../experiments/DragNDrop/Dropper.component";
 import { addAndUpdateRows, createDirections, doRowsConform, writeBackToSpreadsheet } from "../../Trip/Trip.service";
-import { createCellTypeElementsFromRow_master, createColumnDecorators_master, CreateTableHeadingElements_master } from "./MasterSequence.service";
+import { createCellTypeElementsFromRow_master, createColumnDecorators_master, CreateTableHeadingElements_master, reorder } from "./MasterSequence.service";
 import SequenceLegends from "./SequenceLegends.component";
 
 interface MasterSequenceProps{
@@ -101,14 +101,7 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
       return visibilityElements
     }
 
-    function reorder(list: IRow[], startIndex: number, endIndex: number )
-    {
-  
-      const result = Array.from(list)
-      const [removed] = result.splice(startIndex, 1)
-      result.splice(endIndex, 0, removed)
-      return result
-    }
+
 
     function onDragEnd(result: DropResult)
     {

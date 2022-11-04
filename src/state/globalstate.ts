@@ -1,4 +1,5 @@
 import { atom, selector } from "recoil";
+import { EMapPopperStates } from "../components/Maps/GMap.component";
 import { EDepartReturn } from "../components/Trip/DepartureReturn/DepartureReturn.component";
 import { IVehicleListEntry } from "../components/VehicleList/VehicleListDialog.component";
 import { IMember, ITripDirections } from "../interfaces/simpleInterfaces";
@@ -106,6 +107,11 @@ export const RSErrorMessage = atom<string>({
 export const RSSelectedVehicle = atom<IVehicleListEntry | null>({
     key: "selectedVehicle",
     default: null
+})
+
+export const RMapPopperStates = atom<EMapPopperStates[]>({
+    key: "mapPopperStates",
+    default: []
 })
 
 

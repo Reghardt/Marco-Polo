@@ -14,6 +14,7 @@ import RouteBuilder from './components/Trip/Trip.component';
 
 
 import PostLoginConfig from './components/PostLoginConfig/PostLoginConfig.component';
+import ForwardRefParent from './components/experiments/ForwardRef/ForwardRefParent.component';
 
 
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/postLoginConfig" element={<PostLoginConfig/>}/>
           <Route path="/jobEditor" element={<RouteBuilder/>}/>
           <Route path="/admin" element={<AdminPanel/>}/>
+          <Route path="/exp" element={<ForwardRefParent/>}/>
         </Routes>
       </BrowserRouter>
     </div>
