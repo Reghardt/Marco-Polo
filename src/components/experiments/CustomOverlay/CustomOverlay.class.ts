@@ -6,6 +6,7 @@ export class CustomOverlay extends google.maps.OverlayView{
 
     constructor(container: HTMLElement, pane: keyof google.maps.MapPanes, position: google.maps.LatLng)
     {
+        console.log("custom overlay class")
         super()
         this.container = container
         this.pane = pane
@@ -26,6 +27,7 @@ export class CustomOverlay extends google.maps.OverlayView{
         {
             return
         }
+        //console.log(point)
         this.container.style.transform = `translate(${point.x}px, ${point.y}px)`
 
     }

@@ -10,28 +10,29 @@ interface IOverlayViewProps{
 }
 
 const OverlayView: React.FC<IOverlayViewProps> = ({position, pane, map, zIndex, children}) => {
+    console.log("Overlay view fired")
+
     const container = useMemo(() => {
         const div = document.createElement('div')
         div.style.position = 'absolute'
+        div.style.zIndex = `${zIndex}`
         return div
-    }, [])
+    }, [zIndex])
 
     const overlay = useMemo(() => {
         return new CustomOverlay(container, pane, position)   
     }, [container, pane, position])
 
     useEffect(() => {
-        // console.log("Map set")
         overlay?.setMap(map)
         return () => { //TODO read up on cleanup functions for use effect
-            // console.log("set to null")
             overlay?.setMap(null)
         }
     }, [map, overlay])
 
-    useEffect(() => {
-        container.style.zIndex = `${zIndex}`
-    }, [zIndex, container])
+    // useEffect(() => {
+    //     container.style.zIndex = `${zIndex}`
+    // }, [zIndex, container])
 
     return createPortal(children, container) //what is create portal?
 }

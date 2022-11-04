@@ -23,7 +23,7 @@ import { loginRequest } from "../../msalConfig";
     async function loginStandalone()
     {
         console.log("dialog fired - Excel")
-        let {dialog, status} = await openOfficeDialog()
+        const {dialog, status} = await openOfficeDialog()
         return new Promise<string>((accept, reject) => {
             if (status === Office.AsyncResultStatus.Failed) {
                 //TODO display error here
@@ -42,8 +42,8 @@ import { loginRequest } from "../../msalConfig";
                     }
                     else
                     {
-                        let parsedArgs = JSON.parse((args as any).message)
-                        let accessToken: AuthenticationResult = parsedArgs.result
+                        const parsedArgs = JSON.parse((args as any).message)
+                        const accessToken: AuthenticationResult = parsedArgs.result
                         dialog.close() 
                         accept(accessToken.idToken)
                     }

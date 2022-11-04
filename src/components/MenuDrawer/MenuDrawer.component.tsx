@@ -11,11 +11,9 @@ interface IMenuDrawerProps{
     adminPanelConfig: EStandardHeaderConfig;
 }
 
-
-
 const MenuDrawer: React.FC<IMenuDrawerProps> = ({drawerState, handleDrawerState, tokenStoreConfig=EStandardHeaderConfig.Visible, adminPanelConfig=EStandardHeaderConfig.Visible}) => {
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     return(
         <Drawer anchor="right" open={drawerState} onClose={ () => handleDrawerState()}>

@@ -51,7 +51,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
           if(geocoded.status === "OK")
           {
               console.log("OK")
-              setGeocodedResults(geocoded.results)
+              setGeocodedResults(geocoded?.results ?? [])
               setErrorMessage("")
             //   setSelectedGeocodedAddressIndex(-1)
           }
@@ -96,7 +96,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     async function handleDeleteRow(rowYCoord: number, rows: IRow[])
     {
         closePopper()
-        let postDeletionRows = await deleteRow(rowYCoord, rows)
+        const postDeletionRows = await deleteRow(rowYCoord, rows)
         if(R_departureAddress && R_returnAddress)
         {
             recalculateRoute(R_departureAddress.formatted_address, R_returnAddress.formatted_address, postDeletionRows, R_addressColumnIndex)

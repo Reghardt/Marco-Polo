@@ -13,10 +13,10 @@ export default function Login()
 {
   const [, R_setBearer] = useRecoilState(RSBearerToken)
   const [, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
-  const [loginError, setLoginError] = useState<string>(null)
+  const [loginError, setLoginError] = useState<string>("")
   
   const { instance, /* accounts */} = useMsal();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
 
   const [email, setEmail] = useState("")
@@ -112,11 +112,11 @@ export default function Login()
             </Box>
 
             <Box sx={{marginTop: "1em"}}>
-              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.13.3</Typography>
+              <Typography variant="body1" gutterBottom sx={{textAlign:'center'}} color='primary'>Experimental - Beta 0.13.5</Typography>
             </Box>
           </Stack>
 
-          {/* <NavLink to={'/exp'}>Experiment</NavLink> */}
+          <NavLink to={'/exp'}>Experiment</NavLink>
           
         </Paper>
       </Grid>            

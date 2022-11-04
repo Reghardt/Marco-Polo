@@ -4,11 +4,11 @@ import { IRow } from "../../services/worksheet/row.interface";
 export function removeRowParentChildRelations(rows: IRow[])
 {
     console.log("reset parent- children")
-    let noRelationRows: IRow[] = [];
+    const noRelationRows: IRow[] = [];
     for(let i = 0; i < rows.length; i++)
     {
         noRelationRows.push(rows[i])
-        let children = rows[i].children
+        const children = rows[i].children
         
         for(let j = 0; j < children.length; j++)
         {
@@ -23,7 +23,7 @@ export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: nu
 {
     console.log("make parent- children")
     console.log(rows, addressColumnIndex)
-    let parentWithChildrenRows: IRow[] = [];
+    const parentWithChildrenRows: IRow[] = [];
 
     if(addressColumnIndex < 0)
     {
@@ -40,7 +40,7 @@ export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: nu
         {
             if(parentWithChildrenRows.length > 0 && parentWithChildrenRows[parentWithChildrenRows.length - 1].cells[addressColumnIndex].data !== "")
             {
-                let lastParent = parentWithChildrenRows[parentWithChildrenRows.length - 1]
+                const lastParent = parentWithChildrenRows[parentWithChildrenRows.length - 1]
                 lastParent.children.push(rows[i])
             }
             else
@@ -54,8 +54,8 @@ export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: nu
 
 export function geocodeAddress(address: string) : Promise<IGeocoderResult>
     {
-      let geoResPromise = new Promise<IGeocoderResult>((resolve) => {
-        let geocoder = new google.maps.Geocoder();
+      const geoResPromise = new Promise<IGeocoderResult>((resolve) => {
+        const geocoder = new google.maps.Geocoder();
         geocoder.geocode({address: address, region: "ZA"},(res, status) => {
           resolve({status, results: res})
         })
@@ -67,7 +67,7 @@ export function geocodeAddress(address: string) : Promise<IGeocoderResult>
 //this function orders the rows according to thw waypoint orders. X and Y sheet coordinates remain the same.
 export function createInSequenceJobRows(rows: Readonly<IRow[]>, waypointOrder: number[]): IRow[]
     {
-        let inSequenceBody: IRow[] = []
+        const inSequenceBody: IRow[] = []
         for(let i = 0; i< waypointOrder.length; i++)
         {
             const seqRow = rows[waypointOrder[i]];
@@ -87,7 +87,7 @@ export function createDirections(departureAddress: string, returnAddress: string
   };
 
   return new Promise<ITripDirections>((resolve) => {
-    let directionsService = new google.maps.DirectionsService();
+    const directionsService = new google.maps.DirectionsService();
     directionsService.route(request, (result, status) => {
         resolve({result, status})
     });
@@ -95,7 +95,7 @@ export function createDirections(departureAddress: string, returnAddress: string
 }
 
 //this function checks if a number of rows are of equal length and if their columns align.
-export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status: boolean, reason: string}
+export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : {status: boolean, reason: string}
 {
   //
   if(referenceRow === null) //reference row to test against, otherwise use the first row of the rows
@@ -105,7 +105,7 @@ export function doRowsConform(rows: IRow[], referenceRow: IRow = null) : {status
   
   for(let i = 0; i < rows.length; i++)
   {
-    let row = rows[i]
+    const row = rows[i]
     if(row.cells.length === referenceRow.cells.length) //are lengths equal
     {
       for(let j = 0; j < row.cells.length; j++)
@@ -130,10 +130,10 @@ export function addAndUpdateRows(rows: IRow[], rowsToAdd: IRow[], addressColumnI
     // let newRows = Array.from(rows)
     let newRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
     
-    let rowsToAddAccumilator: IRow[] = []
+    const rowsToAddAccumilator: IRow[] = []
     for(let i = 0; i < rowsToAdd.length; i++)
     {
-      let addRow = rowsToAdd[i]
+      const addRow = rowsToAdd[i]
       let matchFound = false
       for(let j = 0; j < newRows.length; j++)
       {
@@ -162,18 +162,18 @@ export function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): v
 {
     for(let j = 0; j < row.cells.length; j++)
     {
-        let cell = row.cells[j]
+        const cell = row.cells[j]
         if(cell.formula !== "") //if cell is formula
         {
             //write formula
-            let range = sheet.getCell(cell.y - 1, cell.x - 1)
+            const range = sheet.getCell(cell.y - 1, cell.x - 1)
             range.formulas = [[cell.formula]]
             //range.format.autofitColumns();
         }
         else //cell only has data
         {
             //write data
-            let range = sheet.getCell(cell.y - 1, cell.x - 1)
+            const range = sheet.getCell(cell.y - 1, cell.x - 1)
             range.values = [[cell.data]]
         }
     }
@@ -188,8 +188,8 @@ export function preSyncRowDataForDeletion(row: IRow, sheet: Excel.Worksheet): vo
 {
     for(let j = 0; j < row.cells.length; j++)
     {
-        let cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
-        let range = sheet.getCell(cell.y - 1, cell.x - 1)
+        const cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
+        const range = sheet.getCell(cell.y - 1, cell.x - 1)
         range.values = [[""]]
     }
 
@@ -214,8 +214,8 @@ function getTopRowYValue(rows: IRow[]): number
 
 function getXValuesOfRowCellsInBody(rows: IRow[]) : number[]
 {
-    let row = rows[0]
-    let cellXVals: number[] = []
+    const row = rows[0]
+    const cellXVals: number[] = []
     for(let i = 0; i < row.cells.length; i++)
     {
         cellXVals.push(row.cells[i].x)
@@ -226,15 +226,15 @@ function getXValuesOfRowCellsInBody(rows: IRow[]) : number[]
 export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: number)
   {
     if(addressColumnIndex){}
-    let writeBackRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
+    const writeBackRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
         
-    let topYVal = getTopRowYValue(writeBackRows)
-    let xCoords = getXValuesOfRowCellsInBody(writeBackRows)
+    const topYVal = getTopRowYValue(writeBackRows)
+    const xCoords = getXValuesOfRowCellsInBody(writeBackRows)
 
     //assign new coords for write back
     for(let i = 0; i < writeBackRows.length; i++)
     {
-        let row = writeBackRows[i]
+        const row = writeBackRows[i]
         for(let j = 0; j < row.cells.length; j++)
         {
             row.cells[j].x = xCoords[j]
@@ -243,12 +243,12 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
     }
 
     //writeBackRows = makeRowParentChildRelations(writeBackRows, addressColumnIndex)
-    let childlessRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
+    const childlessRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
 
-    let rowsToDelete: IRow[] = [] 
+    const rowsToDelete: IRow[] = [] 
     for(let i = 0; i < childlessRows.length; i++)
     {
-      let row = childlessRows[i];
+      const row = childlessRows[i];
       let shouldDelete = true;
       for(let j = 0; j < writeBackRows.length; j++)
       {
@@ -269,7 +269,7 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
 
     return await new Promise<IRow[]>((accept) => {
       Excel.run(async (context) => {
-        let sheet = context.workbook.worksheets.getActiveWorksheet()
+        const sheet = context.workbook.worksheets.getActiveWorksheet()
         for(let i = 0; i < writeBackRows.length; i++)
         {
           preSyncRowDataForWriteBack(writeBackRows[i], sheet)

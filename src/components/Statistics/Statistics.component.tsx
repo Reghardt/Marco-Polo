@@ -2,13 +2,14 @@ import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/ma
 import axios from "axios";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
 import React, { useEffect, useState } from "react"
-import { Line } from "react-chartjs-2";
 import {useRecoilState, useRecoilValue } from "recoil";
 import { IMember, IVehicleListEntry } from "../../interfaces/simpleInterfaces";
 import { RSBearerToken, RSMemberData, RSSelectedVehicle, RSTripDirections, RSWorkspaceID } from "../../state/globalstate";
 import CostGraph from "./CostGraph.component";
+import DistanceGraph from "./DistanceGraph.component";
+import TimeGraph from "./TimeGraph.component";
 
-enum EGraphStatistic{
+enum EGraphType{
     Distance,
     Time,
     Cost
@@ -16,8 +17,10 @@ enum EGraphStatistic{
 
 const Statistics: React.FC = () => {
 
+    console.log("refresh")
+
     const R_tripDirections = useRecoilValue(RSTripDirections)
-    const [graphStatistic, setGraphStatistic] = useState<EGraphStatistic>(EGraphStatistic.Time)
+    const [graphType, setGraphType] = useState<EGraphType>(EGraphType.Time)
 
     const [fuelPrice, setFuelPrice] = useState("")
     const [litersKm, setLitersKm] = useState("")
@@ -31,168 +34,34 @@ const Statistics: React.FC = () => {
 
     ChartJS.register(CategoryScale, LinearScale,PointElement, LineElement, BarElement, Title, Tooltip, Legend)
 
-    function createDistanceGraph()
-    {
-        if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
-        {
-            let legs = R_tripDirections.result.routes[0].legs
-            let labels: string[] = []
-            let dataValues: number[] = [];
-            dataValues.push(0)
-            let totalVal = 0
-            for(let i = 0; i < legs.length; i++)
-            {
-                labels.push(i.toString())
-
-                totalVal += legs[i].distance.value / 1000
-                dataValues.push(totalVal)
-   
-            }
-            labels.push("Return")
-            labels[0] = "Depart"
-
-            const options = {
-                responsive: true,
-                animation: {
-                    duration: 0
-                },
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  }
-                },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function(value, _index, _ticks) {
-                                return value + "km";
-                            }
-                        }
-                    }
-                }
-              };
-        
-            const data = {
-                labels,
-                datasets: [
-                    {
-                    label: 'Distance in Km',
-                    data: dataValues.map((val) => {return val}),
-                    borderColor: 'rgb(53, 162, 235)',
-                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                    },
-                ],
-            };
-
-            return (
-                <div>
-                    <Line options={options} data={data} />
-                </div>
-            )
-        }
-        else
-        {
-            return <div>No graph data</div>
-        }
-    }
-
-    function createTimeGraph()
-    {
-        if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
-        {
-            let legs = R_tripDirections.result.routes[0].legs
-            let labels: string[] = []
-            let dataValues: number[] = [];
-            dataValues.push(0)
-            let totalVal = 0
-            for(let i = 0; i < legs.length; i++)
-            {
-                //console.log(legs[i])
-                labels.push(i.toString())
-
-                totalVal += legs[i].duration.value
-                dataValues.push(totalVal)
-            }
-            labels.push("Return")
-            labels[0] = "Depart"
-
-            const options = {
-                responsive: true,
-                animation: {
-                    duration: 0
-                },
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                  tooltip: {
-                    callbacks: {
-                            label: function(context)
-                            {
-                                // console.log(context.parsed)
-                                return "Time: " +  secondsToH_M(context.parsed.y)
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function(value, _index, _ticks) {
-                                
-                                return secondsToH_M(value)
-                            }
-                        }
-                    }
-                },
-                
-              };
-            const data = {
-                labels,
-                datasets: [
-                    {
-                    label: 'Time in hours and minutes',
-                    data: dataValues.map((val) => {return val}),
-                    borderColor: 'rgb(53, 162, 235)',
-                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                    },
-                ],
-            };
-
-            return (
-                <div>
-                    <Line options={options} data={data} />
-                </div>
-            )
-        }
-        else
-        {
-            return <div>No graph data</div>
-        }
-    }
-
-
     function secondsToH_M(value: number)
     {
-        let minutes = value / 60
+        const minutes = value / 60
         
-        let hours = Math.floor(minutes / 60)
-        let remainingMinutes = Math.floor(minutes % 60)
+        const hours = Math.floor(minutes / 60)
+        const remainingMinutes = Math.floor(minutes % 60)
         return hours + "h:" + remainingMinutes + "m"
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function calculateSimpleStatistics()
     {
         if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            let legs = R_tripDirections.result.routes[0].legs
+            const legs = R_tripDirections?.result?.routes[0].legs
             let roundTripDistance = 0;
             let roundTripTime = 0;
-            for(let i = 0; i < legs.length; i++)
+
+            if(legs)
             {
-                roundTripDistance += legs[i].distance.value
-                roundTripTime += legs[i].duration.value
+                for(let i = 0; i < legs.length; i++)
+                {
+                    roundTripDistance += legs[i]?.distance?.value ?? 0
+                    roundTripTime += legs[i]?.duration?.value ?? 0
+                }
             }
+
+            
 
             return(
                 <React.Fragment>
@@ -272,40 +141,41 @@ const Statistics: React.FC = () => {
 
     console.log("fire stats")
     return(
-        <Box sx={{marginBottom: "20em"}}>
+        <Box sx={{height: "55em"}}>
             <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Trip Statistics</Typography>
 
             {calculateSimpleStatistics()}
 
             <ToggleButtonGroup
-                sx={{maxHeight:"100%", height: "100%", marginBottom: "0.5em"}}
+                sx={{marginBottom: "0.5em"}}
                 size="small"
                 color="primary"
-                value={graphStatistic}
+                value={graphType}
                 exclusive
                 onChange={(_e, v) => {
                     if(v !== null)
                     {
-                        setGraphStatistic(v)
+                        setGraphType(v)
                     } 
                 }}
                 aria-label="Address Type"
                 >
-                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Time}>Time</ToggleButton>
-                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Distance}>Distance</ToggleButton>
-                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphStatistic.Cost}>Cost</ToggleButton>
+                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Time}>Time</ToggleButton>
+                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Distance}>Distance</ToggleButton>
+                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Cost}>Cost</ToggleButton>
             </ToggleButtonGroup>
 
 
-            {graphStatistic === EGraphStatistic.Distance && (
-                createDistanceGraph()
+            {graphType === EGraphType.Distance && (
+                <DistanceGraph tripDirections={R_tripDirections}/>
             )}
 
-            {graphStatistic === EGraphStatistic.Time && (
-                createTimeGraph()
+            {graphType === EGraphType.Time && (
+
+                <TimeGraph tripDirections={R_tripDirections}/>
             )}
 
-            {graphStatistic === EGraphStatistic.Cost && (
+            {graphType === EGraphType.Cost && (
                 <CostGraph tripDirections={R_tripDirections} fuelPrice={fuelPrice} litersKm={litersKm} setFuelPrice={setFuelPrice} setLitersKm={setLitersKm}/>
             )}
 

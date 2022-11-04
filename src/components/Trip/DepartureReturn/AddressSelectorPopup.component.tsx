@@ -5,7 +5,7 @@ import AddressBookDialog from "./AddressBookDialog.component";
 
 interface IAddressSelectorPopup{
     title: string;
-    address: google.maps.GeocoderResult;
+    address: google.maps.GeocoderResult | null;
     addressSetter: React.Dispatch<React.SetStateAction<google.maps.GeocoderResult>>;
     toggleShow: () => void;
 }
@@ -36,7 +36,7 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
             if(geocoded.status === "OK")
             {
                 console.log("OK")
-                setGeocodedResults(geocoded.results)
+                setGeocodedResults(geocoded.results ?? [])
                 setErrorMessage("")
             }
             else

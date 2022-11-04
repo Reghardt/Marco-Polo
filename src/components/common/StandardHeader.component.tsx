@@ -32,7 +32,7 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
 
     const R_tokens = useRecoilValue(RSTokens)
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     const [drawerState, setDrawerState] = useState(false)
 

@@ -8,7 +8,7 @@ import { RSBearerToken, RSSelectedVehicle, RSWorkspaceID } from "../../state/glo
 import VehicleList from "../VehicleList/VehicleList.component";
 
 interface ICostGraph{
-    tripDirections: ITripDirections;
+    tripDirections: ITripDirections | null;
     fuelPrice: string;
     litersKm: string;
     setFuelPrice: React.Dispatch<React.SetStateAction<string>>;
@@ -50,8 +50,8 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
     function pricePerKm(petrol: string, liters: string)
     {
 
-            let tempPetrol = parseFloat(petrol)
-            let tempLiters = parseFloat(liters)
+            const tempPetrol = parseFloat(petrol)
+            const tempLiters = parseFloat(liters)
             if(isNaN(tempPetrol) || isNaN(tempLiters))
             {
                 return 0
@@ -86,38 +86,41 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
     useEffect(() => {
         if(tripDirections && tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            let legs = tripDirections.result.routes[0].legs
-            let labels: string[] = []
-            let dataValues: number[] = [];
+            const legs = tripDirections?.result?.routes[0].legs
+            const labels: string[] = []
+            const dataValues: number[] = [];
 
             let totalCost = 0
-            for(let i = 0; i < legs.length; i++)
+            if(legs)
             {
-                let cost = (legs[i].distance.value / 1000) * pricePerKm(fuelPrice, litersKm)
-                console.log(i, legs[i].distance, cost)
+                for(let i = 0; i < legs.length; i++)
+                {
+                    const cost = ((legs[i]?.distance?.value ?? 0) / 1000) * pricePerKm(fuelPrice, litersKm)
+                    console.log(i, legs[i].distance, cost)
+                    
+                    totalCost += cost;
+                    labels.push(i.toString())
+                    dataValues.push(cost)
+    
+                }
+                labels.shift()
+                console.log(labels)
+                setRoundTripCost(totalCost)
+                setAverageCost(totalCost / legs.length)
+                labels.push("Return")
+                //labels[0] = "D"
                 
-                
-                totalCost += cost;
-                labels.push(i.toString())
-                dataValues.push(cost)
-   
+                console.log(dataValues)
             }
-            labels.shift()
-            console.log(labels)
-            setRoundTripCost(totalCost)
-            setAverageCost(totalCost / legs.length)
-            labels.push("Return")
-            //labels[0] = "D"
             
-            console.log(dataValues)
             const data = {
                 labels: labels,
                 datasets: [
                     {
                     label: 'Cost per Address',
                     data: dataValues,
-                    borderColor: 'rgb(53, 162, 235)',
-                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    borderColor: "#1976d2",
+                    backgroundColor: "#1976d2",
                     },
                 ],
             };
@@ -126,7 +129,6 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
 
             setGraphData(data)
         }
-
     }, [tripDirections, fuelPrice, litersKm])
 
     function saveFuelPrice()
@@ -155,76 +157,75 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
 
 
     return (
-        <div>
-            <Stack spacing={1}>
-                <Box>
-                    <Typography variant="body1">Total cost: R{(roundTripCost).toFixed(2)}</Typography>
-                    <Typography variant="body1">Average cost per Address: R{(averageCost).toFixed(2)}</Typography>
+        <Stack spacing={1}>
+            <Box>
+                <Typography variant="body1">Total cost: R{(roundTripCost).toFixed(2)}</Typography>
+                <Typography variant="body1">Average cost per Address: R{(averageCost).toFixed(2)}</Typography>
+            </Box>
+
+            {graphData !== null && (
+                <Box sx={{height: "28em"}}>
+                    <Bar style={{height: "100%"}} options={options} data={graphData} />
                 </Box>
+            )}
 
-                {graphData !== null && (
-                    <Box>
-                        <Bar options={options} data={graphData} />
-                    </Box>
-                )}
+            <VehicleList/>
 
-                <VehicleList/>
-
-                {R_selectedVehicle && (
-                    <Box>
-                        <Typography variant="body1">Current Vehicle:</Typography>
-                        <Typography variant="body1">{R_selectedVehicle.vehicleDescription} - {R_selectedVehicle.vehicleLicencePlate} - {R_selectedVehicle.vehicleClass}</Typography>
-
-                    </Box>
-                )}
-
-                {R_selectedVehicle === null && (
-                    <Box>
-                        <Typography variant="body1">Current Vehicle:</Typography>
-                        <Typography variant="body1" sx={{fontStyle: "italic"}}>custom</Typography>
-
-                    </Box>
-                )}
-
+            {R_selectedVehicle && (
                 <Box>
-                    <TextField
-                    label="Liters per 100 km"
-                    id="outlined-size-small"
-                    //defaultValue=""
-                    size="small"
-                    sx={{width: '25ch'}}
-                    onChange={(e) => handleSetLitersKm(e.target.value)}
-                    value={litersKm}
-                    error={!isFloat(litersKm)}
-                    InputProps={{startAdornment: <InputAdornment position="start">l/100km:</InputAdornment>}}
-                    />
-                </Box>
+                    <Typography variant="body1">Current Vehicle:</Typography>
+                    <Typography variant="body1">{R_selectedVehicle.vehicleDescription} - {R_selectedVehicle.vehicleLicencePlate} - {R_selectedVehicle.vehicleClass}</Typography>
 
+                </Box>
+            )}
+
+            {R_selectedVehicle === null && (
                 <Box>
-                    <Stack direction={"row"} spacing={1}>
-                        <Box>
-                            <TextField
-                            label="Fuel Price"
-                            id="outlined-size-small"
-                            //defaultValue=""
-                            size="small"
-                            sx={{width: '25ch'}}
-                            onChange={(e) => setFuelPrice(e.target.value)}
-                            value={fuelPrice}
-                            error={!isFloat(fuelPrice)}
-                            InputProps={{startAdornment: <InputAdornment position="start">R</InputAdornment>}}
-                            />
-                        </Box>
-                        <Box>
-                            <Button onClick={() => saveFuelPrice()} sx={{height: "100%"}} variant="outlined">Save Price</Button>
-                        </Box>
-                    </Stack>
-                    
-                </Box>
+                    <Typography variant="body1">Current Vehicle:</Typography>
+                    <Typography variant="body1" sx={{fontStyle: "italic"}}>custom</Typography>
 
+                </Box>
+            )}
+
+            <Box>
+                <TextField
+                label="Liters per 100 km"
+                id="outlined-size-small"
+                //defaultValue=""
+                size="small"
+                sx={{width: '25ch'}}
+                onChange={(e) => handleSetLitersKm(e.target.value)}
+                value={litersKm}
+                error={!isFloat(litersKm)}
+                InputProps={{startAdornment: <InputAdornment position="start">l/100km:</InputAdornment>}}
+                />
+            </Box>
+
+            <Box>
+                <Stack direction={"row"} spacing={1}>
+                    <Box>
+                        <TextField
+                        label="Fuel Price"
+                        id="outlined-size-small"
+                        //defaultValue=""
+                        size="small"
+                        sx={{width: '25ch'}}
+                        onChange={(e) => setFuelPrice(e.target.value)}
+                        value={fuelPrice}
+                        error={!isFloat(fuelPrice)}
+                        InputProps={{startAdornment: <InputAdornment position="start">R</InputAdornment>}}
+                        />
+                    </Box>
+                    <Box>
+                        <Button onClick={() => saveFuelPrice()} sx={{height: "100%"}} variant="outlined">Save Price</Button>
+                    </Box>
+                </Stack>
                 
-            </Stack>
-        </div>
+            </Box>
+
+            
+        </Stack>
+
     )
  
 }

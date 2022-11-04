@@ -19,7 +19,7 @@ export class SelectedCells
         {
             for(let i = 0; i < this.rows.length; i++)
             {
-                let row = this.rows[i];
+                const row = this.rows[i];
                 if(row.cells[0].y === cellToAdd.y) //reads first cell in row and compares y coordinate
                 {
                     row.cells.push(cellToAdd)
@@ -35,11 +35,11 @@ export class SelectedCells
         this.cellAndRange = []
         for(let i = 0; i < this.rows.length; i++)
         {
-            let row = this.rows[i];
+            const row = this.rows[i];
             for(let j = 0; j < row.cells.length; j++)
             {
-                let cell = row.cells[j];
-                let cellAndRange: ICellAndRange = {cell: cell, range: worksheet.getCell(cell.y - 1, cell.x - 1)}; //store cell and range object together to keep track of the realtionship
+                const cell = row.cells[j];
+                const cellAndRange: ICellAndRange = {cell: cell, range: worksheet.getCell(cell.y - 1, cell.x - 1)}; //store cell and range object together to keep track of the realtionship
                 cellAndRange.range.load("values") //tells the range object we want to load values
                 cellAndRange.range.load("formulas") //tells the range object we want to load values
                 this.cellAndRange.push(cellAndRange) //cellAndRange object is pushed to array to later be used (after sync) to extract the value from the range and assign it to the cell
