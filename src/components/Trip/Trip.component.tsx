@@ -203,7 +203,6 @@ const RouteBuilder: React.FC = () =>
               R_setErrorMessage("Error: Check if all addresses are solved")
               return
             }
-            
           }
 
           //TODO check if there are enought tokens available

@@ -7,12 +7,8 @@ import CreateAccount from './components/user/CreateAccount.component';
 import Login from './components/user/Login.component';
 import CreateWorkspace from './components/workspaces/CreateWorkspace.component';
 import WorkSpaces from './components/workspaces/Workspaces.component';
-
 import AdminPanel from './components/admin/AdminPanel.component';
-
 import RouteBuilder from './components/Trip/Trip.component';
-
-
 import PostLoginConfig from './components/PostLoginConfig/PostLoginConfig.component';
 import ForwardRefParent from './components/experiments/ForwardRef/ForwardRefParent.component';
 

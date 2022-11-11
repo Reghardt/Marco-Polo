@@ -179,11 +179,6 @@ const MasterSequence: React.FC<MasterSequenceProps> = ({handleColumnDesignation,
                   {createColumnVisibilityOptions(R_tripRows[0], R_columnVisibility)}
                 </Box>
 
-                
-                
-
-                
-
                 <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
                   {createColumnDecorators_master(R_tripRows[0], R_columnVisibility, handleColumnDesignation)}
                 </Grid>

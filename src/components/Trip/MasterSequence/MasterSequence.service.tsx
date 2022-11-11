@@ -52,8 +52,6 @@ export function createColumnDecorators_master(jobHeadings: IRow, columnVisibilit
         })}
     </React.Fragment>
     return decorators
-
-
 }
 
 export function CreateTableHeadingElements_master(jobHeadings: IRow, columnVisibility: boolean[])
@@ -186,15 +184,11 @@ export async function deleteRow(rowYCoord: number, rows: IRow[])
                 {   
                     preSyncRowDataForDeletion(deletedRow[j], sheet)
                 }
-                    
-                
                 await context.sync()
             })
-
             return newRows
         }
     }
-
     return rows
 }
 
