@@ -150,16 +150,14 @@ const RouteBuilder: React.FC = () =>
       loadSelection().then((selection) => {
         console.log(selection)
         Cache_setRowsToImport(selection)
-        
       })
-     
     }
 
 
     function getUserWorkspaceAndMemberData()
     {
         axios.post<{userWorkspaceAndMemberData: {workspaceName: string, tokens: number, member: IMember}}>
-        ("/api/workspace/userWorkspaceAndMemberData", {
+        ("/api/workspace/getWorkspaceMemberByUserId", {
             workspaceId: R_workspaceId,
           },
           {
