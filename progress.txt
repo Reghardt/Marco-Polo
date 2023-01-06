@@ -1,4 +1,0 @@
-Office.js nullifies browser history functions breaking history usage:
-Fixed by: https://stackoverflow.com/questions/42642863/office-js-nullifies-browser-history-functions-breaking-history-usage
-
-For using emotion with react, include /** @jsxImportSource @emotion/react */ on top of every file it is used in. It does not work by adding "jsxImportSource": "@emotion/react" to tsconfig
