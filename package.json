@@ -1,23 +1,25 @@
 {
   "name": "marco-polo",
   "version": "0.0.0",
-  "private": "true",
-    "workspaces": [
+  "private": true,
+  "workspaces": [
     "apps/*",
     "packages/*"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Reghardt/Marco-Polo.git"
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "eslint-config-custom": "*",
+    "prettier": "latest",
+    "turbo": "latest"
   },
   "engines": {
     "node": ">=14.0.0"
   },
-  
-  "packageManager": "npm@9.2.0",
   "dependencies": {},
-  "devDependencies": {
-        "turbo": "latest"
-  }
-
+  "packageManager": "npm@9.2.0"
 }

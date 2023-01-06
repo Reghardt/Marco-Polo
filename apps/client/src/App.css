@@ -1,0 +1,29 @@
+
+.container{
+    display: grid;
+    grid-template-columns: min-content auto auto auto;
+    row-gap: 2px;
+    column-gap: 2px;
+  }
+  
+  .row {
+    display: contents;
+  
+  }
+  
+  .dragSrcElem{
+    opacity: 0.1;
+  }
+  
+  .elem {
+    border: 3px solid #777;
+    background-color: #ddd;
+    border-radius: .5em;
+    padding: 10px;
+    cursor: default;
+  }
+
+  .grid-item {
+    background-color: #ddd;
+    padding: 2px;
+  }
