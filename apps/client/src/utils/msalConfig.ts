@@ -3,8 +3,7 @@
  * Licensed under the MIT License.
  */
 
-import type { Configuration} from "@azure/msal-browser";
-import { LogLevel } from "@azure/msal-browser";
+import { Configuration, LogLevel } from "@azure/msal-browser";
 
 /**
  * Configuration object to be passed to MSAL instance on creation. 

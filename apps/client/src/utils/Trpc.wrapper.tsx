@@ -3,7 +3,7 @@ import { httpBatchLink } from "@trpc/client";
 import { useState } from "react";
 import { trpc } from "./trpc";
 import superjson from "superjson";
-import { useAccountStore } from "../zustand/accountStore";
+import { useAccountStore } from "../Zustand/accountStore";
 
 type TTrpcWrapper = {
     children? : React.ReactNode

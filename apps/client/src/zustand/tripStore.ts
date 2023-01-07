@@ -1,8 +1,8 @@
+import { EColumnDesignations, ICell, IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
 import create from 'zustand';
 import produce from 'immer';
-import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../services/Trip.service";
-import { EColumnDesignations } from "../common/enums";
-import { IRow, ICell, ITripDirections, IVehicleListEntry } from "../common/interfaces";
+import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Components/Trip/Trip.service";
+import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
 
 
 function getAddressColumn(columnDesignations: EColumnDesignations[])

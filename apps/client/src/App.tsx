@@ -1,28 +1,38 @@
-import { Redirect, Route } from 'wouter'
-import './App.css'
-import Login from './pages/Login.page'
-import Trip from './pages/Trip.page'
-import Workspaces from './pages/Workspaces.page'
 
-export enum ERoutes{
-  Login = "/login",
-  Workspaces = "/workspaces",
-  Trip = "/trip"
-}
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Login from './Components/Account/Login.component'
+import WorkSpaces from './Components/Account/workspaces/Workspaces.component'
+
+import CounterExp from './Components/Experiments/Counter Experiments/CounterExperiment.component'
+import Trip from './Components/Trip/Trip.component'
+
 
 function App() {
+
+
+  console.log("refresh app")
+  
+
   return (
-    <>
-      <Route path='/index.html'><Redirect to={ERoutes.Login}></Redirect></Route>
-      <Route path='/'><Redirect to={ERoutes.Login}></Redirect></Route>
+    <div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login/>}/>
+          <Route path='/index.html' element={<Login/>}/> {/* Navigate is the new redirect. This is to handle office that searches for index.html */}
+          <Route path="/login" element={<Login/>}/>
+          
+          <Route path="/workspaces" element={<WorkSpaces/>}/>
 
-      <Route path={ERoutes.Login}><Login/></Route>
-      <Route path={ERoutes.Workspaces}><Workspaces/></Route>
-      <Route path={ERoutes.Trip}><Trip/></Route>
-        
-        
+          <Route path="/trip" element={<Trip/>}/>
 
-    </>
+
+          <Route path="/exp" element={<CounterExp/>}/>
+        </Routes>
+      </BrowserRouter>
+
+      {/* <Counter1/>
+      <Counter2/> */}
+    </div>
   )
 }
 

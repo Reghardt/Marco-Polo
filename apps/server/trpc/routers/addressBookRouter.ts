@@ -58,14 +58,6 @@ export const addressBookRouter = router({
         console.log(deletedAddressBookEntry)
         return "del"
     }),
-
-    testQuery: protectedProcedure
-    .query<TTestInterface>(() => {
-        const tst: TTestInterface = {_id: new mongoose.Types.ObjectId(), test: "some srt", test2: "some str 2"}
-        return tst as TTestInterface
-    })
-
-
   });
 
 
