@@ -5,7 +5,7 @@ export interface ICell
     displayData: string;
     editableData: string;
     //geocodedResults: google.maps.GeocoderResult[];
-    geoStatusAndRes: IGeoStatusAndRes | null;
+    geocodedDataAndStatus: IGeoStatusAndRes | null;
     selectedGeocodedAddressIndex: number;
     formula: string; // default ""
     isGeoResAccepted: boolean;

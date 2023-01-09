@@ -1,30 +1,14 @@
-import { Box, Button, Checkbox, FormControlLabel, Grid, Stack, Typography } from "@mui/material"
-import React from "react"
-import { useMapsStore } from "../Zustand/mapsStore";
-
-import { useTripStore } from "../Zustand/tripStore";
-
-import { EColumnDesignations, ICell, IGeoStatusAndRes, ILeg, IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums"
+import { Grid, Typography, FormControlLabel, Checkbox } from "@mui/material";
+import React from "react";
+import { ILeg } from "trpc-server/trpc/models/Workspace";
+import { IRow, EColumnDesignations,  IGeoStatusAndRes, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
+import GridRow from "../Components/DragAndDrop/GridRow";
 import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressCell.component";
 import ColumnDecorator from "../Components/Trip/TripTable/cells/ColumnDecorator.component";
 import DataCell from "../Components/Trip/TripTable/cells/DataCell.component";
 import HeadingCell from "../Components/Trip/TripTable/cells/HeadingCell.component";
-
-
-const labelSize = 0.5;
-
-function numberOfVisibleColumns(columnVisibility: boolean[]): number
-{
-    let num = 0
-    for(let i = 0; i < columnVisibility.length; i++)
-    {
-        if(columnVisibility[i] === true)
-        {
-            num++
-        }
-    }
-    return num
-}
+import { useMapsStore } from "../Zustand/mapsStore";
+import { useTripStore } from "../Zustand/tripStore";
 
 //this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : {status: boolean, reason: string}
@@ -67,113 +51,142 @@ export function reorder(list: IRow[], startIndex: number, endIndex: number )
 
 export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, columnVisibility: boolean[]) : JSX.Element
 {
-  const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
-  const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
-  const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
+  // const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
+  // const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
+  // const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
 
   
-  function setVerified(cell: ICell)
-  {
-    ZF_updateBodyCell({...cell, isGeoResAccepted: true})
-  }
+  // function setVerified(cell: ICell)
+  // {
+  //   ZF_updateBodyCell({...cell, isGeoResAccepted: true})
+  // }
 
-  function addressCellGlanceMode(): JSX.Element
-  {
-    const cell = row.cells[Z_addressColumIndex]
-    const isDisabled = cell.geoStatusAndRes?.status === google.maps.GeocoderStatus.OK ? false : true;
-    return(
+  // function addressCellGlanceMode(): JSX.Element
+  // {
+  //   const cell = row.cells[Z_addressColumIndex]
+  //   const isDisabled = cell.geoStatusAndRes?.status === google.maps.GeocoderStatus.OK ? false : true;
+  //   return(
       
-      <Grid key={`cell-${cell.x}-${cell.y}`} item xs={12 - labelSize}>
-          <Stack direction={"row"}>
-            <Box sx={{width: "100%"}}>
-              <AddressCell cellRef={cell} glanceMode={true}/>
-            </Box>
-            <Box sx={{marginLeft: "0.1em"}}>
-              <Button disabled={isDisabled} onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
-            </Box>
-          </Stack>
+  //     <Grid key={`cell-${cell.x}-${cell.y}`} item xs={12 - labelSize}>
+  //         <Stack direction={"row"}>
+  //           <Box sx={{width: "100%"}}>
+  //             <AddressCell cellRef={cell} glanceMode={true}/>
+  //           </Box>
+  //           <Box sx={{marginLeft: "0.1em"}}>
+  //             <Button disabled={isDisabled} onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+  //           </Box>
+  //         </Stack>
           
-      </Grid>
+  //     </Grid>
 
-    )
-  }
+  //   )
+  // }
 
+  if(row.cells[0].y >= 0)
+  {
+    const rowWithChildren = 
 
-  const rowWithChildren = 
-  <React.Fragment>
-    <Grid container spacing={"0.2em"} justifyContent="flex-end">
-        <Grid item xs={labelSize}>
-            <Box sx={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white"}} variant="body1">{nr + 1}</Typography></Box>
-        </Grid>
+    <GridRow key={row.cells[0].y} draggableId={row.cells[0].y}>
+
+      <div draggable="true" style={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white", paddingLeft: "2px", paddingRight: "2px"}} variant="body1">{nr + 1}</Typography></div>
+      
+      {row.cells.map((cell, index) => {
+        if(columnVisibility[index])
         {
-          Z_addressColumIndex > -1 && row.cells[Z_addressColumIndex].isGeoResAccepted === false 
-          ? 
-          addressCellGlanceMode()
-          :
-          row.cells.map((cell, index) => {
-            if(columnVisibility[index] === true){
-                if(columnDesignations[index] === EColumnDesignations.Address){
-                  return(
-                    <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
-                        <AddressCell cellRef={cell} glanceMode={false}/>
-                    </Grid>
-                  )
-                }
-                else{
-                  return(
-                    <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
-                        <DataCell cellRef={cell}
-                        />
-                    </Grid>
-                  )
-                }
-            }
-            else{
-                return <></>
-            }
-          })
+          if(columnDesignations[index] === EColumnDesignations.Address){
+            return(
+              <AddressCell cellRef={cell} glanceMode={false}/>
+            )
+          }
+          else{
+            return(
+              <DataCell cellRef={cell}/>
+            )
+          }
+        }
+        else
+        {
+          return <></> //return nothing if column is not visible
         }
 
-        {row.children.map((row) => {
-            return createChildRow(row, columnVisibility)
-        })}
-    </Grid>
-    {/* <Divider sx={{margin: "0.2em"}}/> */}
-  </React.Fragment>
 
-  return rowWithChildren;
-}
+      })}
 
-function createChildRow(row: Readonly<IRow>, columnVisibility: boolean[])
-{
-    const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
-
-    const childRow =
-    <React.Fragment>
-        <Grid item xs={labelSize}>
-            <Box sx={{height: "100%", width: "100%"}}></Box>
-        </Grid>
-
-        {row.cells.map((cell, index) => {
-            if(columnVisibility[index] === true)
-            {
+      {/* {
+        Z_addressColumIndex > -1 && row.cells[Z_addressColumIndex].isGeoResAccepted === false 
+        ? 
+        addressCellGlanceMode()
+        :
+        row.cells.map((cell, index) => {
+          if(columnVisibility[index] === true){
+              if(columnDesignations[index] === EColumnDesignations.Address){
                 return(
-                    <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
-                        <DataCell
-                            cellRef={cell}
-                        />
-                    </Grid>
+                  <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
+                      <AddressCell cellRef={cell} glanceMode={false}/>
+                  </Grid>
                 )
-            }
-            else
-            {
-                return <></>
-            }
-        })}
-    </React.Fragment>
+              }
+              else{
+                return(
+                  <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
+                      <DataCell cellRef={cell}
+                      />
+                  </Grid>
+                )
+              }
+          }
+          else{
+              return <></>
+          }
+        })
+      } */}
 
-    return childRow
+      {/* {row.children.map((row) => {
+          return createChildRow(row, columnVisibility)
+      })} */}
+    </GridRow>
+
+    return rowWithChildren;
+  }
+  else
+  {
+    return <></>
+  }
+
+
+  
 }
+
+// function createChildRow(row: Readonly<IRow>, columnVisibility: boolean[])
+// {
+//     const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
+
+//     const childRow =
+//     <React.Fragment>
+//         <Grid item xs={labelSize}>
+//             <Box sx={{height: "100%", width: "100%"}}></Box>
+//         </Grid>
+
+//         {row.cells.map((cell, index) => {
+//             if(columnVisibility[index] === true)
+//             {
+//                 return(
+//                     <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
+//                         <DataCell
+//                             cellRef={cell}
+//                         />
+//                     </Grid>
+//                 )
+//             }
+//             else
+//             {
+//                 return <></>
+//             }
+//         })}
+//     </React.Fragment>
+
+//     return childRow
+// }
 
 export function geocodeAddress(address: string) : Promise<IGeoStatusAndRes>
 {
@@ -210,50 +223,39 @@ export function createColumnVisibilityOptions(columnNames: IRow, columnVisibilit
 export function createColumnDecorators(columnVisibility: boolean[]) : JSX.Element
 {
 
-    const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility)
-
     const decorators =
     <React.Fragment>
-        <Grid item xs={labelSize}>
-            <Box sx={{height: "100%", width: "100%"}}></Box>
-        </Grid>
-        {columnVisibility.map((visibility,index) => {
-            if(visibility === true)
-            {
-                return(<Grid item xs={elementSize}>
-                    <ColumnDecorator colIdx={index}/>
-                </Grid>)
-            }
-            else
-            {
-                return <></>
-            }
-        })}
+      <div style={{height: "100%", width: "100%"}}></div>
+      {columnVisibility.map((visibility,index) => {
+        if(visibility === true)
+        {
+            return <ColumnDecorator colIdx={index}/>
+        }
+        else
+        {
+            return <></>
+        }
+      })}
     </React.Fragment>
     return decorators
 }
 
 export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: boolean[])
     {
-      const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility)
       const headings =
       <React.Fragment>
-        <Grid item xs={labelSize}>
-            <Box sx={{height: "100%", width: "100%"}}></Box>
-        </Grid>
+        <div style={{height: "100%", width: "100%"}}></div>
         {jobHeadings.cells.map((cell, index) => {
-            if(columnVisibility[index] === true)
-            {
-                return(
-                    <Grid item xs={elementSize}>
-                        <HeadingCell colNumber={cell.x}/>
-                    </Grid>
-                )
-            }
-            else
-            {
-                return(<></>)
-            }
+          if(columnVisibility[index] === true)
+          {
+              return(
+                <HeadingCell colNumber={cell.x}/>
+              )
+          }
+          else
+          {
+            return(<></>)
+          }
         })}
       </React.Fragment>
       return headings
@@ -280,7 +282,6 @@ export function removeRowParentChildRelations(rows: IRow[])
 export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: number): IRow[]
 {
     console.log("make parent- children")
-    console.log(rows, addressColumnIndex)
     const parentWithChildrenRows: IRow[] = [];
 
     if(addressColumnIndex < 0)
@@ -478,9 +479,9 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
       {
         const cell = Z_tripRows[i].cells[Z_addressColumIndex]
   
-        if(cell.geoStatusAndRes?.results && cell.geoStatusAndRes.results.length > 0 && cell.isGeoResAccepted)
+        if(cell.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0 && cell.isGeoResAccepted)
         {
-          const cellGeoAddress = cell.geoStatusAndRes.results[cell.selectedGeocodedAddressIndex]
+          const cellGeoAddress = cell.geocodedDataAndStatus.results[cell.selectedGeocodedAddressIndex]
           waypoints.push({location: cellGeoAddress.formatted_address, stopover: true})
         }
         else{
@@ -555,7 +556,7 @@ export function createDriverTrip() : {errorMsg: string, legs: ILeg[]}
     }
 
 
-    const fullAddress = addressCell.geoStatusAndRes!.results![addressCell.selectedGeocodedAddressIndex].formatted_address
+    const fullAddress = addressCell.geocodedDataAndStatus!.results![addressCell.selectedGeocodedAddressIndex].formatted_address
     tripLegs.push({givenAddress: addressCell.displayData, fullAddressStr: fullAddress, legDetails: legDetails, avoidTolls: false, legStatus: 0})
   }
 

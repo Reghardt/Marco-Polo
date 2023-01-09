@@ -20,18 +20,18 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 
   function getAddressStatus(): {status: string, color: string, hoverColor: string}
   {
-    if(cellRef.geoStatusAndRes)
+    if(cellRef.geocodedDataAndStatus)
     {
-      if(cellRef.geoStatusAndRes.status === google.maps.GeocoderStatus.OK)
+      if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OK)
       {
-        if(cellRef.geoStatusAndRes.results && cellRef.geoStatusAndRes.results.length > 0)
+        if(cellRef.geocodedDataAndStatus.results && cellRef.geocodedDataAndStatus.results.length > 0)
         {
           if(cellRef.isGeoResAccepted)
           {
-            return {status: cellRef.geoStatusAndRes.results[cellRef.selectedGeocodedAddressIndex].formatted_address, color: "green", hoverColor: "#006e09"}
+            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex].formatted_address, color: "green", hoverColor: "#006e09"}
           }
           else{
-            return {status: cellRef.geoStatusAndRes.results[cellRef.selectedGeocodedAddressIndex].formatted_address, color: "#f57c00", hoverColor: "#df6400"}
+            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex].formatted_address, color: "#f57c00", hoverColor: "#df6400"}
           }
           
         }
@@ -39,17 +39,17 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
           return {status: "error", color: "#ff5100", hoverColor: "#ca2800"}
         }
       }
-      else if(cellRef.geoStatusAndRes.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
+      else if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
       {
         return {status: "server under load, please wait...", color: "#f57c00", hoverColor: "#df6400"}
       }
-      else if(cellRef.geoStatusAndRes.status === google.maps.GeocoderStatus.ZERO_RESULTS)
+      else if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.ZERO_RESULTS)
       {
         return {status:  google.maps.GeocoderStatus.ZERO_RESULTS.toString() , color: "#ff5100", hoverColor: "#ca2800"}
       }
       else
       {
-        return {status: cellRef.geoStatusAndRes.status.toString(), color: "#ff5100", hoverColor: "#ca2800"}
+        return {status: cellRef.geocodedDataAndStatus.status.toString(), color: "#ff5100", hoverColor: "#ca2800"}
       }
 
       

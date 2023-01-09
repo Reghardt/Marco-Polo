@@ -5,7 +5,7 @@ import WorkSpaces from './Components/Account/workspaces/Workspaces.component'
 
 import CounterExp from './Components/Experiments/Counter Experiments/CounterExperiment.component'
 import Trip from './Components/Trip/Trip.component'
-
+import './App.css'
 
 function App() {
 

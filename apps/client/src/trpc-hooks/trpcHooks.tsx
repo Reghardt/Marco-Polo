@@ -42,7 +42,11 @@ import { trpc } from "../utils/trpc"
 //Address book - start //////////////////////////////////////////////////////////////////////////////////
 
   export const useGetAddressBookQuery = (workspaceId: string) => trpc.addressBook.getAddressBook.useQuery(
-    {workspaceId: workspaceId}
+    {workspaceId: workspaceId},
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false
+    }
   )
 
   //should invalidate getAddressBook

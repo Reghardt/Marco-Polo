@@ -19,8 +19,6 @@ enum EGraphType{
 
 const Statistics: React.FC = () => {
 
-    console.log("refresh")
-
     const R_tripDirections = useTripStore(state => state.data.tripDirections)
     const [graphType, setGraphType] = useState<EGraphType>(EGraphType.Time)
 
@@ -115,12 +113,6 @@ const Statistics: React.FC = () => {
 
     }, [memberQuery.isFetched])
     
-
-
-
-    console.log(vehicleQuery.data)
-
-    console.log("fire stats")
     return(
         <Box sx={{height: "55em"}}>
             <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Trip Statistics</Typography>

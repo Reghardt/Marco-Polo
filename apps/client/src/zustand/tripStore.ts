@@ -22,6 +22,11 @@ export enum EDepartReturn{
     different
 }
 
+export enum ETableMode{
+    EditMode = 1,
+    SolveAddressMode = 2,
+}
+
 interface ITrip{
     departureAddress: google.maps.GeocoderResult | null;
     returnAddress: google.maps.GeocoderResult | null;
@@ -36,6 +41,8 @@ interface ITrip{
 
     vehicle: IVehicleListEntry | null;
     errorMessage: string;
+
+    tabelMode: ETableMode;
 }
 
 interface ITripState {
@@ -60,6 +67,8 @@ interface ITripState {
         setVehicle: (vehicle: IVehicleListEntry | null) => void;
 
         setErrorMessage: (msg: string) => void;
+
+        setTableMode: (tableMode: ETableMode) => void;
     }
 }
 
@@ -77,7 +86,8 @@ export const useTripStore = create<ITripState>()(((set) => ({
 
         vehicle: null,
 
-        errorMessage: ""
+        errorMessage: "",
+        tabelMode: ETableMode.EditMode
     },
     reducers: {
         setDepartureAddress(departureAddress) {
@@ -147,12 +157,39 @@ export const useTripStore = create<ITripState>()(((set) => ({
             set(produce<ITripState>((state) => {
                 if(payload.columnIndex > -1 && payload.columnIndex < state.data.columnDesignations.length)
                 {
-                    state.data.columnDesignations.fill(EColumnDesignations.Data)                    
-                    state.data.columnDesignations[payload.columnIndex] = payload.designation
-                    
+                    if(payload.designation === EColumnDesignations.Data) //if designation is data, simply assign it as such
+                    {
+                        state.data.columnDesignations[payload.columnIndex] = payload.designation
+                        state.data.tabelMode = ETableMode.EditMode;
+                    }
+                    else if(payload.designation === EColumnDesignations.Address) // if it is an address, loop through the current designations, set the current column designated as address to data, then set the new specified column as the address
+                    {
+                        //if its the first time a column is set as address the loop will fall through
+                        for(let i = 0; i < state.data.columnDesignations.length; i++)
+                        {
+                            if(state.data.columnDesignations[i] === EColumnDesignations.Address)
+                            {
+                                state.data.columnDesignations[i] = EColumnDesignations.Data
+                                break;
+                            }
+                        }
+                        state.data.columnDesignations[payload.columnIndex] = payload.designation
 
-                    state.data.addressColumnIndex = getAddressColumn(state.data.columnDesignations);
-                    state.data.rows = makeRowParentChildRelations(removeRowParentChildRelations(state.data.rows), state.data.addressColumnIndex)
+                        //check if addresses in column needs solving, if so, enter solve mode
+                        for(let i = 0; i < state.data.rows.length; i++)
+                        {
+                            const cell = state.data.rows[i].cells[payload.columnIndex];
+                            if(cell.isGeoResAccepted === false)
+                            {
+                                state.data.tabelMode = ETableMode.SolveAddressMode;
+                                console.log("Solve address mode")
+                                break;
+                            }
+                        }
+                    }                
+                    
+                    state.data.addressColumnIndex = getAddressColumn(state.data.columnDesignations); //save the new address columns index
+                    state.data.rows = makeRowParentChildRelations(removeRowParentChildRelations(state.data.rows), state.data.addressColumnIndex) //new parent child relations may be needed, recalculate them
                 }
             }))
         },
@@ -222,6 +259,12 @@ export const useTripStore = create<ITripState>()(((set) => ({
                 state.data.errorMessage = msg;
             }))
         },
+
+        setTableMode(tabelMode){
+            set(produce<ITripState>((state) => {
+                state.data.tabelMode = tabelMode
+            }))
+        }
     }
 })))
 

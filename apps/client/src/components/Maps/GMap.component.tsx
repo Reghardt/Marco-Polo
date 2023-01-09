@@ -36,13 +36,10 @@ const GMap: React.FC = () => {
 
     const Z_preserveViewport = useMapsStore(state => state.data.preserveViewport)
 
-    console.log("maps refresh")
-
     useEffect(() => {
         popperRefs.current = popperRefs.current.slice(0, Z_tripRows.length) //creates new refs array?
         
         setMarkers(createCustomMapMarkers(Z_tripRows, Z_addresColumIndex, map, Z_departureAddress, Z_returnAddress, popperRefs))
-        console.log(popperRefs)
         for(let i = 0; i < popperRefs.current.length; i++)
         {
             popperRefs.current[i]?.update()

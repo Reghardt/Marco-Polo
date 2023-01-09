@@ -23,7 +23,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
         cellRef,
     }) => {
 
-    const [geoStatusAndRes, setGeoStatusAndRes] = useState(cellRef.geoStatusAndRes);
+    const [geoStatusAndRes, setGeoStatusAndRes] = useState(cellRef.geocodedDataAndStatus);
 
     const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(cellRef.selectedGeocodedAddressIndex)
     const [textboxContent, setTextboxContent] = useState(currentAddress)
@@ -35,7 +35,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     const ZR_deleteRow = useTripStore((state) => state.reducers.deleteRow)
 
     useEffect( () => {
-        if(cellRef.geoStatusAndRes === null)
+        if(cellRef.geocodedDataAndStatus === null)
         {
             generateGeocodeResults(cellRef.displayData)
         }
@@ -68,7 +68,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     {
         if(geoStatusAndRes?.results)
         {
-            ZR_updateBodyCell({...cellRef, displayData: textboxContent, geoStatusAndRes: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isGeoResAccepted: true})
+            ZR_updateBodyCell({...cellRef, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isGeoResAccepted: true})
             closePopper()
         }
         else

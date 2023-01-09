@@ -40,7 +40,7 @@ function generateCellsFromCoordinates(userSelection: string)
         {
             for(let k = range.start.y; k <= range.stop.y; k++)
             {
-                selectionData.insertCell({x: j, y: k, displayData: "", editableData: "", geoStatusAndRes: null, selectedGeocodedAddressIndex: 0,  formula: "", isGeoResAccepted: false});
+                selectionData.insertCell({x: j, y: k, displayData: "", editableData: "", geocodedDataAndStatus: null, selectedGeocodedAddressIndex: 0,  formula: "", isGeoResAccepted: false});
             }
         }
     }

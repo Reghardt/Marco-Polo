@@ -11,10 +11,10 @@ const DataCell: React.FC<DataCellProps> = ({cellRef}) =>
 {
 
     return(
-            <React.Fragment>
+            <div draggable="true">
                 <Button disableRipple variant={"contained"} 
                   sx={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start", minHeight: "2.4em", pointerEvents: "none"}}>{cellRef.displayData}</Button>
-            </React.Fragment>
+            </div>
         )
 }
 

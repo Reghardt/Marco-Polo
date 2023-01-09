@@ -1,15 +1,13 @@
 import { PanToolOutlined } from "@mui/icons-material"
-import { Box, Button, Divider, Grid, Stack, Typography } from "@mui/material"
+import { Box, Button, Stack, Typography } from "@mui/material"
 import React, { useEffect } from "react"
-import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useTripStore } from "../../../Zustand/tripStore"
-//import { ICell } from "../../common/CommonInterfacesAndEnums"
-import Dragger from "../../DragNDrop/Dragger.component"
-import Dropper from "../../DragNDrop/Dropper.component"
-import { calcRoute, createColumnDecorators, createColumnVisibilityOptions, CreateTableHeadingElements, createTripTableRow, doRowsConform, geocodeAddress, reorder, writeBackToSpreadsheet } from "../../../Services/Trip.service"
+import { calcRoute, createColumnDecorators, createColumnVisibilityOptions, CreateTableHeadingElements, createTripTableRow, doRowsConform, geocodeAddress, writeBackToSpreadsheet } from "../../../Services/Trip.service"
 import { loadSelection } from "../Worksheet/worksheet.service"
 import { Driver } from "./Driver/Driver.component"
 import TripTableLegends from "./TripTableLegends.component"
+import GridContainer from "../../DragAndDrop/GridContainer"
+
 
 const TripTable: React.FC = () => {
 
@@ -28,9 +26,6 @@ const TripTable: React.FC = () => {
 
     const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
 
-
-
-
     async function solveAddresses(){
       if(Z_addressColumnIndex >= 0)
       {
@@ -41,16 +36,16 @@ const TripTable: React.FC = () => {
 
           
 
-          if(addressCell.geoStatusAndRes === null) //if the cell has no geocoded address, find one
+          if(addressCell.geocodedDataAndStatus === null) //if the cell has no geocoded address, find one
           {
             const geoRes = await geocodeAddress(addressCell.displayData)
-            ZF_updateBodyCell({...addressCell, geoStatusAndRes: geoRes});
+            ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
             return;
           }
-          else if(addressCell.geoStatusAndRes && addressCell.geoStatusAndRes.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
+          else if(addressCell.geocodedDataAndStatus && addressCell.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
           {
             await setTimeout(() => {
-              ZF_updateBodyCell({...addressCell, geoStatusAndRes: null});
+              ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: null});
             }, 2000)
             return;
           }
@@ -106,22 +101,38 @@ const TripTable: React.FC = () => {
     }
 
     useEffect(() => {
-      
       solveAddresses()
-      
-      
     }, [Z_tripRows])
 
-    function onDragEnd(result: DropResult)
-    {
-      if(!result.destination)
-      {
-          return;
-      }
+    // function onDragEnd(result: DropResult)
+    // {
+    //   if(!result.destination)
+    //   {
+    //       return;
+    //   }
   
-      const reorderedRows = reorder(Z_tripRows, result.source.index, result.destination.index)
-      ZF_setTripRows(reorderedRows)
-      calcRoute(false, true)
+    //   const reorderedRows = reorder(Z_tripRows, result.source.index, result.destination.index)
+    //   ZF_setTripRows(reorderedRows)
+    //   calcRoute(false, true)
+    // }
+
+    function onDragEnd(sequence: number[])
+    {
+      console.log(sequence)
+      const rearrangedRows: any[] = []
+      for(let i = 0; i < sequence.length; i++)
+      {
+        for(let j = 0; j < Z_tripRows.length; j++)
+        {
+          if(Z_tripRows[j].cells[0].y === sequence[i])
+          {
+            rearrangedRows.push(Z_tripRows[j])
+          }
+        }
+      }
+      console.log(sequence, rearrangedRows)
+  
+      ZF_setTripRows(rearrangedRows)
     }
 
     function handleReverseOrder()
@@ -193,7 +204,20 @@ const TripTable: React.FC = () => {
       return <></>
     }
 
-    
+    function createGridTracks(columnVisibility: boolean[])
+    {
+      let tracks = "min-content "
+
+      //TODO check in what state the table is in
+
+      columnVisibility.forEach(vis => {
+        if(vis)
+        {
+          tracks += "auto "
+        }
+      })
+      return tracks
+    }
 
     if(Z_tripRows.length > 0)
     {
@@ -209,29 +233,18 @@ const TripTable: React.FC = () => {
               {createColumnVisibilityOptions(Z_tripRows[0], Z_columnVisibility)}
             </Box>
 
-            <Grid container spacing={0.3} sx={{paddingBottom: "1px"}}>
+            <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
+
               {createColumnDecorators(Z_columnVisibility)}
-            </Grid>
-            <Grid container spacing={0.3}>
+
               {CreateTableHeadingElements(Z_tripRows[0], Z_columnVisibility)}
-            </Grid>
 
-            <Box sx={{p: "0.3em"}}>
-              <Divider/>
-            </Box>
-            
-
-
-            <DragDropContext onDragEnd={onDragEnd}>
-                <Dropper droppableId="droppable">
-                    {Z_tripRows.map((row, idx) => {
-                    return (
-                        <Dragger key={row.cells[0].y} draggableId={row.cells[0].y.toString()} index={idx}>
-                            {createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)}
-                        </Dragger>)
-                    })}
-                </Dropper>                    
-            </DragDropContext>
+              {Z_tripRows.map((row, idx) => {
+                return(
+                  createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
+                )})
+              }                   
+            </GridContainer>
 
             <Stack sx={{marginTop: "1em"}} spacing={1}>
               <ConfirmAllAddressesAsAcceptedButton/>

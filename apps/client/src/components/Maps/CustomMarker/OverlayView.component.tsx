@@ -11,7 +11,6 @@ interface IOverlayViewProps{
 }
 
 const OverlayView: React.FC<IOverlayViewProps> = ({position, pane, map, zIndex, children}) => {
-    console.log("Overlay view fired")
 
     const container = useMemo(() => {
         const div = document.createElement('div')

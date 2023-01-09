@@ -19,16 +19,15 @@ export function createCustomMapMarkers(
 
     if(addressColumnIndex > -1)
     {
-        console.log(popperRefs)
         for(let i = 0; i < rows.length; i++)
         {
             //const row: IRow = rows[i]
             const label = (i + 1).toString()
             const cell = rows[i].cells[addressColumnIndex]
 
-            if(cell.geoStatusAndRes?.results && cell.geoStatusAndRes.results.length > 0)
+            if(cell.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0)
             {
-                const addressRes = cell.geoStatusAndRes.results[cell.selectedGeocodedAddressIndex]
+                const addressRes = cell.geocodedDataAndStatus.results[cell.selectedGeocodedAddressIndex]
                 if(addressRes)
                 {
 
