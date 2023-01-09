@@ -5,12 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { useAccountStore } from "../../../Zustand/accountStore";
 import { IWorkspace } from "../../common/CommonInterfacesAndEnums";
 
-import { updateLastUsedWorkspaceId } from "./workspace.service";
+import { updateLastUsedWorkspaceId } from "../../../Services/workspace.service";
 
 
 export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descriptionPurpose, tokens}) =>
 {
-    const ZF_setWorkspaceId = useAccountStore(state => state.reducers.setWorkspaceId)
+    const ZF_setWorkspaceId = useAccountStore(state => state.actions.setWorkspaceId)
     const Z_bearer = useAccountStore(state => state.values.bearer)
     const navigate = useNavigate();
 

@@ -1,6 +1,6 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, Stack, TextField} from "@mui/material"
 import React, { useState } from "react"
-import { geocodeAddress } from "../Trip.service";
+import { geocodeAddress } from "../../../Services/Trip.service";
 import AddressBookDialog from "./AddressBookDialog.component";
 
 interface IAddressSelectorPopup{

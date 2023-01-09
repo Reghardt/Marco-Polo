@@ -1,8 +1,8 @@
 import { Instance } from "@popperjs/core";
 import React from "react";
-import { IRow } from "../common/CommonInterfacesAndEnums";
-import BodyMarker, { EMarkerType } from "./CustomMarker/BodyMarker.component";
-import DepRetMarker from "./CustomMarker/DepRetMarker.component";
+import { IRow } from "../Components/common/CommonInterfacesAndEnums";
+import BodyMarker, { EMarkerType } from "../Components/Maps/CustomMarker/BodyMarker.component";
+import DepRetMarker from "../Components/Maps/CustomMarker/DepRetMarker.component";
 
 
 export function createCustomMapMarkers(

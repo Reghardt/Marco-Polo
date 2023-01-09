@@ -5,7 +5,7 @@ import { useTripStore } from "../../../../../Zustand/tripStore";
 
 import HelpTooltip from "../../../../common/HelpTooltip.component";
 import { ICell } from "../../../../common/CommonInterfacesAndEnums";
-import { geocodeAddress } from "../../../Trip.service";
+import { geocodeAddress } from "../../../../../Services/Trip.service";
 
 
 

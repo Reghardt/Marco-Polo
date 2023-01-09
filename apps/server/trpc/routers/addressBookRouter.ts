@@ -16,7 +16,7 @@ export const addressBookRouter = router({
         console.log(input.workspaceId)
         const workspace = await WorkspaceModel.findOne({_id: new mongoose.Types.ObjectId(input.workspaceId)}, {addressBook: 1})
         console.log(workspace)
-
+        //TODO fix this:
         type TReturnType = {
             addressBookEntries: IAddressBookEntry[]
         }
@@ -28,9 +28,10 @@ export const addressBookRouter = router({
 
     createAddressBookEntry: protectedProcedure
     .input(z.object({
+        workspaceId: z.string(),
         physicalAddress: z.string(),
-        addressDescription: z.string(),
-        workspaceId: z.string()
+        addressDescription: z.string()
+        
     }))
     .mutation( async ({input}) => {
         const addressBookEntry = await WorkspaceModel.updateOne({

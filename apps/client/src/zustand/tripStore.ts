@@ -1,7 +1,7 @@
 import { EColumnDesignations, ICell, IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
 import create from 'zustand';
 import produce from 'immer';
-import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Components/Trip/Trip.service";
+import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Services/Trip.service";
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
 
 

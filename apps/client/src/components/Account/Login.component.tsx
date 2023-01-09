@@ -1,65 +1,50 @@
-import * as React from 'react';
 import axios from 'axios';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Box, Button, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
-import { msLogin } from './Account.service';
+import { msLogin } from '../../Services/Account.service';
 import { useMsal } from '@azure/msal-react';
 import MSLogo from './MSLogo.component';
 import { useAccountStore } from '../../Zustand/accountStore';
-import { trpc } from '../../utils/trpc';
+import { useDoesWorkspaceExistMutation, useloginMsMutation } from '../../trpc-hooks/trpcHooks';
+
+
 
 
 export default function Login()
-{
-//   const [, R_setBearer] = useRecoilState(RSBearerToken)
-//   const [, R_setWorkspaceId] = useRecoilState(RSWorkspaceID)
-  
+{ 
   const [loginError, setLoginError] = useState<string>("")
   
   const { instance, /* accounts */} = useMsal();
   const navigate = useNavigate();
 
-
-
-  const Z_bearer = useAccountStore((store) => store.values.bearer)
-
-  const ZF_setBearer = useAccountStore(store => store.reducers.setBearer)
-  const ZF_setWorkspaceId = useAccountStore(store => store.reducers.setWorkspaceId)
+  const ZF_setBearer = useAccountStore(store => store.actions.setBearer)
+  const ZF_setWorkspaceId = useAccountStore(store => store.actions.setWorkspaceId)
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-
-  console.log(Z_bearer)
-
-  const doesWorkspaceExist = trpc.workspaces.doesWorkspaceExist.useMutation({
-    onSuccess: (res) => {
-      if(res.doesExist)
-      {
-        navigate("/trip", {replace: true})
-      }
-      else
-      {
-        navigate("/workspaces", {replace: true})
-      }
-    },
-    onError: () => {
-
+  const doesWorkspaceExist = useDoesWorkspaceExistMutation((res) => {
+    if(res.doesExist)
+    {
+      navigate("/trip", {replace: true})
+    }
+    else
+    {
+      navigate("/workspaces", {replace: true})
     }
   })
 
-  const loginMsMutation = trpc.auth.loginMs.useMutation({
-    onSuccess: (res) => {
+  const loginMsMutation = useloginMsMutation({
+    doOnSuccess: (res) => {
       ZF_setBearer(res.accessToken)
       ZF_setWorkspaceId(res.lastUsedWorkspaceId)
-      // navigate("/postLoginConfig", {replace: true})
       doesWorkspaceExist.mutate({workspaceId: res.lastUsedWorkspaceId})
     },
-    onError: (err) => {
+    doOnError: (err) => {
       console.error(err)
       setLoginError("Microsoft Login Failed")
-    }
+    },
   })
 
   async function loginCM()

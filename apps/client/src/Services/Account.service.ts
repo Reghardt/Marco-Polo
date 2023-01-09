@@ -1,5 +1,5 @@
 import { AuthenticationResult, IPublicClientApplication } from "@azure/msal-browser";
-import { loginRequest } from "../../utils/msalConfig";
+import { loginRequest } from "../utils/msalConfig";
 
     // function handlePopupLogout(instance: IPublicClientApplication)
     // {

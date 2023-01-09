@@ -6,7 +6,7 @@ interface IAccountState{
         bearer: string;
         workspaceId: string;
     },
-    reducers: {
+    actions: {
         setBearer: (bearer: string) => void;
         setWorkspaceId: (workspaceId: string) => void;
 
@@ -20,7 +20,7 @@ export const useAccountStore = create<IAccountState>()(
             workspaceId: "",
 
         },
-        reducers: {
+        actions: {
             setBearer(bearer: string){
                 set(state => {
                     state.values.bearer = bearer

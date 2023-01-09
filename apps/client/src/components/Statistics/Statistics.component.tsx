@@ -1,9 +1,11 @@
 import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
 import React, {useEffect, useState } from "react"
+import { useGetMemberQuery, useGetVehicleByIdQuery } from "../../trpc-hooks/trpcHooks";
+import { useAccountStore } from "../../Zustand/accountStore";
 
 import { useTripStore } from "../../Zustand/tripStore";
-import { useGetMemberQuery, useGetVehicleByIdQuery } from "../Trip/Trip.network";
+
 
 import CostGraph from "./CostGraph.component";
 import DistanceGraph from "./DistanceGraph.component";
@@ -86,14 +88,14 @@ const Statistics: React.FC = () => {
         
     }
 
-    const memberQuery = useGetMemberQuery()
-    const vehicleQuery = useGetVehicleByIdQuery(memberQuery.data?.data?.lastUsedVehicleId ? memberQuery.data.data.lastUsedVehicleId : "")
+    const memberQuery = useGetMemberQuery(useAccountStore.getState().values.workspaceId)
+    const vehicleQuery = useGetVehicleByIdQuery(useAccountStore.getState().values.workspaceId, memberQuery.data?.lastUsedVehicleId ? memberQuery.data.lastUsedVehicleId : "")
 
     useEffect( () => {
-        if(vehicleQuery.data?.data?.vehicle)
+        if(vehicleQuery.data?.vehicle)
         {
-            ZF_setVehicle(vehicleQuery.data.data.vehicle)
-            setLitersKm(vehicleQuery.data.data.vehicle.litersPer100km.toString())
+            ZF_setVehicle(vehicleQuery.data.vehicle)
+            setLitersKm(vehicleQuery.data.vehicle.litersPer100km.toString())
         }
     }, [vehicleQuery.isFetched])
 
@@ -106,9 +108,9 @@ const Statistics: React.FC = () => {
     }, [Z_vehicle])
 
     useEffect(() => {
-        if(memberQuery.data?.data.lastUsedFuelPrice)
+        if(memberQuery.data?.lastUsedFuelPrice)
         {
-            setFuelPrice(memberQuery.data?.data.lastUsedFuelPrice.toString())
+            setFuelPrice(memberQuery.data?.lastUsedFuelPrice.toString())
         }
 
     }, [memberQuery.isFetched])

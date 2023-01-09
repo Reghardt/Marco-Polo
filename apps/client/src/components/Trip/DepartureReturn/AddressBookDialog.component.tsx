@@ -1,12 +1,14 @@
 import { DeleteOutline } from "@mui/icons-material"
 import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material"
-import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query"
 import React, { useState } from "react"
-import { EQueryKeys, createAddressBookEntryMutation, deleteAddressBookEntryMutation } from "../../../Queries"
+
+import { useAccountStore } from "../../../Zustand/accountStore"
 
 import TabPanel, { a11yProps } from "../../Tabs/TabPanel.component"
-import { geocodeAddress } from "../Trip.service"
-import { useGetAddressBookQuery } from "./DepartureReturn.component"
+import { geocodeAddress } from "../../../Services/Trip.service"
+
+import { useCreateAddressBookEntry, useDeleteAddressBookEntryMutation, useGetAddressBookQuery } from "../../../trpc-hooks/trpcHooks"
+import { trpc } from "../../../utils/trpc"
 
 interface IAddressBookDialogProps{
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,33 +22,13 @@ export interface INewAddress{
     addressDescription: string
   }
 
-const useCreateAddressBookEntry = (queryClient: QueryClient, onSuccessFunc: () => void) => useMutation({
-    mutationFn: ({physicalAddress, addressDescription}: INewAddress) => createAddressBookEntryMutation({physicalAddress, addressDescription}),
-    onSuccess: () => {
-        queryClient.invalidateQueries({queryKey: [EQueryKeys.addressBook]});
-        onSuccessFunc();
-    }
-})
 
-const useDeleteAddressBookEntryMutation = (queryClient: QueryClient) => useMutation({
-    mutationFn: deleteAddressBookEntryMutation,
-    onSuccess: () => {
-        queryClient.invalidateQueries({queryKey: [EQueryKeys.addressBook]});
-    }
-})
 
 
 
 const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, applyAddressBookSelection}) => {
     //TODO read up on top, left and translate, and their interactions with each other
-
-    const queryClient = useQueryClient();
-
     const [tabValue, setTabValue] = useState(0)
-
-    //const R_workspaceId = useRecoilValue(RSWorkspaceID)
-    // const Z_workspaceId = useAccountStore(store => store.values.workspaceId)
-    // const Z_bearer = useAccountStore(store => store.values.bearer)
 
     const [physicalAddress, setPhysicalAddress] = useState("")
 
@@ -57,18 +39,28 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
     const [selectedAddressIdx, setSelectedAddressIdx] = useState(-1)
 
-    const addressBookQuery = useGetAddressBookQuery()
+    const utils = trpc.useContext()
 
-    const createAddressBookEntry = useCreateAddressBookEntry(queryClient, () => {
+    const addressBookQuery = useGetAddressBookQuery(useAccountStore.getState().values.workspaceId)
+
+    const createAddressBookEntry = useCreateAddressBookEntry({
+        doOnSuccess: () => {
         setPhysicalAddress("")
         setErrorMessage("")
         setGeocodedResults([])
         setSelectedAddressIdx(-1)
         setAddressDescription("")
         setTabValue(0)
-    })
 
-    const deleteAddressBookEntry = useDeleteAddressBookEntryMutation(queryClient);
+        utils.addressBook.getAddressBook.invalidate()
+
+    }})
+
+    const deleteAddressBookEntry = useDeleteAddressBookEntryMutation({
+        doOnSuccess: () => {
+            utils.addressBook.getAddressBook.invalidate()
+        },
+    });
 
     function capturePhysicalAddress(input: string)
     {
@@ -116,7 +108,10 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
     {
         if(addressDescription)
         {
-            createAddressBookEntry.mutate({physicalAddress: geocodedResults[selectedAddressIdx].formatted_address, addressDescription: addressDescription})
+            createAddressBookEntry.mutate({
+                workspaceId: useAccountStore.getState().values.workspaceId, 
+                physicalAddress: geocodedResults[selectedAddressIdx].formatted_address, 
+                addressDescription: addressDescription})
         }
         else
         {
@@ -126,7 +121,9 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
     function handledeleteAddressBookEntry(entryId: string)
     {
-        deleteAddressBookEntry.mutate(entryId)
+        deleteAddressBookEntry.mutate({
+            workspaceId: useAccountStore.getState().values.workspaceId, 
+            addressBookEntryId: entryId})
     }
 
     return(
@@ -147,10 +144,10 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
                             <Typography color={"primary"} variant="h6">Saved Addresses:</Typography>
                         </Box>
 
-                        {addressBookQuery.data?.data.addressBookEntries && addressBookQuery.data?.data.addressBookEntries.length > 0 && (
+                        {addressBookQuery.data?.addressBookEntries && addressBookQuery.data.addressBookEntries.length > 0 && (
                             <Box>
                                 <Stack spacing={1}>
-                                    {addressBookQuery.data.data.addressBookEntries.map((entry, index) => {
+                                    {addressBookQuery.data.addressBookEntries.map((entry, index) => {
                                     return(
                                         <Box key={`addressBookEntry-${index}`}>
                                             
@@ -169,7 +166,7 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
                                                     </Box>
                                                     <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%"}}>
                                                         <Tooltip title={"Delete Entry"}>
-                                                            <IconButton onClick={() => {handledeleteAddressBookEntry(entry._id); console.log("pressed")}}>
+                                                            <IconButton onClick={() => {handledeleteAddressBookEntry(entry._id.toString()); console.log("pressed")}}>
                                                                 <DeleteOutline color="error"/>
                                                             </IconButton>
                                                         </Tooltip>
@@ -183,12 +180,10 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
                             </Box> 
                         )}
 
-                        {addressBookQuery.data?.data.addressBookEntries && addressBookQuery.data?.data.addressBookEntries.length === 0 && (
-                            
+                        {addressBookQuery.data?.addressBookEntries && addressBookQuery.data.addressBookEntries.length === 0 && (
                             <Box>
                                 <Typography variant="subtitle1">No saved addresses, click on "Create New Address"</Typography>
                             </Box>
-                            
                         )}
                     </Stack>
                 </TabPanel>

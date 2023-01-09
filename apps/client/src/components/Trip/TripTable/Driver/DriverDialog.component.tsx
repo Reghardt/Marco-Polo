@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAccountStore } from "../../../../Zustand/accountStore";
 import TabPanel, { a11yProps } from "../../../Tabs/TabPanel.component";
-import { createDriverTrip } from "../../Trip.service";
+import { createDriverTrip } from "../../../../Services/Trip.service";
 import { InviteDriver } from "./InviteDriver.component";
 
 interface IDriverDetails{

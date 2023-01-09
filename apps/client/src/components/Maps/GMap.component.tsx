@@ -6,7 +6,7 @@ import { useTripStore } from "../../Zustand/tripStore";
 import Statistics from "../Statistics/Statistics.component";
 
 
-import { createCustomMapMarkers } from "./GMap.service"
+import { createCustomMapMarkers } from "../../Services/GMap.service"
 import GMapLegends from "./GMapLegends.component";
 
 export enum EMapPopperStates{

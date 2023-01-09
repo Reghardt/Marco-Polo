@@ -1,15 +1,13 @@
 import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
-import { useQuery } from "@tanstack/react-query"
 import React from "react"
-import { EQueryKeys, getAddressBookQuery } from "../../../Queries"
+import { useGetAddressBookQuery } from "../../../trpc-hooks/trpcHooks"
+
+import { useAccountStore } from "../../../Zustand/accountStore"
 import { EDepartReturn, useTripStore } from "../../../Zustand/tripStore"
 import HelpTooltip from "../../common/HelpTooltip.component"
 import AddressSelector from "./AddressSelector.component"
 
-export const useGetAddressBookQuery = () => useQuery({
-    queryKey: [EQueryKeys.addressBook],
-    queryFn: getAddressBookQuery
-})
+
 
 const DepartureReturn: React.FC = () => {
 
@@ -22,7 +20,7 @@ const DepartureReturn: React.FC = () => {
     const Z_departReturnState = useTripStore(store => store.data.departureReturnState)
     const Z_setDepartReturnState = useTripStore(store => store.reducers.setDepartureReturnState)
 
-    useGetAddressBookQuery()
+    useGetAddressBookQuery(useAccountStore.getState().values.workspaceId)
     
     return(
         <Box sx={{marginTop: "1em", marginBottom: "1em"}}>

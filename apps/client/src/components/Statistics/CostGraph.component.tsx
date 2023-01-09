@@ -1,17 +1,16 @@
 import { Box, Button, InputAdornment, Stack, TextField, Typography } from "@mui/material"
-import { useMutation } from "@tanstack/react-query";
 //import axios from "axios";
 import React, { useEffect, useState } from "react"
 import { Bar } from "react-chartjs-2"
-import { setFuelPriceMutation } from "../../Queries";
+
+import { useAccountStore } from "../../Zustand/accountStore";
 import { useTripStore } from "../../Zustand/tripStore";
 import { ITripDirections } from "../common/CommonInterfacesAndEnums";
 import VehicleList from "../VehicleList/VehicleList.component";
-import { isFloat } from "./Statistics.service";
+import { isFloat } from "../../Services/Statistics.service";
+import { useSetFuelPriceMutation } from "../../trpc-hooks/trpcHooks";
 
-export const useSetFuelPriceMutation = () => useMutation({
-    mutationFn: setFuelPriceMutation
-})
+
 
 interface ICostGraph{
     tripDirections: ITripDirections | null;
@@ -35,7 +34,7 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
 
     const ZF_setVehicle = useTripStore(state => state.reducers.setVehicle)
 
-    const fuelPriceMutation = useSetFuelPriceMutation()
+    const TM_fuelPriceMutation = useSetFuelPriceMutation()
 
     // const R_workspaceId = useRecoilValue(RSWorkspaceID)
     // const R_bearer = useRecoilValue(RSBearerToken)
@@ -136,11 +135,9 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
     {
         if(isFloat(fuelPrice))
         {
-            fuelPriceMutation.mutate(fuelPrice)
+            TM_fuelPriceMutation.mutate({workspaceId: useAccountStore.getState().values.workspaceId, fuelPrice: fuelPrice})
         }
-
     }
-
 
     return (
         <Stack spacing={1}>

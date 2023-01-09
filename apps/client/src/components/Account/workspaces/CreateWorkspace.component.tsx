@@ -1,32 +1,27 @@
 import { Box, Button, Stack, TextField } from "@mui/material";
-import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { createNewWorkspaceMutation, EQueryKeys } from "../../../Queries";
+import { useCreateNewWorkspaceMutation } from "../../../trpc-hooks/trpcHooks";
+import { trpc } from "../../../utils/trpc";
 
 
 interface ICreateWorkspaceTab{
     setTabValue: React.Dispatch<React.SetStateAction<number>>
 }
 
-const useCreateNewWorkspaceMutation = (queryClient: QueryClient, onSuccessFunc: () => void) => useMutation({
-    mutationFn: createNewWorkspaceMutation,
-    onSuccess: () => {
-        queryClient.invalidateQueries({queryKey: [EQueryKeys.myWorkspaces]});
-        onSuccessFunc();
-    }
-})
+
 
 export const CreateWorkspace: React.FC<ICreateWorkspaceTab> = ({setTabValue}) =>
-{
-    const queryClient = useQueryClient();
-    
+{   
     const [workspaceName, setWorkspaceName] = useState("")
     const [descriptionPurpose, setDescriptionPurpose] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
 
-    const workspaceMutation = useCreateNewWorkspaceMutation(queryClient, () => {
+    const utils = trpc.useContext()
+
+    const workspaceMutation = useCreateNewWorkspaceMutation( {doOnSuccess: () => {
         setTabValue(0)
-    })
+        utils.workspaces.getWorkspaces.invalidate()
+    }})
     
     // const createNewWorkspace = () =>{
     //     console.log("bearer test fired")

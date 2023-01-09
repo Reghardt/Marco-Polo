@@ -1,14 +1,14 @@
 import { Box, Button, Checkbox, FormControlLabel, Grid, Stack, Typography } from "@mui/material"
 import React from "react"
-import { useMapsStore } from "../../Zustand/mapsStore";
+import { useMapsStore } from "../Zustand/mapsStore";
 
-import { useTripStore } from "../../Zustand/tripStore";
+import { useTripStore } from "../Zustand/tripStore";
 
-import { EColumnDesignations, ICell, IGeoStatusAndRes, ILeg, IRow, ITripDirections } from "../common/CommonInterfacesAndEnums"
-import AddressCell from "./TripTable/cells/AddressCell/AddressCell.component";
-import ColumnDecorator from "./TripTable/cells/ColumnDecorator.component";
-import DataCell from "./TripTable/cells/DataCell.component";
-import HeadingCell from "./TripTable/cells/HeadingCell.component";
+import { EColumnDesignations, ICell, IGeoStatusAndRes, ILeg, IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums"
+import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressCell.component";
+import ColumnDecorator from "../Components/Trip/TripTable/cells/ColumnDecorator.component";
+import DataCell from "../Components/Trip/TripTable/cells/DataCell.component";
+import HeadingCell from "../Components/Trip/TripTable/cells/HeadingCell.component";
 
 
 const labelSize = 0.5;

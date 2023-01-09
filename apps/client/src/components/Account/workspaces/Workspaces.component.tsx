@@ -1,7 +1,6 @@
 import { Box, Tab, Tabs, Typography } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { EQueryKeys, getWorkspacesQuery } from '../../../Queries';
+import { useGetWorkspacesQuery } from '../../../trpc-hooks/trpcHooks';
 
 import StandardHeader, { EStandardHeaderConfig } from '../../common/StandardHeader.component';
 import TabPanel, { a11yProps } from '../../Tabs/TabPanel.component';
@@ -10,10 +9,7 @@ import { WorkSpaceCard } from './WorkspaceCard.component';
 
 
 
-const useGetWorkspacesQuery = () => useQuery({
-    queryKey: [EQueryKeys.myWorkspaces],
-    queryFn: getWorkspacesQuery
-})
+
 
 export default function WorkSpaces()
 {
@@ -36,14 +32,14 @@ export default function WorkSpaces()
 
             <TabPanel value={tabValue} index={0}>
                 <Box sx={{p: "0.5em"}}>
-                    {workspaces.data?.data && workspaces.data?.data.length > 0 && (
+                    {workspaces.data && workspaces.data.length > 0 && (
                         <Box>
-                            {workspaces.data.data.map((elem, idx) => {
-                                return <WorkSpaceCard _id={elem._id} workspaceName={elem.workspaceName} descriptionPurpose={elem.descriptionPurpose} tokens={elem.tokens}  key={idx}/>
+                            {workspaces.data.map((elem, idx) => {
+                                return <WorkSpaceCard _id={elem._id.toString()} workspaceName={elem.workspaceName} descriptionPurpose={elem.descriptionPurpose} tokens={elem.tokens}  key={idx}/>
                             })}
                         </Box>
                     )}
-                    {workspaces.isFetched === true && workspaces.data?.data && workspaces.data?.data.length === 0 &&(
+                    {workspaces.isFetched === true && workspaces.data && workspaces.data.length === 0 &&(
                         <Box>
                             <Typography variant="body1">You currently don't belong to a workspace, click on "Create Workspace" to create one or ask an admin to invite you to an existing workspace.</Typography>
                         </Box>

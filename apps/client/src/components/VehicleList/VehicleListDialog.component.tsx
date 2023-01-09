@@ -3,6 +3,7 @@ import { Button, DialogActions, DialogContent, DialogTitle, FormControl, IconBut
 import { Box } from "@mui/system";
 import React, { useState } from "react"
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
+import { useCreateVehicleMutation, useGetVehicleListQuery, useDeletetVehicleMutation, useSetLastUsedVehicleMutation } from "../../trpc-hooks/trpcHooks";
 import { trpc } from "../../utils/trpc";
 import { useAccountStore } from "../../Zustand/accountStore";
 import { useTripStore } from "../../Zustand/tripStore";
@@ -21,22 +22,7 @@ enum EAdditionalCostType{
     R_100km = 2
 }
 
-const useCreateVehicleMutation = (doOnSuccess: () => void) => trpc.vehicle.createVehicle.useMutation({
-    onSuccess: () => {
-        doOnSuccess()
-        trpc.useContext().vehicle.vehicleList.invalidate()
-    }
-})
 
-const useGetVehicleListQuery = (workspaceId: string) => trpc.vehicle.vehicleList.useQuery({workspaceId: workspaceId})
-
-const useDeletetVehicleMutation = () => trpc.vehicle.deleteVehicle.useMutation({
-    onSuccess: () => {
-        trpc.useContext().vehicle.vehicleList.invalidate()
-    }
-})
-
-const useSetLastUsedVehicleMutation = () => trpc.vehicle.setLastUsedVehicle.useMutation()
 
 interface IVehicleListDialog{
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -59,21 +45,31 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
 
     const [errorMessage, setErrorMessage] = useState("")
 
+    const utils = trpc.useContext()
+
     //TRPC - start
-    const TM_createVehicle = useCreateVehicleMutation(() => {
-        setVehicleDescription("")
-        setVehicleLicencePlate("")
-        setLitersPer100km("")
-        setAdditionalCost("")
-        setAdditionalCostType(EAdditionalCostType.R_hr)
-        setVehicleClass(EVehicleClass.class1)
-        setTabValue(0)
-        setErrorMessage("")
+    const TM_createVehicle = useCreateVehicleMutation({
+        doOnSuccess: () => {
+            setVehicleDescription("")
+            setVehicleLicencePlate("")
+            setLitersPer100km("")
+            setAdditionalCost("")
+            setAdditionalCostType(EAdditionalCostType.R_hr)
+            setVehicleClass(EVehicleClass.class1)
+            setTabValue(0)
+            setErrorMessage("")
+
+            utils.vehicle.vehicleList.invalidate()
+        }
     })
 
     const TQ_vehicleList = useGetVehicleListQuery(useAccountStore.getState().values.workspaceId)
 
-    const TM_deletetVehicleMutation = useDeletetVehicleMutation()
+    const TM_deletetVehicleMutation = useDeletetVehicleMutation({
+        doOnSuccess: () => {
+            utils.vehicle.vehicleList.invalidate()
+        }
+    })
 
     const TM_setLastUsedVehicle = useSetLastUsedVehicleMutation()
 
@@ -131,7 +127,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
             vehicleDescription: vehicleDescription,
             vehicleLicencePlate: vehicleLicencePlate,
             litersPer100km: parseFloat(litersPer100km),
-            additionalCost: parseFloat(additionalCost),
+            additionalCost: additionalCost ? parseFloat(additionalCost) : 0,
             additionalCostType: additionalCostType,
             vehicleClass: vehicleClass,
             workspaceId: useAccountStore.getState().values.workspaceId
