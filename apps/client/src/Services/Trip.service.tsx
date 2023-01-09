@@ -1,14 +1,13 @@
-import { Grid, Typography, FormControlLabel, Checkbox } from "@mui/material";
+import { Grid, Typography, FormControlLabel, Checkbox, Button } from "@mui/material";
 import React from "react";
 import { ILeg } from "trpc-server/trpc/models/Workspace";
-import { IRow, EColumnDesignations,  IGeoStatusAndRes, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
-import GridRow from "../Components/DragAndDrop/GridRow";
+import { IRow, EColumnDesignations,  IGeoStatusAndRes, ITripDirections, ICell } from "../Components/common/CommonInterfacesAndEnums";
 import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressCell.component";
 import ColumnDecorator from "../Components/Trip/TripTable/cells/ColumnDecorator.component";
 import DataCell from "../Components/Trip/TripTable/cells/DataCell.component";
 import HeadingCell from "../Components/Trip/TripTable/cells/HeadingCell.component";
 import { useMapsStore } from "../Zustand/mapsStore";
-import { useTripStore } from "../Zustand/tripStore";
+import { ETableMode, useTripStore } from "../Zustand/tripStore";
 
 //this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : {status: boolean, reason: string}
@@ -49,68 +48,98 @@ export function reorder(list: IRow[], startIndex: number, endIndex: number )
   return result
 }
 
+export function isAllAddressesInColumnValidAndAccepted(column: number)
+{
+  const Z_tripRows = useTripStore.getState().data.rows
+
+  if(column < 0)
+  {
+    return false
+  }
+
+  for(let i = 0; i < Z_tripRows.length; i++)
+  {
+    const cell = Z_tripRows[i].cells[column]
+    if(cell.geocodedDataAndStatus?.status !== google.maps.GeocoderStatus.OK || !cell.isAddressValidAndAccepted)
+    {
+      return false
+    }
+  }
+  return true
+}
+
 export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, columnVisibility: boolean[]) : JSX.Element
 {
-  // const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
-  // const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
-  // const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
+  const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex;
+  const Z_tableMode = useTripStore.getState().data.tabelMode;
+  const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
+  const ZF_setErrorMessage = useTripStore.getState().reducers.setErrorMessage
 
-  
-  // function setVerified(cell: ICell)
-  // {
-  //   ZF_updateBodyCell({...cell, isGeoResAccepted: true})
-  // }
 
-  // function addressCellGlanceMode(): JSX.Element
-  // {
-  //   const cell = row.cells[Z_addressColumIndex]
-  //   const isDisabled = cell.geoStatusAndRes?.status === google.maps.GeocoderStatus.OK ? false : true;
-  //   return(
+  function setVerified(cell: ICell)
+  {
+    if(cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
+    {
+      ZF_updateBodyCell({...cell, isAddressValidAndAccepted: true})
+      ZF_setErrorMessage("")
       
-  //     <Grid key={`cell-${cell.x}-${cell.y}`} item xs={12 - labelSize}>
-  //         <Stack direction={"row"}>
-  //           <Box sx={{width: "100%"}}>
-  //             <AddressCell cellRef={cell} glanceMode={true}/>
-  //           </Box>
-  //           <Box sx={{marginLeft: "0.1em"}}>
-  //             <Button disabled={isDisabled} onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
-  //           </Box>
-  //         </Stack>
-          
-  //     </Grid>
+    }
+    else
+    {
+      ZF_setErrorMessage("Error: the address has a problem, click on the cell to fix it")
+    } 
 
-  //   )
-  // }
+  }
+
+  function tableSolveMode(): JSX.Element
+  {
+    const cell = row.cells[Z_addressColumnIndex]
+    // const isDisabled = cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK ? false : true;
+    return(
+      <>
+        <AddressCell cellRef={cell} glanceMode={true}/>
+        <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+      </>
+    )
+  }
 
   if(row.cells[0].y >= 0)
   {
     const rowWithChildren = 
-
-    <GridRow key={row.cells[0].y} draggableId={row.cells[0].y}>
+    <>
+      
 
       <div draggable="true" style={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white", paddingLeft: "2px", paddingRight: "2px"}} variant="body1">{nr + 1}</Typography></div>
-      
-      {row.cells.map((cell, index) => {
-        if(columnVisibility[index])
-        {
-          if(columnDesignations[index] === EColumnDesignations.Address){
-            return(
-              <AddressCell cellRef={cell} glanceMode={false}/>
-            )
-          }
-          else{
-            return(
-              <DataCell cellRef={cell}/>
-            )
-          }
-        }
-        else
-        {
-          return <></> //return nothing if column is not visible
-        }
+
+      {Z_tableMode !== ETableMode.EditMode 
+        ? 
+          tableSolveMode()
+        : 
+          
+          <>
+          {row.cells.map((cell, index) => {
+            if(columnVisibility[index])
+            {
+              if(columnDesignations[index] === EColumnDesignations.Address){
+                return(
+                  <AddressCell cellRef={cell} glanceMode={false}/>
+                )
+              }
+              else{
+                return(
+                  <DataCell cellRef={cell}/>
+                )
+              }
+            }
+            else
+            {
+              return <></> //return nothing if column is not visible
+            }
+          })}
+        </> 
+      }
 
 
-      })}
 
       {/* {
         Z_addressColumIndex > -1 && row.cells[Z_addressColumIndex].isGeoResAccepted === false 
@@ -144,7 +173,9 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
       {/* {row.children.map((row) => {
           return createChildRow(row, columnVisibility)
       })} */}
-    </GridRow>
+
+    </>
+
 
     return rowWithChildren;
   }
@@ -222,44 +253,86 @@ export function createColumnVisibilityOptions(columnNames: IRow, columnVisibilit
 
 export function createColumnDecorators(columnVisibility: boolean[]) : JSX.Element
 {
+    const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
+    const Z_tableMode = useTripStore.getState().data.tabelMode;
+
+    function tableSolveMode(): JSX.Element
+    {
+      return(
+        <>
+          <ColumnDecorator colIdx={Z_addressColumIndex}/>
+          <div style={{height: "100%", width: "100%"}}></div>
+        </>
+      )
+    }
 
     const decorators =
-    <React.Fragment>
-      <div style={{height: "100%", width: "100%"}}></div>
-      {columnVisibility.map((visibility,index) => {
-        if(visibility === true)
-        {
-            return <ColumnDecorator colIdx={index}/>
+      <React.Fragment>
+        <div style={{height: "100%", width: "100%"}}></div>
+        {Z_tableMode === ETableMode.EditMode ?
+          <>
+            {columnVisibility.map((visibility,index) => {
+                if(visibility === true)
+                {
+                  return <ColumnDecorator colIdx={index}/>
+                }
+                else
+                {
+                  return <></>
+                }
+              })
+            }
+          </>
+          :
+          tableSolveMode()
         }
-        else
-        {
-            return <></>
-        }
-      })}
-    </React.Fragment>
+        
+      </React.Fragment>
     return decorators
 }
 
 export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: boolean[])
-    {
-      const headings =
-      <React.Fragment>
+{
+  const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
+  const Z_tableMode = useTripStore.getState().data.tabelMode;
+
+  function tableSolveMode(): JSX.Element
+  {
+    const cell = jobHeadings.cells[Z_addressColumIndex]
+    return(
+      <>
+        <HeadingCell colNumber={cell.x}/>
         <div style={{height: "100%", width: "100%"}}></div>
-        {jobHeadings.cells.map((cell, index) => {
-          if(columnVisibility[index] === true)
-          {
-              return(
-                <HeadingCell colNumber={cell.x}/>
-              )
-          }
-          else
-          {
-            return(<></>)
-          }
-        })}
-      </React.Fragment>
-      return headings
-    }
+      </>
+    )
+  }
+
+  const headings =
+    <React.Fragment>
+      <div style={{height: "100%", width: "100%"}}></div>
+      {Z_tableMode === ETableMode.EditMode
+        ?
+        <>
+          {jobHeadings.cells.map((cell, index) => {
+            if(columnVisibility[index] === true)
+            {
+                return(
+                  <HeadingCell colNumber={cell.x}/>
+                )
+            }
+            else
+            {
+              return(<></>)
+            }
+          })}
+        </>
+        :
+          tableSolveMode()
+      }
+
+    </React.Fragment>
+  return headings
+}
 
 export function removeRowParentChildRelations(rows: IRow[])
 {
@@ -479,7 +552,7 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
       {
         const cell = Z_tripRows[i].cells[Z_addressColumIndex]
   
-        if(cell.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0 && cell.isGeoResAccepted)
+        if(cell.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0 && cell.isAddressValidAndAccepted)
         {
           const cellGeoAddress = cell.geocodedDataAndStatus.results[cell.selectedGeocodedAddressIndex]
           waypoints.push({location: cellGeoAddress.formatted_address, stopover: true})
@@ -513,7 +586,7 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
       }
     }
     else{
-      return {status: false, msg: "Error: Something went wrong with finding a route"}
+      return {status: false, msg: "Error: No address column set"}
     }
   }
 }
@@ -550,7 +623,7 @@ export function createDriverTrip() : {errorMsg: string, legs: ILeg[]}
     }
 
     const addressCell = row.cells[Z_addressColumIndex]
-    if(addressCell.isGeoResAccepted === false)
+    if(addressCell.isAddressValidAndAccepted === false)
     {
       return {errorMsg: "Trip not valid, one or more addresses were not confirmed", legs: []}
     }

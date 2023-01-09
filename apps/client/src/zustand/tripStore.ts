@@ -179,7 +179,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                         for(let i = 0; i < state.data.rows.length; i++)
                         {
                             const cell = state.data.rows[i].cells[payload.columnIndex];
-                            if(cell.isGeoResAccepted === false)
+                            if(cell.isAddressValidAndAccepted === false)
                             {
                                 state.data.tabelMode = ETableMode.SolveAddressMode;
                                 console.log("Solve address mode")

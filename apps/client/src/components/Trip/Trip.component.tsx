@@ -2,12 +2,13 @@ import { Box, Button } from "@mui/material"
 import React from "react"
 import { useTripStore } from "../../Zustand/tripStore"
 import StandardHeader from "../common/StandardHeader.component"
-import GMap from "../Maps/GMap.component"
+
 import DepartureReturn from "./DepartureReturn/DepartureReturn.component"
 import { TripNetwork } from "./Trip.network"
 import { doRowsConform } from "../../Services/Trip.service"
 import TripTable from "./TripTable/TripTable.component"
 import { loadSelection } from "./Worksheet/worksheet.service"
+import GMap from "../Maps/GMap.component"
 
 const Trip : React.FC = () => {
   console.log("Trip Refresh")

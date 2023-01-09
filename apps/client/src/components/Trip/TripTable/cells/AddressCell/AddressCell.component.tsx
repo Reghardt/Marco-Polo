@@ -1,7 +1,6 @@
-import { Box, Button, ClickAwayListener, Stack, Typography } from "@mui/material";
-import React, { useRef, useState } from "react";
-import { usePopper } from "react-popper";
-import PopperContainer from "../../../../common/PopperContainer.styled";
+import { useFloating, offset, useDismiss, useInteractions, autoUpdate, flip } from "@floating-ui/react";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import React, { useState } from "react";
 import { ICell } from "../../../../common/CommonInterfacesAndEnums";
 import AddressPopper from "./AddressPopper.component";
 
@@ -12,11 +11,24 @@ type AddressCellProps = {
 
 const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 {
-  const buttonRef = useRef(null);
-  const popperRef = useRef(null);
+  const [open, setOpen] = useState(false);
 
-  const [show, setShow] = useState(false);
-  const [arrowRef, setArrowRef] = useState<any>(null);
+  const {x, y, reference, floating, strategy, context} = useFloating({
+    middleware: [
+      offset(-4),
+      flip()
+    ],
+    whileElementsMounted: autoUpdate,
+    placement: "bottom-start",
+    open,
+    onOpenChange: setOpen,
+
+  });
+
+  const dismiss = useDismiss(context);
+  const {getReferenceProps, getFloatingProps} = useInteractions([
+    dismiss,
+  ]);
 
   function getAddressStatus(): {status: string, color: string, hoverColor: string}
   {
@@ -26,7 +38,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
       {
         if(cellRef.geocodedDataAndStatus.results && cellRef.geocodedDataAndStatus.results.length > 0)
         {
-          if(cellRef.isGeoResAccepted)
+          if(cellRef.isAddressValidAndAccepted)
           {
             return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex].formatted_address, color: "green", hoverColor: "#006e09"}
           }
@@ -59,82 +71,56 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
     }
   }
 
- 
-  const { styles, attributes } = usePopper(
-      buttonRef.current,
-      popperRef.current,
-      {
-        modifiers: [
-          {
-            name: "arrow",
-            options: {
-              element: arrowRef
-            }
-          },
-          {
-            name: "offset",
-            options: {
-              offset: [0, 1]
-            }
-          },
-          {
-            name: "flip",
-            options: {
-              
-            },
+  function closePopper()
+  {
+    setOpen(!open)
+  }
+
+  return(
+    <React.Fragment>
+      <Button 
+        sx={{textAlign:"left", background: getAddressStatus().color, ":hover": {backgroundColor: getAddressStatus().hoverColor}, width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "left"}} 
+        
+        variant={"contained"} 
+        {...getReferenceProps()} ref={reference} onClick={()=> closePopper()}>
+          
+          {glanceMode ? 
+            <Stack>
+              <Box>
+                Given: {cellRef.displayData}
+              </Box>
+              <Box>
+                <Typography sx={{fontSize: "1em", fontStyle: "italic"}}>Found: {getAddressStatus().status}</Typography>
+              </Box>
+            </Stack>
+          :
+            cellRef.displayData
           }
-        ]
-      }
-    );
+      </Button>
+      
 
-    function closePopper()
-    {
-      setShow(!show)
-    }
-
-    return(
-        <React.Fragment>
-        
-        
-
-          <Button 
-            sx={{textAlign:"left", background: getAddressStatus().color, ":hover": {backgroundColor: getAddressStatus().hoverColor}, width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "left"}} 
-            
-            variant={"contained"} 
-            ref={buttonRef} onClick={()=> closePopper()}>
-              
-              {glanceMode ? 
-                <Stack>
-                  <Box>
-                    Given: {cellRef.displayData}
-                  </Box>
-                  <Box>
-                    <Typography sx={{fontSize: "1em", fontStyle: "italic"}}>Found: {getAddressStatus().status}</Typography>
-                  </Box>
-                </Stack>
-              :
-                cellRef.displayData
-              }
-          </Button>
-        
-
-        {show && (
-        <ClickAwayListener onClickAway={()=> closePopper()}>
-            <PopperContainer 
-                ref={popperRef}
-                style={{...styles.popper, width: "80%"}}
-                {...attributes.popper}
-                >
-                  <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
-                  <AddressPopper 
-                    currentAddress={cellRef.displayData} 
-                    closePopper={closePopper} 
-                    cellRef={cellRef}
-                    />
-            </PopperContainer>
-        </ClickAwayListener>)}
-    </React.Fragment>
-    )
+      {open && (
+          <div 
+            ref={floating}
+            style={{
+              position: strategy,
+              top: y ?? 0,
+              left: x ?? 0,
+              width: 'max-content',
+              zIndex: 1
+            }}
+            {...getFloatingProps()}
+          >
+              {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
+              <AddressPopper 
+                currentAddress={cellRef.displayData} 
+                closePopper={closePopper} 
+                cellRef={cellRef}
+                />
+          </div>
+      )}
+  </React.Fragment>
+  )
 }
 
 export default AddressCell;

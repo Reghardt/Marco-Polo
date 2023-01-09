@@ -68,7 +68,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     {
         if(geoStatusAndRes?.results)
         {
-            ZR_updateBodyCell({...cellRef, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isGeoResAccepted: true})
+            ZR_updateBodyCell({...cellRef, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isAddressValidAndAccepted: true})
             closePopper()
         }
         else

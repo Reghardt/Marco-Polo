@@ -53,6 +53,7 @@ const GridRow: React.FC<TGridRow> = ({children, draggableId}) => {
 
             onDragEnd={(evt) => {
                 removeStyleToElementAndImmediateChildren(evt.currentTarget, "dragSrcElem")
+                console.log(evt)
             }}
             onDragOver={(evt) => {evt.preventDefault()}} //continues to fire on hover
 
@@ -86,6 +87,7 @@ const GridRow: React.FC<TGridRow> = ({children, draggableId}) => {
 
             onDrop={(evt) => {
                 evt.stopPropagation()
+                console.log(evt)
                 const sequence: number[] = []
                 const rows = evt.currentTarget.parentElement?.children
                 if(rows)

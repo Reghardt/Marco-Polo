@@ -1,11 +1,7 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import React, { useRef, useState } from "react";
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-
-import { usePopper } from "react-popper";
-
-import PopperContainer from "../../common/PopperContainer.styled";
+import React, { useState } from "react";
 import AddressSelectorPopup from "./AddressSelectorPopup.component";
+import { useFloating, shift, offset, useDismiss, useInteractions, autoUpdate } from "@floating-ui/react";
 
 interface IAddressSelectorProps{
     address: google.maps.GeocoderResult | null;
@@ -18,68 +14,68 @@ interface IAddressSelectorProps{
 const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSetter, title}) =>
 {
 
-    const [show, setShow] = useState(false);
-    const buttonRef = useRef(null);
-    const popperRef = useRef(null);
-    const [arrowRef, setArrowRef] = useState<any>(null);
+  const [open, setOpen] = useState(false);
 
-    const { styles, attributes } = usePopper(
-        buttonRef.current,
-        popperRef.current,
-        {
-          modifiers: [
-            {
-              name: "arrow",
-              options: {
-                element: arrowRef
-              }
-            },
-            {
-              name: "offset",
-              options: {
-                offset: [0, 1]
-              }
-            }
-          ]
-        }
-      );
+  const {x, y, reference, floating, strategy, context} = useFloating({
+    middleware: [
+      shift(), 
+      offset(-4),
 
-    function toggleShow()
-    {
-      setShow(current => {
-        return !current;
-      })
-    }
+    ],
+    whileElementsMounted: autoUpdate,
+    placement: "bottom-start",
+    open,
+    onOpenChange: setOpen,
 
-    return(
-        <React.Fragment>
+  });
 
-          <Stack spacing={0} sx={{margin: "0", padding: "0"}}>
-            <Box>
-              <Typography variant="body1">{title}: </Typography>
-            </Box>
-            
-            <Box>
-              <Button ref={buttonRef} onClick={()=> setShow(!show)} style={{textTransform: "none"}} sx={{fontStyle: (address === null ? "italic" : "normal")}}>
-                {(address === null ? "click to specify address" : address.formatted_address)}
-            </Button>
-            </Box>
+  const dismiss = useDismiss(context);
+  const {getReferenceProps, getFloatingProps} = useInteractions([
+    dismiss,
+  ]);
 
-          </Stack>
 
-            {show && (
-                <ClickAwayListener onClickAway={()=> toggleShow()}>
-                    <PopperContainer 
-                        ref={popperRef}
-                        style={{...styles.popper, width: "80%"}}
-                        {...attributes.popper}
-                        >
-                            <div ref={setArrowRef} style={styles.arrow} className="arrow"/>
-                            <AddressSelectorPopup title={title} address={address} addressSetter={addressSetter} toggleShow={toggleShow}/>
-                    </PopperContainer>
-                </ClickAwayListener>)}
-        </React.Fragment>
-    )
+  function toggleShow()
+  {
+    setOpen(current => {
+      return !current;
+    })
+  }
+
+  return(
+    <React.Fragment>
+
+      <Stack spacing={0} sx={{margin: "0", padding: "0"}}>
+        <Box>
+          <Typography variant="body1">{title}: </Typography>
+        </Box>
+        
+        <Box>
+          <Button {...getReferenceProps()} ref={reference} onClick={()=> setOpen(!open)} style={{textTransform: "none"}} sx={{fontStyle: (address === null ? "italic" : "normal")}}>
+            {(address === null ? "click to specify address" : address.formatted_address)}
+        </Button>
+        </Box>
+
+      </Stack>
+
+        {open && (
+                <div 
+                  ref={floating}
+                  style={{
+                    position: strategy,
+                    top: y ?? 0,
+                    left: x ?? 0,
+                    width: 'max-content',
+                    zIndex: 1
+                  }}
+                  {...getFloatingProps()}
+                >
+                  {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
+                  <AddressSelectorPopup title={title} address={address} addressSetter={addressSetter} toggleShow={toggleShow}/>
+                </div>
+        )}
+    </React.Fragment>
+  )
 }
 
 export default AddressSelector;

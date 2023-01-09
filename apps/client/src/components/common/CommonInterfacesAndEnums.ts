@@ -8,7 +8,7 @@ export interface ICell
     geocodedDataAndStatus: IGeoStatusAndRes | null;
     selectedGeocodedAddressIndex: number;
     formula: string; // default ""
-    isGeoResAccepted: boolean;
+    isAddressValidAndAccepted: boolean;
 }
 
 export interface IRow //each row contains a bumch of cell objects

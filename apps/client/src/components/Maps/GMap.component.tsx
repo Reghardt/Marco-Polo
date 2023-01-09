@@ -3,7 +3,7 @@ import { Instance } from "@popperjs/core";
 import React, { useEffect, useRef, useState } from "react"
 import { useMapsStore } from "../../Zustand/mapsStore";
 import { useTripStore } from "../../Zustand/tripStore";
-import Statistics from "../Statistics/Statistics.component";
+
 
 
 import { createCustomMapMarkers } from "../../Services/GMap.service"
@@ -137,13 +137,13 @@ const GMap: React.FC = () => {
 
     return(
         // <Paper sx={{padding: "0.3em", marginTop: "0.3em"}} variant="elevation" elevation={5}>
-            <Box>
+            <Box sx={{height: "10em"}}>
                 <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Google Maps</Typography>   
                 {/* <Button onClick={() => printPopperRefs()}>Print</Button>          */}
                 <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
                 <GMapLegends/>
 
-                <Statistics/>
+                
 
                 {markers.length > 0 && (
                     markers.map((marker) => {

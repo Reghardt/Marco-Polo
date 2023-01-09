@@ -13,21 +13,19 @@ export async function getBearer(req: any)
         const token = authHeader.substr(7)
         if(preamble === "Bearer ")
         {        
-            return new Promise<TRPCError | JwtPayload>((accept) => {
+            return new Promise<JwtPayload>((accept) => {
                 verify(token, "1223434", (error: any, user: any) => {
                     if(error) //if there is some error, like token expired return error
                     {
                         console.log("res is", error.inner)
                         console.log("res is", error.message)
                         console.log("res is", error.name)
-                        accept(new TRPCError({message: `${error.name}, ${error.message}`,code: "UNAUTHORIZED"}))
-                         
+                        throw new TRPCError({message: `${error.name}, ${error.message}`,code: "UNAUTHORIZED"})
                     }
                     else
                     {
                         accept(user as JwtPayload)
                     }
-                    
                 })
             })    
         }
