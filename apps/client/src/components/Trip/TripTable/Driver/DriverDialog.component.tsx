@@ -1,18 +1,11 @@
 import { Box, Button, DialogActions, DialogContent, DialogTitle, Paper, Stack, Tab, Tabs, TextField, Typography } from "@mui/material"
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAccountStore } from "../../../../Zustand/accountStore";
 import TabPanel, { a11yProps } from "../../../Tabs/TabPanel.component";
 import { createDriverTrip } from "../../../../Services/Trip.service";
 import { InviteDriver } from "./InviteDriver.component";
-
-interface IDriverDetails{
-    _id: string;
-    firstName: string;
-    lastName: string;
-    lastUsedWorkspaceId: string;
-    username: string
-}
+import { useSendTripToDriver, useGetDriversQuery } from "../../../../trpc-hooks/trpcHooks";
+import { IDriver } from "trpc-server/trpc/models/Driver.model";
 
 interface IDriverDialogProps{
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,34 +16,21 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
     const [tabValue, setTabValue] = useState(0)
     const [tripName, setTripName] = useState("")
     const [error, setError] = useState("")
-    const [assignedDriver, setAssignedDriver] = useState<IDriverDetails | null>(null)
+    const [assignedDriver, setAssignedDriver] = useState<IDriver | null>(null)
     const Z_workspaceId = useAccountStore.getState().values.workspaceId
-    const Z_bearer = useAccountStore.getState().values.bearer
 
     const [sentStatus, setSentStatus] = useState("")
 
-    const [drivers, setDrivers] = useState<IDriverDetails[]>([])
-
-    function getDriverListOfWorkspace()
-    {
-        return axios.post<IDriverDetails[]>("/api/workspace/getDriverListOfWorkspace", {
-            workspaceId: Z_workspaceId
-        },
+ 
+    const getDrivers = useGetDriversQuery({workspaceId: Z_workspaceId})
+    const sendToDriver = useSendTripToDriver({doOnSuccess: () => {
+        if(assignedDriver)
         {
-            headers: {authorization: Z_bearer} //for user id
-        })
-    }
+            setSentStatus(`Sent "${tripName}" to ${assignedDriver.firstName} ${assignedDriver.lastName}`)
+        }
 
-    async function handleGetDriverListOfWorkspace()
-    {
-        const res = await getDriverListOfWorkspace()
-        console.log(res.data)
-        setDrivers(res.data)
-    }
+    }})
 
-    useEffect(() => {
-        handleGetDriverListOfWorkspace()
-    }, [])
 
     function assignTripToDriver()
     {
@@ -71,17 +51,12 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
                 setError(driverTrip.errorMsg)
                 return
             }
-            axios.post("/api/workspace/assignTripToDriver", {
+
+            sendToDriver.mutate({
                 tripName: tripName,
-                assignedDriverId: assignedDriver._id,
+                assignedDriverId: assignedDriver._id.toString(),
                 workspaceId: Z_workspaceId,
-                legs: driverTrip.legs
-            },
-            {
-                headers: {authorization: Z_bearer} //for user id
-            }).then(() => {
-                setSentStatus(`Sent "${tripName}" to ${assignedDriver.firstName} ${assignedDriver.lastName}`)
-            })
+                legs: driverTrip.legs})
         }
     }
 
@@ -127,7 +102,7 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
                             </Box>
                         </Stack>
                         
-                        {drivers.map((elem, index) => {
+                        {getDrivers.data?.map((elem, index) => {
                             return(
                                 <Box key={`driver-${index}`}>
                                     

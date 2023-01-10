@@ -1,30 +1,20 @@
 import { Box, Button, Stack, TextField, Typography } from "@mui/material"
-import axios from "axios"
 import { useState } from "react"
+import { useAddDriverMutation } from "../../../../trpc-hooks/trpcHooks"
+import { trpc } from "../../../../utils/trpc"
 import { useAccountStore } from "../../../../Zustand/accountStore"
 
 export const InviteDriver: React.FC = () => {
     const [driverUsername, setDriverUsername] = useState("")
 
-    const Z_workspaceId = useAccountStore.getState().values.workspaceId
-    const Z_bearer = useAccountStore.getState().values.bearer
+    const utils = trpc.useContext()
 
-    function addDriverWithUsername()
-    {
-        return axios.post("/api/workspace/addDriver", {
-            username: driverUsername,
-            workspaceId: Z_workspaceId,
+    const addDriver = useAddDriverMutation({
+        doOnSuccess: () => {
+            utils.driver.getDrivers.invalidate()
         },
-        {
-            headers: {authorization: Z_bearer} //for user id
-        })
-    }
+    })
 
-    async function handleAddDriver()
-    {
-        const res = await addDriverWithUsername()
-        console.log(res)
-    }
 
     return(
         <Box sx={{p: 0.5}}>
@@ -40,7 +30,7 @@ export const InviteDriver: React.FC = () => {
                     </Stack>
                 </Box>
                 <Box>
-                    <Button onClick={() => {handleAddDriver()}}>Add Driver</Button>
+                    <Button onClick={() => {addDriver.mutate({workspaceId: useAccountStore.getState().values.workspaceId, username: driverUsername})}}>Add Driver</Button>
                 </Box>
             </Stack>
         </Box> 

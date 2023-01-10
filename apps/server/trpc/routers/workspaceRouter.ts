@@ -7,6 +7,7 @@ import { protectedProcedure, router } from "../trpc";
 import WorkspaceModel from "../models/Workspace"
 import { getBearer } from "../../utils/bearer";
 import { JwtPayload } from "jsonwebtoken";
+import UserModel from "../models/User.model";
 
 
 export const workspaceRouter = router({
@@ -115,5 +116,18 @@ export const workspaceRouter = router({
     {
         throw new TRPCError({message: "No member with that userId found in workspace", code: "NOT_FOUND"})
     }
+  }),
+
+  setLastUsedWorkspace: protectedProcedure
+  .input(z.object({
+    workspaceId: z.string()
+  }))
+  .mutation(async ({input, ctx}) => {
+    const bearerRes = await getBearer(ctx.req) as JwtPayload
+
+    await UserModel.updateOne(
+        {_id: new mongoose.Types.ObjectId(bearerRes['user'])},
+        {$set: {lastUsedWorkspaceId: input.workspaceId}})
+        .then(res => {console.log(res)})
   })
 });

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Box, Button, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
@@ -7,9 +6,6 @@ import { useMsal } from '@azure/msal-react';
 import MSLogo from './MSLogo.component';
 import { useAccountStore } from '../../Zustand/accountStore';
 import { useDoesWorkspaceExistMutation, useloginMsMutation } from '../../trpc-hooks/trpcHooks';
-
-
-
 
 export default function Login()
 { 
@@ -47,25 +43,25 @@ export default function Login()
     },
   })
 
-  async function loginCM()
-  {
-      //TODO make server throw unauthorized 
-      console.log(email, password)
+  // async function loginCM()
+  // {
+  //     //TODO make server throw unauthorized 
+  //     console.log(email, password)
       
-      axios.post<{userName: string, lastUsedWorkspaceId: string}>("/api/auth/loginCM", { //login custom
-          email: email,
-          password: password
-      })
-      .then(res => {
-        ZF_setBearer(res.headers.authorization!)
-        ZF_setWorkspaceId(res.data.lastUsedWorkspaceId)
-        navigate("/postLoginConfig", {replace: true})
-      })
-      .catch(err => {
-        console.log("Err", err)
-        setLoginError("Email or Password Incorrect")
-      })
-  }
+  //     axios.post<{userName: string, lastUsedWorkspaceId: string}>("/api/auth/loginCM", { //login custom
+  //         email: email,
+  //         password: password
+  //     })
+  //     .then(res => {
+  //       ZF_setBearer(res.headers.authorization!)
+  //       ZF_setWorkspaceId(res.data.lastUsedWorkspaceId)
+  //       navigate("/postLoginConfig", {replace: true})
+  //     })
+  //     .catch(err => {
+  //       console.log("Err", err)
+  //       setLoginError("Email or Password Incorrect")
+  //     })
+  // }
 
   async function loginMS()
   {
@@ -107,7 +103,7 @@ export default function Login()
             )}
             
             <Box> 
-              <Button variant="contained" type="submit" sx={{width:'100%', borderRadius: 0}} onClick={() => loginCM()}>Sign In</Button>
+              <Button variant="contained" type="submit" sx={{width:'100%', borderRadius: 0}}>Sign In</Button>
             </Box>
 
             <Box justifyContent={"center"} display="flex">

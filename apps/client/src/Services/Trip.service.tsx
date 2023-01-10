@@ -1,6 +1,6 @@
 import { Grid, Typography, FormControlLabel, Checkbox, Button } from "@mui/material";
 import React from "react";
-import { ILeg } from "trpc-server/trpc/models/Workspace";
+import { TLeg } from "trpc-server/trpc/models/Workspace";
 import { IRow, EColumnDesignations,  IGeoStatusAndRes, ITripDirections, ICell } from "../Components/common/CommonInterfacesAndEnums";
 import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressCell.component";
 import ColumnDecorator from "../Components/Trip/TripTable/cells/ColumnDecorator.component";
@@ -591,7 +591,7 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
   }
 }
 
-export function createDriverTrip() : {errorMsg: string, legs: ILeg[]}
+export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
 {
   const Z_tripRows = useTripStore.getState().data.rows
   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex
@@ -608,7 +608,7 @@ export function createDriverTrip() : {errorMsg: string, legs: ILeg[]}
     return {errorMsg: "No route has been calculated yet", legs: []}
   }
 
-  const tripLegs: ILeg[] = [];
+  const tripLegs: TLeg[] = [];
   for(let i = 0; i < Z_tripRows.length; i++)
   {
     const legDetails: {name: string, value: string}[] = []

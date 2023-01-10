@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+import { z } from "zod";
 import mongoose from "mongoose";
 
 export interface IMember{
@@ -31,13 +31,14 @@ export interface IDrivers{
     accepted: boolean;
 }
 
-export interface ILeg {
-    givenAddress: string;
-    fullAddressStr: string;
-    legDetails: {name: string, value: string}[];
-    avoidTolls: boolean;
-    legStatus: number;
-}
+export const Leg_ZodSchema = z.object({
+    givenAddress: z.string(),
+    fullAddressStr: z.string(),
+    legDetails: z.object({name: z.string(), value: z.string()}).array(),
+    avoidTolls: z.boolean(),
+    legStatus: z.number(),
+})
+export type TLeg = z.infer<typeof Leg_ZodSchema> //infer type to be used in client
 
 export interface IDrivableTrip {
     _id: mongoose.Types.ObjectId;
@@ -46,7 +47,7 @@ export interface IDrivableTrip {
     date: string;
     notes: string;
     assignedDriverId: mongoose.Types.ObjectId;
-    legs: ILeg[]
+    legs: z.infer<typeof Leg_ZodSchema>[];
     tripStatus: number;
 }
 

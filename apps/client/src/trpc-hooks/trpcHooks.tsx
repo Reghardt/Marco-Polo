@@ -18,7 +18,12 @@ import { trpc } from "../utils/trpc"
   export const useDoesWorkspaceExistMutation = (onSuccess: (res: { doesExist: boolean}) => void) => trpc.workspaces.doesWorkspaceExist.useMutation({
     onSuccess: (res) => {
       onSuccess(res)
+    }
+  })
 
+  export const useSetLastUsedWorkspace = (callbacks: {doOnSuccess: () => void}) => trpc.workspaces.setLastUsedWorkspace.useMutation({
+    onSuccess: () => {
+      callbacks.doOnSuccess()
     }
   })
 
@@ -96,6 +101,26 @@ import { trpc } from "../utils/trpc"
   export const useSetLastUsedVehicleMutation = () => trpc.vehicle.setLastUsedVehicle.useMutation()
 
 //vehicle - end \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+//driver - start //////////////////////////////////////////////////////////////////////////////////////////
+
+  export const useAddDriverMutation = (callbacks: {doOnSuccess: () => void}) => trpc.driver.addDriver.useMutation({
+    onSuccess: () => {
+      callbacks.doOnSuccess()
+    }
+  })
+
+  export const useGetDriversQuery = (params: {workspaceId: string}) => trpc.driver.getDrivers.useQuery({
+    workspaceId: params.workspaceId
+  })
+
+  export const useSendTripToDriver = (callbacks: {doOnSuccess: () => void}) => trpc.driver.sendTripToDriver.useMutation({
+    onSuccess: () => {
+      callbacks.doOnSuccess()
+    }
+  })
+
+//driver - end \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
 

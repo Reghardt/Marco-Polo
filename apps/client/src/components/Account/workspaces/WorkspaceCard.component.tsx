@@ -2,10 +2,11 @@ import { DeleteOutline } from "@mui/icons-material";
 import { Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSetLastUsedWorkspace } from "../../../trpc-hooks/trpcHooks";
 import { useAccountStore } from "../../../Zustand/accountStore";
 import { IWorkspace } from "../../common/CommonInterfacesAndEnums";
 
-import { updateLastUsedWorkspaceId } from "../../../Services/workspace.service";
+
 
 
 export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descriptionPurpose, tokens}) =>
@@ -14,11 +15,17 @@ export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descrip
     const Z_bearer = useAccountStore(state => state.values.bearer)
     const navigate = useNavigate();
 
+    const setLastUsedWorkspace = useSetLastUsedWorkspace({
+        doOnSuccess: () => {
+
+        }
+    })
+
     async function setSelectionAndNavigate()
     {
         ZF_setWorkspaceId(_id);
         console.log("Bearer token is:", Z_bearer)
-        updateLastUsedWorkspaceId(Z_bearer, _id)
+        setLastUsedWorkspace.mutate({workspaceId: _id})
         navigate("/trip", {replace: true})
     }
     

@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Login from './Components/Account/Login.component'
 import WorkSpaces from './Components/Account/workspaces/Workspaces.component'
 
-import CounterExp from './Components/Experiments/Counter Experiments/CounterExperiment.component'
 import Trip from './Components/Trip/Trip.component'
 import './App.css'
 
@@ -24,9 +23,6 @@ function App() {
           <Route path="/workspaces" element={<WorkSpaces/>}/>
 
           <Route path="/trip" element={<Trip/>}/>
-
-
-          <Route path="/exp" element={<CounterExp/>}/>
         </Routes>
       </BrowserRouter>
 
