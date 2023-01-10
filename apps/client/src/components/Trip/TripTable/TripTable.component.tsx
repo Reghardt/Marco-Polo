@@ -90,7 +90,7 @@ const TripTable: React.FC = () => {
   function handleReverseOrder()
   {
     ZF_reverseRows()
-    // calcRoute(false, true)
+    calcRoute(false, true)
   }
 
   function appendRows()

@@ -9,6 +9,7 @@ import { doRowsConform } from "../../Services/Trip.service"
 import TripTable from "./TripTable/TripTable.component"
 import { loadSelection } from "./Worksheet/worksheet.service"
 import GMap from "../Maps/GMap.component"
+import Statistics from "../Statistics/Statistics.component"
 
 const Trip : React.FC = () => {
   console.log("Trip Refresh")
@@ -48,6 +49,10 @@ const Trip : React.FC = () => {
             <TripTable/>
 
             <GMap/>
+
+            <Statistics/>
+
+            
           </Box>
 
           
