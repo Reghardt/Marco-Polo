@@ -2,7 +2,6 @@ import { Box, Button, Stack, TextField, Typography } from "@mui/material"
 import { useState } from "react"
 import { useAddDriverMutation } from "../../../../trpc-hooks/trpcHooks"
 import { trpc } from "../../../../utils/trpc"
-import { useAccountStore } from "../../../../Zustand/accountStore"
 
 export const InviteDriver: React.FC = () => {
     const [driverUsername, setDriverUsername] = useState("")
@@ -30,7 +29,7 @@ export const InviteDriver: React.FC = () => {
                     </Stack>
                 </Box>
                 <Box>
-                    <Button onClick={() => {addDriver.mutate({workspaceId: useAccountStore.getState().values.workspaceId, username: driverUsername})}}>Add Driver</Button>
+                    <Button onClick={() => {addDriver.mutate({username: driverUsername})}}>Add Driver</Button>
                 </Box>
             </Stack>
         </Box> 

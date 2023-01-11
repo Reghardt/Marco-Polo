@@ -4,8 +4,8 @@ import { Box, Button, Divider, Grid, Paper, Stack, TextField, Typography } from 
 import { msLogin } from '../../Services/Account.service';
 import { useMsal } from '@azure/msal-react';
 import MSLogo from './MSLogo.component';
-import { useAccountStore } from '../../Zustand/accountStore';
 import { useDoesWorkspaceExistMutation, useloginMsMutation } from '../../trpc-hooks/trpcHooks';
+import { useAuthStore } from '../../Zustand/authStore';
 
 export default function Login()
 { 
@@ -14,8 +14,7 @@ export default function Login()
   const { instance, /* accounts */} = useMsal();
   const navigate = useNavigate();
 
-  const ZF_setBearer = useAccountStore(store => store.actions.setBearer)
-  const ZF_setWorkspaceId = useAccountStore(store => store.actions.setWorkspaceId)
+  const ZF_setToken = useAuthStore(store => store.actions.setToken)
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -33,9 +32,8 @@ export default function Login()
 
   const loginMsMutation = useloginMsMutation({
     doOnSuccess: (res) => {
-      ZF_setBearer(res.accessToken)
-      ZF_setWorkspaceId(res.lastUsedWorkspaceId)
-      doesWorkspaceExist.mutate({workspaceId: res.lastUsedWorkspaceId})
+      ZF_setToken(res.accessToken)
+      doesWorkspaceExist.mutate()
     },
     doOnError: (err) => {
       console.error(err)
@@ -67,7 +65,7 @@ export default function Login()
   {
     msLogin(instance)
     .then(async (msIdToken) => {
-      loginMsMutation.mutate({idToken: msIdToken})
+      loginMsMutation.mutate({microsoftIdToken: msIdToken})
     })
     .catch(err => {
       console.log(err)

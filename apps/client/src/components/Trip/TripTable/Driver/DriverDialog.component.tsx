@@ -1,6 +1,5 @@
 import { Box, Button, DialogActions, DialogContent, DialogTitle, Paper, Stack, Tab, Tabs, TextField, Typography } from "@mui/material"
 import { useState } from "react";
-import { useAccountStore } from "../../../../Zustand/accountStore";
 import TabPanel, { a11yProps } from "../../../Tabs/TabPanel.component";
 import { createDriverTrip } from "../../../../Services/Trip.service";
 import { InviteDriver } from "./InviteDriver.component";
@@ -17,12 +16,10 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
     const [tripName, setTripName] = useState("")
     const [error, setError] = useState("")
     const [assignedDriver, setAssignedDriver] = useState<IDriver | null>(null)
-    const Z_workspaceId = useAccountStore.getState().values.workspaceId
-
     const [sentStatus, setSentStatus] = useState("")
 
  
-    const getDrivers = useGetDriversQuery({workspaceId: Z_workspaceId})
+    const getDrivers = useGetDriversQuery()
     const sendToDriver = useSendTripToDriver({doOnSuccess: () => {
         if(assignedDriver)
         {
@@ -55,7 +52,6 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
             sendToDriver.mutate({
                 tripName: tripName,
                 assignedDriverId: assignedDriver._id.toString(),
-                workspaceId: Z_workspaceId,
                 legs: driverTrip.legs})
         }
     }

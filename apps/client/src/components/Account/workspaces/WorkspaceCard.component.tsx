@@ -3,7 +3,7 @@ import { Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from "@mui
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetLastUsedWorkspace } from "../../../trpc-hooks/trpcHooks";
-import { useAccountStore } from "../../../Zustand/accountStore";
+import { useAuthStore } from "../../../Zustand/authStore";
 import { IWorkspace } from "../../common/CommonInterfacesAndEnums";
 
 
@@ -11,20 +11,17 @@ import { IWorkspace } from "../../common/CommonInterfacesAndEnums";
 
 export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descriptionPurpose, tokens}) =>
 {
-    const ZF_setWorkspaceId = useAccountStore(state => state.actions.setWorkspaceId)
-    const Z_bearer = useAccountStore(state => state.values.bearer)
     const navigate = useNavigate();
+    const ZF_setToken = useAuthStore(store => store.actions.setToken)
 
     const setLastUsedWorkspace = useSetLastUsedWorkspace({
-        doOnSuccess: () => {
-
+        doOnSuccess: (res) => {
+            ZF_setToken(res)
         }
     })
 
     async function setSelectionAndNavigate()
     {
-        ZF_setWorkspaceId(_id);
-        console.log("Bearer token is:", Z_bearer)
         setLastUsedWorkspace.mutate({workspaceId: _id})
         navigate("/trip", {replace: true})
     }

@@ -2,7 +2,6 @@ import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/ma
 import React from "react"
 import { useGetAddressBookQuery } from "../../../trpc-hooks/trpcHooks"
 
-import { useAccountStore } from "../../../Zustand/accountStore"
 import { EDepartReturn, useTripStore } from "../../../Zustand/tripStore"
 import HelpTooltip from "../../common/HelpTooltip.component"
 
@@ -21,7 +20,7 @@ const DepartureReturn: React.FC = () => {
     const Z_departReturnState = useTripStore(store => store.data.departureReturnState)
     const Z_setDepartReturnState = useTripStore(store => store.reducers.setDepartureReturnState)
 
-    useGetAddressBookQuery(useAccountStore.getState().values.workspaceId)
+    useGetAddressBookQuery()
     
     return(
         <Box sx={{marginTop: "1em", marginBottom: "1em"}}>

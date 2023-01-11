@@ -1,5 +1,5 @@
 import produce from "immer";
-import create from "zustand/react";
+import create from "zustand";
 
 interface IAuthStore{
     values: {
