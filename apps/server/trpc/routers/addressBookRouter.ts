@@ -9,33 +9,31 @@ import { protectedProcedure, router } from "../trpc";
 
 export const addressBookRouter = router({
     getAddressBook: protectedProcedure
-    .input(z.object({
-      workspaceId: z.string()
-    }))
-    .query(async ({input}) => {
-        console.log(input.workspaceId)
-        const workspace = await WorkspaceModel.findOne({_id: new mongoose.Types.ObjectId(input.workspaceId)}, {addressBook: 1})
-        console.log(workspace)
+    .query(async ({ctx}) => {
+
+        console.log("FIRED: getAddressBook")
+
+        const workspace = await WorkspaceModel.findOne({_id: new mongoose.Types.ObjectId(ctx.workspaceId)}, {addressBook: 1})
+
         //TODO fix this:
         type TReturnType = {
             addressBookEntries: IAddressBookEntry[]
         }
 
         const ret: TReturnType = {addressBookEntries: workspace?.addressBook ?? [] }
-
         return ret
     }),
 
     createAddressBookEntry: protectedProcedure
     .input(z.object({
-        workspaceId: z.string(),
         physicalAddress: z.string(),
         addressDescription: z.string()
         
     }))
-    .mutation( async ({input}) => {
+    .mutation( async ({input, ctx}) => {
+        console.log("FIRED: createAddressBookEntry")
         const addressBookEntry = await WorkspaceModel.updateOne({
-            _id: new mongoose.Types.ObjectId(input.workspaceId)
+            _id: new mongoose.Types.ObjectId(ctx.workspaceId)
         },
         {
             $push: {addressBook: {_id: new mongoose.Types.ObjectId(), physicalAddress: input.physicalAddress, addressDescription: input.addressDescription }}
@@ -46,18 +44,19 @@ export const addressBookRouter = router({
 
     deleteAddressBookEntry: protectedProcedure
     .input(z.object({
-        workspaceId: z.string(),
         addressBookEntryId: z.string()
     }))
-    .mutation( async ({input}) => {
-        const deletedAddressBookEntry = await WorkspaceModel.updateOne({
-        _id: new mongoose.Types.ObjectId(input.workspaceId)
-        },
-        {
-            $pull: {addressBook: {_id: new mongoose.Types.ObjectId(input.addressBookEntryId)}}
-        })
-        console.log(deletedAddressBookEntry)
-        return "del"
+    .mutation( async ({input, ctx}) => {
+        console.log("FIRED: deleteAddressBookEntry")
+        await WorkspaceModel.updateOne(
+            {
+                _id: new mongoose.Types.ObjectId(ctx.workspaceId)
+            },
+            {
+                $pull: {addressBook: {_id: new mongoose.Types.ObjectId(input.addressBookEntryId)}}
+            }
+        )
+        return
     }),
   });
 

@@ -1,9 +1,7 @@
 import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
 import React, {useEffect, useState } from "react"
-import { useGetMemberQuery, useGetVehicleByIdQuery } from "../../trpc-hooks/trpcHooks";
-import { useAccountStore } from "../../Zustand/accountStore";
-
+import { useGetMemberDataQuery, useGetVehicleByIdQuery } from "../../trpc-hooks/trpcHooks";
 import { useTripStore } from "../../Zustand/tripStore";
 
 
@@ -86,8 +84,8 @@ const Statistics: React.FC = () => {
         
     }
 
-    const memberQuery = useGetMemberQuery(useAccountStore.getState().values.workspaceId)
-    const vehicleQuery = useGetVehicleByIdQuery(useAccountStore.getState().values.workspaceId, memberQuery.data?.lastUsedVehicleId ? memberQuery.data.lastUsedVehicleId : "")
+    const memberQuery = useGetMemberDataQuery()
+    const vehicleQuery = useGetVehicleByIdQuery(memberQuery.data?.lastUsedVehicleId ? memberQuery.data.lastUsedVehicleId : "")
 
     useEffect( () => {
         if(vehicleQuery.data?.vehicle)

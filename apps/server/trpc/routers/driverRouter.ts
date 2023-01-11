@@ -8,15 +8,15 @@ import { TRPCError } from "@trpc/server";
 export const driverRouter = router({
     addDriver: protectedProcedure
     .input(z.object({
-        username: z.string(),
-        workspaceId: z.string()
+        username: z.string()
     }))
-    .mutation(async ({input}) => {
+    .mutation(async ({input, ctx}) => {
+        console.log("FIRED: addDriver")
         const driver = await DriverModel.findOne({username: input.username})
 
         if(driver)
         {
-            const addedDriver = await Workspace.updateOne({_id: new mongoose.Types.ObjectId(input.workspaceId)}, {"$push": {drivers: {_id : new mongoose.Types.ObjectId(), driverId: driver._id, accepted: false}}})
+            const addedDriver = await Workspace.updateOne({_id: new mongoose.Types.ObjectId(ctx.workspaceId)}, {"$push": {drivers: {_id : new mongoose.Types.ObjectId(), driverId: driver._id, accepted: false}}})
             return
         }
         else
@@ -26,12 +26,9 @@ export const driverRouter = router({
     }),
 
     getDrivers: protectedProcedure
-    .input(z.object({
-        workspaceId: z.string()
-    }))
-    .query(async ({input}) => {
-        console.log("get list of drivers fired")
-        const driversInWorkspace = (await Workspace.findOne({_id: input.workspaceId}, {drivers: 1}))?.drivers
+    .query(async ({ctx}) => {
+        console.log("FIRED: getDrivers")
+            const driversInWorkspace = (await Workspace.findOne({_id: ctx.workspaceId}, {drivers: 1}))?.drivers
         if(driversInWorkspace)
         {
             console.log("found at least one driver", driversInWorkspace)
@@ -50,17 +47,13 @@ export const driverRouter = router({
     sendTripToDriver: protectedProcedure
     .input(z.object({
         assignedDriverId: z.string(), 
-        workspaceId: z.string(), 
         legs: Leg_ZodSchema.array(), 
         tripName: z.string()
     }))
-    .mutation(async ({input}) => {
-        console.log(input.assignedDriverId)
-        console.log(input.workspaceId)
-        console.log(input.legs)
-        console.log("assign trip to driver fired")
+    .mutation(async ({input, ctx}) => {
+        console.log("FIRED: sendTripToDriver")
 
-        const updateRes = await Workspace.updateOne({_id: input.workspaceId}, {
+        const updateRes = await Workspace.updateOne({_id: ctx.workspaceId}, {
             $push: { 
                 drivableTrips: { 
                     _id: new mongoose.Types.ObjectId(), 
@@ -75,6 +68,6 @@ export const driverRouter = router({
             }
         })
         console.log(updateRes)
-        return "added"
+        return
     })
 })

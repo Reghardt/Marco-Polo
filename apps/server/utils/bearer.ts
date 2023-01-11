@@ -2,7 +2,12 @@
 import { TRPCError } from "@trpc/server"
 import type { JwtPayload} from "jsonwebtoken";
 import { verify } from "jsonwebtoken"
+import z from "zod"
 
+const tokenSchema = z.object({
+    workspaceId: z.string(),
+    userId: z.string()
+})
 
 export async function getBearer(req: any)
 {
@@ -10,21 +15,40 @@ export async function getBearer(req: any)
     if(authHeader && authHeader.length > 0)
     {
         const preamble = authHeader.substr(0, 7)
-        const token = authHeader.substr(7)
-        if(preamble === "Bearer ")
+        const tokenString = authHeader.substr(7)
+        if(preamble === "Bearer ") //bearer distinguishes the type of Authorization being used
         {        
-            return new Promise<JwtPayload>((accept) => {
-                verify(token, "1223434", (error: any, user: any) => {
-                    if(error) //if there is some error, like token expired return error
+            return new Promise<z.infer<typeof tokenSchema>>((accept) => {
+                verify(tokenString, "1223434", {algorithms: ['HS256']}, (err, decoded) => {
+                    if(err)
                     {
-                        console.log("res is", error.inner)
-                        console.log("res is", error.message)
-                        console.log("res is", error.name)
-                        throw new TRPCError({message: `${error.name}, ${error.message}`,code: "UNAUTHORIZED"})
+                        throw new TRPCError({message: `${err.name}, ${err.message}`, code: "UNAUTHORIZED"})
                     }
-                    else
+                    else //if no error, continue
                     {
-                        accept(user as JwtPayload)
+                        if(decoded === undefined)
+                        {
+                            throw new TRPCError({message: "token undefined", code: "UNAUTHORIZED"})
+                        }
+                        else if(typeof decoded === "string" ) //expects to be decoded to JwtPayload, not string
+                        {
+                            throw new TRPCError({message: "token decoded to a string", code: "UNAUTHORIZED"})
+                        }
+                        else
+                        {
+                            const parseResult = tokenSchema.safeParse({ //check if type safe
+                                workspaceId: decoded.workspaceId,
+                                userId: decoded.userId
+                            })
+                            if(parseResult.success)
+                            {
+                                accept(parseResult.data) //accept if type safe
+                            }
+                            else
+                            {
+                                throw new TRPCError({message: parseResult.error.message, code: "UNAUTHORIZED"}) //throw error if not
+                            }
+                        }
                     }
                 })
             })    

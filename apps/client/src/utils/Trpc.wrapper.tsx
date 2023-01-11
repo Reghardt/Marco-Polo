@@ -3,7 +3,7 @@ import { httpBatchLink } from "@trpc/client";
 import { useState } from "react";
 import { trpc } from "./trpc";
 import superjson from "superjson";
-import { useAccountStore } from "../Zustand/accountStore";
+import { useAuthStore } from "../Zustand/authStore";
 
 type TTrpcWrapper = {
     children? : React.ReactNode
@@ -20,7 +20,7 @@ const TrpcWrapper: React.FC<TTrpcWrapper> = ({children}) => {
             // optional
             headers() {
               return {
-                authorization: `Bearer ${useAccountStore.getState().values.bearer}`,
+                authorization: `Bearer ${useAuthStore.getState().values.token}`,
               };
             },
           }),

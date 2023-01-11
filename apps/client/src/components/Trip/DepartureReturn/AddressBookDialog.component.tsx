@@ -2,8 +2,6 @@ import { DeleteOutline } from "@mui/icons-material"
 import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material"
 import React, { useState } from "react"
 
-import { useAccountStore } from "../../../Zustand/accountStore"
-
 import TabPanel, { a11yProps } from "../../Tabs/TabPanel.component"
 import { geocodeAddress } from "../../../Services/Trip.service"
 
@@ -41,7 +39,7 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
     const utils = trpc.useContext()
 
-    const addressBookQuery = useGetAddressBookQuery(useAccountStore.getState().values.workspaceId)
+    const addressBookQuery = useGetAddressBookQuery()
 
     const createAddressBookEntry = useCreateAddressBookEntry({
         doOnSuccess: () => {
@@ -109,7 +107,6 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
         if(addressDescription)
         {
             createAddressBookEntry.mutate({
-                workspaceId: useAccountStore.getState().values.workspaceId, 
                 physicalAddress: geocodedResults[selectedAddressIdx].formatted_address, 
                 addressDescription: addressDescription})
         }
@@ -122,7 +119,6 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
     function handledeleteAddressBookEntry(entryId: string)
     {
         deleteAddressBookEntry.mutate({
-            workspaceId: useAccountStore.getState().values.workspaceId, 
             addressBookEntryId: entryId})
     }
 

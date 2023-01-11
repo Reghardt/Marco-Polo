@@ -3,23 +3,15 @@ import { z } from "zod";
 import mongoose from "mongoose";
 import { protectedProcedure, router } from "../trpc";
 import Workspace, { IVehicleListEntry } from "../models/Workspace";
-import { getBearer } from "../../utils/bearer";
-import { JwtPayload } from "jsonwebtoken";
-
-
-
 
 export const vehicleRouter = router({
 
   vehicleList: protectedProcedure
-  .input(z.object({
-      workspaceId: z.string()
-  }))
-  .query(async ({input}) => {
-      console.log("get vehicle list fired")
+  .query(async ({ctx}) => {
+    console.log("FIRED: vehicleList")
       const workspace = await Workspace.findOne(
           {
-              _id: new mongoose.Types.ObjectId(input.workspaceId)
+              _id: new mongoose.Types.ObjectId(ctx.workspaceId)
           }, 
           {
               vehicleList: 1
@@ -32,7 +24,6 @@ export const vehicleRouter = router({
 
   createVehicle: protectedProcedure
   .input(z.object({
-    workspaceId: z.string(), 
     vehicleDescription: z.string(), 
     vehicleLicencePlate: z.string(), 
     litersPer100km: z.number(), 
@@ -41,9 +32,9 @@ export const vehicleRouter = router({
     vehicleClass: z.string()
   }))
   .mutation(async ({input, ctx}) => {
-    
+    console.log("FIRED: createVehicle")
     const newVehicle = await Workspace.updateOne({
-        _id: new mongoose.Types.ObjectId(input.workspaceId)
+        _id: new mongoose.Types.ObjectId(ctx.workspaceId)
     },
     {
         $push: {vehicleList: {
@@ -61,12 +52,12 @@ export const vehicleRouter = router({
   }),
   deleteVehicle: protectedProcedure
   .input(z.object({
-    workspaceId: z.string(), 
     vehicleId: z.string()
   }))
-  .mutation(async ({input}) => {
+  .mutation(async ({input, ctx}) => {
+    console.log("FIRED: deleteVehicle")
     const deletedVehicle = await Workspace.updateOne({
-        _id: new mongoose.Types.ObjectId(input.workspaceId)
+        _id: new mongoose.Types.ObjectId(ctx.workspaceId)
     },
     {
         $pull: {vehicleList: {_id: new mongoose.Types.ObjectId(input.vehicleId)}}
@@ -77,15 +68,14 @@ export const vehicleRouter = router({
 
   setLastUsedVehicle: protectedProcedure
   .input(z.object({
-    workspaceId: z.string(), 
     vehicleId: z.string()
   }))
   .mutation(async ({input,ctx}) => {
-    console.log("set last used vehicle fired")
-    const bearer = await getBearer(ctx.req) as JwtPayload; //TODO pass only bearer as ctx when it is valid, handle error in middleware
+    console.log("FIRED: setLastUsedVehicle")
+
     const updated = await Workspace.updateOne({
-        _id: new mongoose.Types.ObjectId(input.workspaceId),
-        "members.userId":  new mongoose.Types.ObjectId(bearer.user)
+        _id: new mongoose.Types.ObjectId(ctx.workspaceId),
+        "members.userId":  new mongoose.Types.ObjectId(ctx.userId)
     },
     {
         $set: {"members.$.lastUsedVehicleId": input.vehicleId}
@@ -98,12 +88,12 @@ export const vehicleRouter = router({
 
   getVehicleById: protectedProcedure
   .input(z.object({
-    workspaceId: z.string(),
     vehicleId: z.string()
   }))
-  .query(async ({input}) => {
+  .query(async ({input, ctx}) => {
+    console.log("FIRED: getVehicleById")
     const vehicle = await Workspace.aggregate<{_id: mongoose.Types.ObjectId, vehicle: IVehicleListEntry}>([
-      {$match: {"_id": new mongoose.Types.ObjectId(input.workspaceId), "vehicleList._id": new mongoose.Types.ObjectId(input.vehicleId)}},
+      {$match: {"_id": new mongoose.Types.ObjectId(ctx.workspaceId), "vehicleList._id": new mongoose.Types.ObjectId(input.vehicleId)}},
     
       {$project : {"_id": 0, "vehicle": "$vehicleList"}},
       {
@@ -118,18 +108,19 @@ export const vehicleRouter = router({
 
   setFuelPrice: protectedProcedure
   .input(z.object({
-    workspaceId: z.string(), 
     fuelPrice: z.string()
   }))
   .mutation(async ({input, ctx}) => {
-    const bearer = await getBearer(ctx.req) as JwtPayload; //TODO pass only bearer as ctx when it is valid, handle error in middleware
-    const updated = await Workspace.updateOne({
-      _id: new mongoose.Types.ObjectId(input.workspaceId),
-      "members.userId":  new mongoose.Types.ObjectId(bearer.user)
-    },
-    {
-        $set: {"members.$.lastUsedFuelPrice": input.fuelPrice}
-    })
+    console.log("FIRED: setFuelPrice")
+    await Workspace.updateOne(
+      {
+      _id: new mongoose.Types.ObjectId(ctx.workspaceId),
+      "members.userId":  new mongoose.Types.ObjectId(ctx.userId)
+      },
+      {
+          $set: {"members.$.lastUsedFuelPrice": input.fuelPrice}
+      }
+    )
 
     //TODO check if updated
 

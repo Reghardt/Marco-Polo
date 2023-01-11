@@ -11,9 +11,13 @@ import { trpc } from "../utils/trpc"
     }
   })
 
-  export const useGetMemberQuery = (workspaceId: string) => trpc.workspaces.getMemberData.useQuery({
-      workspaceId: workspaceId
-  })
+  //get data associated with a member of a workspace, like role, last used fuel price etc
+  export const useGetMemberDataQuery = () => trpc.workspaces.getMemberData.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false
+    }
+  )
 
   export const useDoesWorkspaceExistMutation = (onSuccess: (res: { doesExist: boolean}) => void) => trpc.workspaces.doesWorkspaceExist.useMutation({
     onSuccess: (res) => {
@@ -21,9 +25,9 @@ import { trpc } from "../utils/trpc"
     }
   })
 
-  export const useSetLastUsedWorkspace = (callbacks: {doOnSuccess: () => void}) => trpc.workspaces.setLastUsedWorkspace.useMutation({
-    onSuccess: () => {
-      callbacks.doOnSuccess()
+  export const useSetLastUsedWorkspace = (callbacks: {doOnSuccess: (res: string) => void}) => trpc.workspaces.setActiveWorkspace.useMutation({
+    onSuccess: (res) => {
+      callbacks.doOnSuccess(res)
     }
   })
 
@@ -31,7 +35,7 @@ import { trpc } from "../utils/trpc"
 
 //auth - start /////////////////////////////////////////////////////////////////////////////////////////
   export const useloginMsMutation = (callbacks: {
-    doOnSuccess: (res: { accessToken: string; lastUsedWorkspaceId: string;}) => void;
+    doOnSuccess: (res: { accessToken: string;}) => void;
     doOnError: (err: any) => void;
   }) => trpc.auth.loginMs.useMutation({
     onSuccess: (res) => {
@@ -46,8 +50,8 @@ import { trpc } from "../utils/trpc"
 
 //Address book - start //////////////////////////////////////////////////////////////////////////////////
 
-  export const useGetAddressBookQuery = (workspaceId: string) => trpc.addressBook.getAddressBook.useQuery(
-    {workspaceId: workspaceId},
+  export const useGetAddressBookQuery = () => trpc.addressBook.getAddressBook.useQuery(
+    undefined,
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false
@@ -72,7 +76,7 @@ import { trpc } from "../utils/trpc"
 
 //vehicle - start ///////////////////////////////////////////////////////////////////////////////////////
 
-  export const useGetVehicleListQuery = (workspaceId: string) => trpc.vehicle.vehicleList.useQuery({workspaceId: workspaceId})
+  export const useGetVehicleListQuery = () => trpc.vehicle.vehicleList.useQuery()
 
   //should invalidate vehicle list
   export const useCreateVehicleMutation = (callbacks: {doOnSuccess: () => void}) => trpc.vehicle.createVehicle.useMutation({
@@ -88,12 +92,12 @@ import { trpc } from "../utils/trpc"
     }
   })
 
-  export const useGetVehicleByIdQuery = (workspaceId: string ,vehicleId: string) => trpc.vehicle.getVehicleById.useQuery({
-      workspaceId: workspaceId,
+  export const useGetVehicleByIdQuery = (vehicleId: string) => trpc.vehicle.getVehicleById.useQuery({
       vehicleId: vehicleId
   },
   {
-      enabled: !!vehicleId
+      enabled: !!vehicleId,
+      refetchOnWindowFocus: false
   })
 
   export const useSetFuelPriceMutation = () => trpc.vehicle.setFuelPrice.useMutation()
@@ -110,9 +114,7 @@ import { trpc } from "../utils/trpc"
     }
   })
 
-  export const useGetDriversQuery = (params: {workspaceId: string}) => trpc.driver.getDrivers.useQuery({
-    workspaceId: params.workspaceId
-  })
+  export const useGetDriversQuery = () => trpc.driver.getDrivers.useQuery()
 
   export const useSendTripToDriver = (callbacks: {doOnSuccess: () => void}) => trpc.driver.sendTripToDriver.useMutation({
     onSuccess: () => {

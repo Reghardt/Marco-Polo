@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { Context } from "./createContext";
 import superjson from "superjson"
+import { getBearer } from "../utils/bearer";
 
 const t = initTRPC.context<Context>().create({
     transformer: superjson,
@@ -9,13 +10,19 @@ const t = initTRPC.context<Context>().create({
     }
 });
 
-const isAuthed = t.middleware(({ ctx, next }) => {
-    //TODO chek if token is valid
+const isAuthed = t.middleware(async ({ ctx, next }) => {
+    //TODO check if token is valid
     if (!ctx.req.headers.authorization) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
+
+    const bearerRes = await getBearer(ctx.req)
+
     return next({
-      ctx: ctx
+      ctx: {
+        workspaceId: bearerRes.workspaceId,
+        userId: bearerRes.userId
+      }
     });
   });
 

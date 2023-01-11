@@ -5,7 +5,6 @@ import React, { useState } from "react"
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
 import { useCreateVehicleMutation, useGetVehicleListQuery, useDeletetVehicleMutation, useSetLastUsedVehicleMutation } from "../../trpc-hooks/trpcHooks";
 import { trpc } from "../../utils/trpc";
-import { useAccountStore } from "../../Zustand/accountStore";
 import { useTripStore } from "../../Zustand/tripStore";
 import HelpTooltip from "../common/HelpTooltip.component";
 import TabPanel, { a11yProps } from "../Tabs/TabPanel.component";
@@ -63,7 +62,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
         }
     })
 
-    const TQ_vehicleList = useGetVehicleListQuery(useAccountStore.getState().values.workspaceId)
+    const TQ_vehicleList = useGetVehicleListQuery()
 
     const TM_deletetVehicleMutation = useDeletetVehicleMutation({
         doOnSuccess: () => {
@@ -129,8 +128,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
             litersPer100km: parseFloat(litersPer100km),
             additionalCost: additionalCost ? parseFloat(additionalCost) : 0,
             additionalCostType: additionalCostType,
-            vehicleClass: vehicleClass,
-            workspaceId: useAccountStore.getState().values.workspaceId
+            vehicleClass: vehicleClass
         })
     }
 
@@ -138,7 +136,6 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
     {
         ZF_setVehicle(vehicle)
         TM_setLastUsedVehicle.mutate({
-            workspaceId: useAccountStore.getState().values.workspaceId,
             vehicleId: vehicle._id.toString(),
         })
         setIsModalOpen((current) => {return !current})
@@ -186,7 +183,6 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
                                                     <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%"}}>
                                                         <Tooltip title={"Delete Entry"}>
                                                             <IconButton onClick={() => {TM_deletetVehicleMutation.mutate({
-                                                                workspaceId: useAccountStore.getState().values.workspaceId, 
                                                                 vehicleId: vehicle._id.toString()})}}>
                                                                 <DeleteOutline color="error"/>
                                                             </IconButton>
