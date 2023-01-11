@@ -54,7 +54,7 @@ import { trpc } from "../utils/trpc"
     undefined,
     {
       refetchOnWindowFocus: false,
-      refetchOnMount: false
+      // refetchOnMount: false //if the user switches workspaces will the new addressbook be fetched?
     }
   )
 
@@ -97,7 +97,7 @@ import { trpc } from "../utils/trpc"
   },
   {
       enabled: !!vehicleId,
-      refetchOnWindowFocus: false
+      refetchOnWindowFocus: false,
   })
 
   export const useSetFuelPriceMutation = () => trpc.vehicle.setFuelPrice.useMutation()

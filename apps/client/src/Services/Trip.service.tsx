@@ -9,10 +9,11 @@ import HeadingCell from "../Components/Trip/TripTable/cells/HeadingCell.componen
 import { useMapsStore } from "../Zustand/mapsStore";
 import { ETableMode, useTripStore } from "../Zustand/tripStore";
 
+const BlankColumnComponent: React.FC = () => <div style={{height: "100%", width: "100%"}}></div> //used for layout alignment
+
 //this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : {status: boolean, reason: string}
 {
-  //
   if(referenceRow === null) //reference row to test against, otherwise use the first row of the rows
   {
     referenceRow = rows[0]
@@ -41,7 +42,6 @@ export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : 
 
 export function reorder(list: IRow[], startIndex: number, endIndex: number )
 {
-
   const result = Array.from(list)
   const [removed] = result.splice(startIndex, 1)
   result.splice(endIndex, 0, removed)
@@ -82,52 +82,44 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
     {
       ZF_updateBodyCell({...cell, isAddressValidAndAccepted: true})
       ZF_setErrorMessage("")
-      
     }
     else
     {
       ZF_setErrorMessage("Error: the address has a problem, click on the cell to fix it")
     } 
-
   }
 
-  function tableSolveMode(): JSX.Element
-  {
-    const cell = row.cells[Z_addressColumnIndex]
-    // const isDisabled = cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK ? false : true;
-    return(
-      <>
-        <AddressCell cellRef={cell} glanceMode={true}/>
-        <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
-      </>
-    )
-  }
+  const SequenceIndicatorComponent: React.FC<{sequenceNumber: number}> = ({sequenceNumber}) => <div draggable="true" style={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white", paddingLeft: "2px", paddingRight: "2px"}} variant="body1">{sequenceNumber + 1}</Typography></div>
 
   if(row.cells[0].y >= 0)
   {
-    const rowWithChildren = 
-    <>
-      
-
-      <div draggable="true" style={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white", paddingLeft: "2px", paddingRight: "2px"}} variant="body1">{nr + 1}</Typography></div>
-
-      {Z_tableMode !== ETableMode.EditMode 
-        ? 
-          tableSolveMode()
-        : 
-          
-          <>
+    if(Z_tableMode !== ETableMode.EditMode)
+    {
+      const cell = row.cells[Z_addressColumnIndex]
+      return(
+        <>
+          <SequenceIndicatorComponent sequenceNumber={nr}/>
+          <AddressCell cellRef={cell} glanceMode={true}/>
+          <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+        </>
+      )
+    }
+    else
+    {
+      return(
+        <>
+          <SequenceIndicatorComponent sequenceNumber={nr}/>
           {row.cells.map((cell, index) => {
             if(columnVisibility[index])
             {
               if(columnDesignations[index] === EColumnDesignations.Address){
                 return(
-                  <AddressCell cellRef={cell} glanceMode={false}/>
+                  <AddressCell key={`cell=${index}`} cellRef={cell} glanceMode={false}/>
                 )
               }
               else{
                 return(
-                  <DataCell cellRef={cell}/>
+                  <DataCell key={`cell=${index}`} cellRef={cell}/>
                 )
               }
             }
@@ -136,56 +128,14 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
               return <></> //return nothing if column is not visible
             }
           })}
-        </> 
-      }
-
-
-
-      {/* {
-        Z_addressColumIndex > -1 && row.cells[Z_addressColumIndex].isGeoResAccepted === false 
-        ? 
-        addressCellGlanceMode()
-        :
-        row.cells.map((cell, index) => {
-          if(columnVisibility[index] === true){
-              if(columnDesignations[index] === EColumnDesignations.Address){
-                return(
-                  <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
-                      <AddressCell cellRef={cell} glanceMode={false}/>
-                  </Grid>
-                )
-              }
-              else{
-                return(
-                  <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
-                      <DataCell cellRef={cell}
-                      />
-                  </Grid>
-                )
-              }
-          }
-          else{
-              return <></>
-          }
-        })
-      } */}
-
-      {/* {row.children.map((row) => {
-          return createChildRow(row, columnVisibility)
-      })} */}
-
-    </>
-
-
-    return rowWithChildren;
+        </>
+      )
+    }
   }
   else
   {
     return <></>
   }
-
-
-  
 }
 
 // function createChildRow(row: Readonly<IRow>, columnVisibility: boolean[])
@@ -237,12 +187,12 @@ export function createColumnVisibilityOptions(columnNames: IRow, columnVisibilit
   const visibilityElements = 
     <Grid container sx={{paddingTop: "0.3em"}}>
       {columnNames.cells.map((elem, idx) => {
-        return  <Grid item xs="auto" sx={{margin: 0, padding: 0}}>
+        return  (<Grid item xs="auto" sx={{margin: 0, padding: 0}}>
                   <FormControlLabel  control={<Checkbox sx={{paddingTop: 0, paddingBottom: 0}} checked={columnVisibility[idx]} 
                     onChange={() => {
                       useTripStore.getState().reducers.updateColumnVisibility(idx)
                     }}/>} label={String.fromCharCode(elem.x - 1 + 'A'.charCodeAt(0))} />
-                </Grid>
+                </Grid>)
       })}
     </Grid>
     
@@ -256,39 +206,35 @@ export function createColumnDecorators(columnVisibility: boolean[]) : JSX.Elemen
     const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
     const Z_tableMode = useTripStore.getState().data.tabelMode;
 
-    function tableSolveMode(): JSX.Element
+    if(Z_tableMode === ETableMode.EditMode)
     {
       return(
         <>
+          <BlankColumnComponent/>
+          {columnVisibility.map((visibility,index) => {
+              if(visibility === true)
+              {
+                return <ColumnDecorator colIdx={index}/>
+              }
+              else
+              {
+                return <></>
+              }
+            })
+          }
+        </>
+      )
+    }
+    else
+    {
+      return(
+        <>
+          <BlankColumnComponent/>
           <ColumnDecorator colIdx={Z_addressColumIndex}/>
           <div style={{height: "100%", width: "100%"}}></div>
         </>
       )
     }
-
-    const decorators =
-      <React.Fragment>
-        <div style={{height: "100%", width: "100%"}}></div>
-        {Z_tableMode === ETableMode.EditMode ?
-          <>
-            {columnVisibility.map((visibility,index) => {
-                if(visibility === true)
-                {
-                  return <ColumnDecorator colIdx={index}/>
-                }
-                else
-                {
-                  return <></>
-                }
-              })
-            }
-          </>
-          :
-          tableSolveMode()
-        }
-        
-      </React.Fragment>
-    return decorators
 }
 
 export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: boolean[])
@@ -296,42 +242,38 @@ export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: 
   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
   const Z_tableMode = useTripStore.getState().data.tabelMode;
 
-  function tableSolveMode(): JSX.Element
+  if(Z_tableMode === ETableMode.EditMode)
+  {
+    return(
+      <>
+      <BlankColumnComponent/>
+        {jobHeadings.cells.map((cell, index) => {
+          if(columnVisibility[index] === true)
+          {
+              return(
+                <HeadingCell colNumber={cell.x}/>
+              )
+          }
+          else
+          {
+            return(<></>)
+          }
+        })}
+      </>
+    )
+  }
+  else
   {
     const cell = jobHeadings.cells[Z_addressColumIndex]
     return(
       <>
+        <BlankColumnComponent/>
         <HeadingCell colNumber={cell.x}/>
         <div style={{height: "100%", width: "100%"}}></div>
       </>
     )
   }
 
-  const headings =
-    <React.Fragment>
-      <div style={{height: "100%", width: "100%"}}></div>
-      {Z_tableMode === ETableMode.EditMode
-        ?
-        <>
-          {jobHeadings.cells.map((cell, index) => {
-            if(columnVisibility[index] === true)
-            {
-                return(
-                  <HeadingCell colNumber={cell.x}/>
-                )
-            }
-            else
-            {
-              return(<></>)
-            }
-          })}
-        </>
-        :
-          tableSolveMode()
-      }
-
-    </React.Fragment>
-  return headings
 }
 
 export function removeRowParentChildRelations(rows: IRow[])

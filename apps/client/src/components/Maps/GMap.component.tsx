@@ -136,26 +136,20 @@ const GMap: React.FC = () => {
     
 
     return(
-        // <Paper sx={{padding: "0.3em", marginTop: "0.3em"}} variant="elevation" elevation={5}>
-            <Box>
-                <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Google Maps</Typography>   
-                {/* <Button onClick={() => printPopperRefs()}>Print</Button>          */}
-                <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
-                <GMapLegends/>
-
-                
-
-                {markers.length > 0 && (
-                    markers.map((marker) => {
-                        return marker
-                    })
-                )}
-            </Box>
+        <Box>
+            <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Google Maps</Typography>   
+            {/* <Button onClick={() => printPopperRefs()}>Print</Button>          */}
+            <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
+            <GMapLegends/>
 
             
 
-
-        // </Paper>
+            {markers.length > 0 && (
+                markers.map((marker) => {
+                    return marker
+                })
+            )}
+        </Box>
     )
 }
 
