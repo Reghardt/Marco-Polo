@@ -42,7 +42,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
       {
         if(cellRef.geocodedDataAndStatus.results && cellRef.geocodedDataAndStatus.results.length > 0)
         {
-          if(cellRef.isAddressValidAndAccepted)
+          if(cellRef.isAddressAccepted)
           {
             return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]!.formatted_address, color: "green", hoverColor: "#006e09"}
           }
@@ -69,7 +69,15 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
       }
     }
     else{
-      return {status: "loading...", color: "#f57c00", hoverColor: "#df6400"}
+      if(cellRef.displayData === "")
+      {
+        return {status: "No Link Address", color: "primary", hoverColor: "primary.hover"}
+      }
+      else
+      {
+        return {status: "loading...", color: "#f57c00", hoverColor: "#df6400"}
+      }
+      
     }
   }
 

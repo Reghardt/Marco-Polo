@@ -13,7 +13,7 @@ export enum EDepartReturn{
 export enum ETableMode{
     EditMode = 1,
     AddressSolveMode = 2,
-    GoToAddressSolveMode = 3
+    LinkAddressSolveMode = 3
 }
 
 function getAddressColumn(columnDesignations: EColumnDesignations[])
@@ -32,7 +32,7 @@ function getToAddressColumn(columnDesignations: EColumnDesignations[])
 {
     for(let i = 0; i < columnDesignations.length; i++)
     {
-        if(columnDesignations[i] === EColumnDesignations.GoTo)
+        if(columnDesignations[i] === EColumnDesignations.LinkAddress)
         {
             return i;
         }
@@ -59,9 +59,9 @@ function updateColumnDesignationHelper(state: WritableDraft<ITripState>, payload
     for(let i = 0; i < state.data.rows.length; i++)
     {
         const cell = state.data.rows[i]?.cells[payload.columnIndex];
-        if(cell?.isAddressValidAndAccepted === false)
+        if(cell?.isAddressAccepted === false)
         {
-            state.data.tabelMode = payload.designation === EColumnDesignations.Address ? ETableMode.AddressSolveMode : ETableMode.GoToAddressSolveMode;
+            state.data.tabelMode = payload.designation === EColumnDesignations.Address ? ETableMode.AddressSolveMode : ETableMode.LinkAddressSolveMode;
             break;
         }
     }
@@ -78,7 +78,7 @@ interface ITrip{
     columnVisibility: boolean[];
     rows: IRow[];
     addressColumnIndex: number; 
-    goToAddressColumnIndex: number;
+    linkAddressColumnIndex: number;
 
     tripDirections: ITripDirections | null;
 
@@ -125,7 +125,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
         columnVisibility: [],
         rows: [],
         addressColumnIndex: -1,
-        goToAddressColumnIndex: -1,
+        linkAddressColumnIndex: -1,
         tripDirections: null,
 
         vehicle: null,
@@ -166,7 +166,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                     state.data.columnVisibility = new Array<boolean>(rowLength).fill(true)
                     state.data.rows = payload;
                     state.data.addressColumnIndex = -1;
-                    state.data.goToAddressColumnIndex = -1;
+                    state.data.linkAddressColumnIndex = -1;
                     state.data.tripDirections = null;
                     state.data.tabelMode = ETableMode.EditMode
                 }
@@ -222,7 +222,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                     
                     //get both the address column and goToAddress column as one might have been set to the other and have thus been over written
                     state.data.addressColumnIndex = getAddressColumn(state.data.columnDesignations); //save the new address columns index
-                    state.data.goToAddressColumnIndex = getToAddressColumn(state.data.columnDesignations); //save the new to address columns index
+                    state.data.linkAddressColumnIndex = getToAddressColumn(state.data.columnDesignations); //save the new to address columns index
                     state.data.rows = makeRowParentChildRelations(removeRowParentChildRelations(state.data.rows), state.data.addressColumnIndex) //new parent child relations may be needed, recalculate them
                 }
             }))

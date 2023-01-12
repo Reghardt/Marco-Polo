@@ -42,7 +42,7 @@ function generateCellsFromCoordinates(userSelection: string)
             {
                 for(let k = range.start.y; k <= range.stop.y; k++)
                 {
-                    selectionData.insertCell({x: j, y: k, displayData: "", editableData: "", geocodedDataAndStatus: null, selectedGeocodedAddressIndex: 0,  formula: "", isAddressValidAndAccepted: false});
+                    selectionData.insertCell({x: j, y: k, displayData: "", geocodedDataAndStatus: null, selectedGeocodedAddressIndex: 0,  formula: "", isAddressAccepted: false});
                 }
             }
         }

@@ -8,7 +8,7 @@ const ConfirmAllAddresses: React.FC = () => {
 
     const Z_tabelMode = useTripStore(store => store.data.tabelMode)
     const Z_addressColumnIndex = useTripStore(store => store.data.addressColumnIndex)
-    const Z_goToAddressColumnIndex = useTripStore(store => store.data.goToAddressColumnIndex)
+    const Z_goToAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
     const Z_tripRows = useTripStore(store => store.data.rows)
 
     const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
@@ -20,9 +20,13 @@ const ConfirmAllAddresses: React.FC = () => {
       for(let i = 0; i < Z_tripRows.length; i++)
       {
         const cell = Z_tripRows[i]!.cells[colIndex]
-        if(cell?.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
+        if(cell?.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK) // if OK then there is at least one result
         {
-          ZF_updateBodyCell({...cell, isAddressValidAndAccepted: true})
+          ZF_updateBodyCell({...cell, isAddressAccepted: true})
+        }
+        else if(cell?.displayData === "")
+        {
+          continue
         }
         else
         {

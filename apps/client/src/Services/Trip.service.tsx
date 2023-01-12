@@ -57,7 +57,7 @@ export function reorder(list: IRow[], startIndex: number, endIndex: number )
 
 }
 
-export function isAllAddressesInColumnValidAndAccepted(column: number)
+export function isAllAddressesInColumnValidAndAccepted(column: number, tableMode: ETableMode)
 {
   const Z_tripRows = useTripStore.getState().data.rows
 
@@ -69,7 +69,13 @@ export function isAllAddressesInColumnValidAndAccepted(column: number)
   for(let i = 0; i < Z_tripRows.length; i++)
   {
     const cell = Z_tripRows[i]?.cells[column]
-    if(cell?.geocodedDataAndStatus?.status !== google.maps.GeocoderStatus.OK || cell.isAddressValidAndAccepted === false)
+
+    if(tableMode === ETableMode.LinkAddressSolveMode && cell?.displayData === "") //if in linkAddressSolveMode and cell data is empty, skip it.
+    {
+      continue;
+    }
+
+    if(cell?.geocodedDataAndStatus?.status !== google.maps.GeocoderStatus.OK || cell.isAddressAccepted === false)
     {
       return false
     }
@@ -80,7 +86,7 @@ export function isAllAddressesInColumnValidAndAccepted(column: number)
 export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, columnVisibility: boolean[]) : JSX.Element
 {
   const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex;
-  const Z_toAddressColumnIndex = useTripStore.getState().data.goToAddressColumnIndex;
+  const Z_toAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex;
   const Z_tableMode = useTripStore.getState().data.tabelMode;
   const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
   const ZF_setErrorMessage = useTripStore.getState().reducers.setErrorMessage
@@ -90,7 +96,7 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
   {
     if(cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
     {
-      ZF_updateBodyCell({...cell, isAddressValidAndAccepted: true})
+      ZF_updateBodyCell({...cell, isAddressAccepted: true})
       ZF_setErrorMessage("")
     }
     else
@@ -116,7 +122,7 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
                   <AddressCell key={`cell=${index}`} cellRef={cell} glanceMode={false}/>
                 )
               }
-              else if(columnDesignations[index] === EColumnDesignations.GoTo){
+              else if(columnDesignations[index] === EColumnDesignations.LinkAddress){
                 return(
                   <AddressCell key={`cell=${index}`} cellRef={cell} glanceMode={false}/>
                 )
@@ -154,7 +160,7 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
       }
 
     }
-    else //toAddressSolveMode
+    else //goToAddressSolveMode
     {
       const cell = row.cells[Z_toAddressColumnIndex]
       if(cell)
@@ -162,8 +168,8 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
         return(
           <>
             <SequenceIndicatorComponent sequenceNumber={nr}/>
-            <AddressCell cellRef={cell} glanceMode={true}/>
-            <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+            <AddressCell cellRef={cell} glanceMode={cell.displayData === "" ? false : true}/>
+            <Button disabled={cell.displayData === "" ? true : false} onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
           </>  
         )
       }
@@ -243,7 +249,7 @@ export function createColumnVisibilityCheckboxes(columnNames: IRow, columnVisibi
 export function createColumnDesignationSelectors(columnVisibility: boolean[]) : JSX.Element
 {
     const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
-    const Z_toAddressColumIndex = useTripStore.getState().data.goToAddressColumnIndex;
+    const Z_toAddressColumIndex = useTripStore.getState().data.linkAddressColumnIndex;
     const Z_tableMode = useTripStore.getState().data.tabelMode;
 
     if(Z_tableMode === ETableMode.EditMode)
@@ -290,7 +296,7 @@ export function createColumnDesignationSelectors(columnVisibility: boolean[]) : 
 export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: boolean[])
 {
   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
-  const Z_toAddressColumIndex = useTripStore.getState().data.goToAddressColumnIndex;
+  const Z_toAddressColumIndex = useTripStore.getState().data.linkAddressColumnIndex;
   const Z_tableMode = useTripStore.getState().data.tabelMode;
 
   if(Z_tableMode === ETableMode.EditMode)
@@ -637,6 +643,7 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
   const Z_returnAddress = useTripStore.getState().data.returnAddress
   const Z_tripRows = useTripStore.getState().data.rows
   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex
+  const Z_goToaddressColumIndex = useTripStore.getState().data.linkAddressColumnIndex
 
   const ZF_setRowOrderPerWaypoints = useTripStore.getState().reducers.setRowOrderPerWaypoints
   const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
@@ -653,27 +660,43 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
     {
       for(let i = 0; i < Z_tripRows.length; i++)
       {
-        const cell = Z_tripRows[i]?.cells[Z_addressColumIndex]
-  
-        if(cell?.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0 && cell.isAddressValidAndAccepted)
         {
-          const cellGeoAddress = cell.geocodedDataAndStatus.results[cell.selectedGeocodedAddressIndex]
-          waypoints.push({location: cellGeoAddress?.formatted_address, stopover: true})
+          const addressCell = Z_tripRows[i]?.cells[Z_addressColumIndex]
+          if(addressCell?.geocodedDataAndStatus?.results && addressCell.geocodedDataAndStatus.results.length > 0 && addressCell.isAddressAccepted)
+          {
+            const addressCellGeoAddress = addressCell.geocodedDataAndStatus.results[addressCell.selectedGeocodedAddressIndex]
+            waypoints.push({location: addressCellGeoAddress?.formatted_address, stopover: true})
+          }
+          else{
+            return {status: false, msg: "Error: Check if all addresses are confirmed"}
+          }
         }
-        else{
-          return {status: false, msg: "Error: Check if all addresses are confirmed"}
+
+        if(Z_goToaddressColumIndex > -1)
+        {
+          const goToAddressCell = Z_tripRows[i]?.cells[Z_goToaddressColumIndex]
+          if(goToAddressCell?.geocodedDataAndStatus?.results && goToAddressCell.geocodedDataAndStatus.results.length > 0 && goToAddressCell.isAddressAccepted)
+          {
+            const goToAddressCellGeoAddress = goToAddressCell.geocodedDataAndStatus.results[goToAddressCell.selectedGeocodedAddressIndex]
+            waypoints.push({location: goToAddressCellGeoAddress?.formatted_address, stopover: true})
+          }
         }
       }
 
       //TODO check if there are enought tokens available
-      //makeRouteOnDB(5)
-      const directionsResult = await createDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, shouldOptimize)
+
+      //if goToAddress exists dont optimize
+      const directionsResult = await createDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, Z_goToaddressColumIndex > -1 ? false : shouldOptimize)
 
       if(directionsResult.status === google.maps.DirectionsStatus.OK)
       {
         if(directionsResult.result?.routes[0]?.waypoint_order)
         {
-          ZF_setRowOrderPerWaypoints(directionsResult.result?.routes[0].waypoint_order);
+          if(!(Z_goToaddressColumIndex > -1))
+          {
+            ZF_setRowOrderPerWaypoints(directionsResult.result?.routes[0].waypoint_order);
+          }
+          
           ZF_setPreserveViewport(preserveViewport);
           ZF_setTripDirections(directionsResult);
           console.log(directionsResult)
@@ -730,7 +753,7 @@ export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
       }
   
       const addressCell = row.cells[Z_addressColumIndex]
-      if(addressCell?.isAddressValidAndAccepted === false)
+      if(addressCell?.isAddressAccepted === false)
       {
         return {errorMsg: "Trip not valid, one or more addresses were not confirmed", legs: []}
       }
@@ -776,7 +799,11 @@ export async function solveAddresses(columnIndex: number)
       if(addressCell?.geocodedDataAndStatus === null) //if the cell has no geocoded address, find one
       {
         const geoRes = await geocodeAddress(addressCell.displayData)
-        ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
+        if(addressCell.displayData)
+        {
+          ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
+        }
+        
         // return;
       }
       // else if(addressCell?.geocodedDataAndStatus && addressCell.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)

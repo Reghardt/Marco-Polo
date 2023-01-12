@@ -9,6 +9,7 @@ import TripTableLegends from "./Legends/TripTableLegends.component"
 import GridContainer from "../../DragAndDrop/GridContainer"
 import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
+import { handleCalculateFastestRoute } from "../../../Services/GMap.service"
 
 
 const TripTable: React.FC = () => {
@@ -17,14 +18,14 @@ const TripTable: React.FC = () => {
   const Z_columnVisibility = useTripStore(store => store.data.columnVisibility)
   const Z_columnDesignations = useTripStore(store => store.data.columnDesignations)
   const Z_addressColumnIndex = useTripStore(store => store.data.addressColumnIndex)
-  const Z_toAddressColumnIndex = useTripStore(store => store.data.goToAddressColumnIndex)
+  const Z_toAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
   const Z_tabelMode = useTripStore(store => store.data.tabelMode)
   const Z_errorMessage = useTripStore(store => store.data.errorMessage)
 
   const ZF_setTripRows = useTripStore(store => store.reducers.setTripRows)
   const ZF_appendRows = useTripStore(store => store.reducers.appendRows)
   const ZF_reverseRows = useTripStore(store => store.reducers.reverseRows)
-  const ZF_setErrorMessage = useTripStore(store => store.reducers.setErrorMessage)
+  // const ZF_setErrorMessage = useTripStore(store => store.reducers.setErrorMessage)
   // const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
   const ZF_setTableMode = useTripStore(store => store.reducers.setTableMode)
 
@@ -57,15 +58,15 @@ const TripTable: React.FC = () => {
   useEffect(() => {
     if(Z_tabelMode === ETableMode.AddressSolveMode)
     {
-      if(isAllAddressesInColumnValidAndAccepted(Z_addressColumnIndex))
+      if(isAllAddressesInColumnValidAndAccepted(Z_addressColumnIndex, Z_tabelMode))
       {
         ZF_setTableMode(ETableMode.EditMode)
       }
       //solveAddresses(Z_addressColumnIndex) //TODO make solveAddresses event based, only needs to fire on solve modes
     }
-    else if(Z_tabelMode === ETableMode.GoToAddressSolveMode)
+    else if(Z_tabelMode === ETableMode.LinkAddressSolveMode)
     {
-      if(isAllAddressesInColumnValidAndAccepted(Z_toAddressColumnIndex))
+      if(isAllAddressesInColumnValidAndAccepted(Z_toAddressColumnIndex, Z_tabelMode))
       {
         ZF_setTableMode(ETableMode.EditMode)
       }
@@ -122,16 +123,16 @@ const TripTable: React.FC = () => {
     ZF_setTripRows(newRows)
   }
 
-  async function handleCalcFastestRoute()
-  {
-    const routeRes = await calcRoute(true, false)
-    if(routeRes.status){
-      ZF_setErrorMessage("");
-    }
-    else{
-      ZF_setErrorMessage(routeRes.msg)
-    }
-  }
+  // async function handleCalcFastestRoute()
+  // {
+  //   const routeRes = await calcRoute(true, false)
+  //   if(routeRes.status){
+  //     ZF_setErrorMessage("");
+  //   }
+  //   else{
+  //     ZF_setErrorMessage(routeRes.msg)
+  //   }
+  // }
 
 
 
@@ -142,7 +143,7 @@ const TripTable: React.FC = () => {
 
     let tracks = "min-content "
 
-    if(Z_tabelMode === ETableMode.AddressSolveMode || Z_tabelMode === ETableMode.GoToAddressSolveMode)
+    if(Z_tabelMode === ETableMode.AddressSolveMode || Z_tabelMode === ETableMode.LinkAddressSolveMode)
     {
       tracks += "auto min-content"
     }
@@ -215,24 +216,25 @@ const TripTable: React.FC = () => {
             <Box>
                 <Stack direction={"row"} spacing={1} >
                   <Box >
-                      <Button  variant="outlined" onClick={() => {appendRows()}}>Add Selection</Button>
+                      <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
                   </Box>
                   <Box>
-                      <Button variant="outlined" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
+                      <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
                   </Box>
                   <Box>
-                      <Button variant='outlined' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
+                      <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
+                  </Box>
+                  <Box>
+                    <Driver/>
                   </Box>
                 </Stack>
                 
             </Box>
             <Box sx={{width: "100%"}}>
-                <Button sx={{ width: "100%"}} onClick={() => handleCalcFastestRoute()} variant="outlined">Find Route</Button>
+                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestRoute()} variant="contained">Find Route</Button>
             </Box>
             
-            <Box sx={{width: "100%"}}>
-              <Driver/>
-            </Box>
+            
           </Stack>
       </Box>
     )

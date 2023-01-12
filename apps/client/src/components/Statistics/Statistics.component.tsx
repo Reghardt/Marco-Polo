@@ -47,6 +47,7 @@ const Statistics: React.FC = () => {
 
     function calculateSimpleStatistics()
     {
+        console.log("calculate trip directions fired")
         if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
         {
             const legs = R_tripDirections?.result?.routes[0]?.legs

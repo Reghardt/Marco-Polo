@@ -7,7 +7,7 @@ export const Driver: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     return(
         <>
-            <Button sx={{ width: "100%"}} variant="outlined" onClick={() => setIsModalOpen(!isModalOpen)}>Send To Driver</Button>
+            <Button sx={{ width: "100%"}} variant="text" onClick={() => setIsModalOpen(!isModalOpen)}>Send To Driver</Button>
 
             <Dialog
                 PaperProps={{sx: {width: "80%", minHeight: "90%"}}}

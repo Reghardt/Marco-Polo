@@ -61,7 +61,7 @@ export class SelectedCells
             //set the cells data, the data field gets displayed in MP.
             //Also set the origionalData field to keep track of what the cells value was before any changes like geocoding an address. The use may choose to use the origional or geocoded address for example.
             this.cellAndRange[i]!.cell.displayData = this.cellAndRange[i]!.range.values[0]![0] as string;
-            this.cellAndRange[i]!.cell.editableData = this.cellAndRange[i]!.range.values[0]![0] as string;
+
             //this.cellAndRange[i].cell.geocodedAddressRes = null; //initialize geocodedAddressRes as null. Only cells designated as an address will be not null
 
             if(this.cellAndRange[i]!.range.values[0]![0] !== this.cellAndRange[i]!.range.formulas[0]![0])

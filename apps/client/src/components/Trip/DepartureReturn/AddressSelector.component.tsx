@@ -51,7 +51,7 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
         </Box>
         
         <Box>
-          <Button {...getReferenceProps()} ref={reference} onClick={()=> setOpen(!open)} style={{textTransform: "none"}} sx={{fontStyle: (address === null ? "italic" : "normal")}}>
+          <Button variant="contained" {...getReferenceProps()} ref={reference} onClick={()=> setOpen(!open)} style={{textTransform: "none"}} sx={{fontStyle: (address === null ? "italic" : "normal")}}>
             {(address === null ? "click to specify address" : address.formatted_address)}
         </Button>
         </Box>

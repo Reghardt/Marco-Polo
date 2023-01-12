@@ -33,7 +33,7 @@ const ColumnDesignationSelector : React.FC<ColumnDecoratorProps> = ({columnIndex
       >
         <MenuItem value={EColumnDesignations.Data}>Data</MenuItem>
         <MenuItem value={EColumnDesignations.Address}>Address</MenuItem>
-        <MenuItem value={EColumnDesignations.GoTo}>Go to</MenuItem>
+        <MenuItem value={EColumnDesignations.LinkAddress}>Link Address</MenuItem>
       </Select>
     </div>
   )

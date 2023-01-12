@@ -66,7 +66,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     {
         if(geoStatusAndRes?.results)
         {
-            ZR_updateBodyCell({...cellRef, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isAddressValidAndAccepted: true})
+            ZR_updateBodyCell({...cellRef, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isAddressAccepted: true})
             closePopper()
         }
         else
@@ -109,7 +109,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
                         />
                     </Box>
                     <Box>
-                        <Button onClick={()=> generateGeocodeResults(textboxContent)}>Search</Button>
+                        <Button variant="contained" onClick={()=> generateGeocodeResults(textboxContent)}>Search</Button>
                     </Box>
                 </Stack>
 
@@ -141,9 +141,11 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
             </DialogContent>
 
             <DialogActions>
-                <Button variant="outlined" onClick={() => handleSaveAndClose()}>Save</Button>
-                <Button variant="outlined" onClick={() => closePopper()}>Cancel</Button>
-                <Button variant="outlined" onClick={() => handleDeleteRow(cellRef.y)}>Delete Row</Button>
+                <Button variant="text" color="error" onClick={() => handleDeleteRow(cellRef.y)}>Delete Row</Button>
+                <Button variant="text" onClick={() => closePopper()}>Cancel</Button>
+                <Button variant="contained" onClick={() => handleSaveAndClose()}>Save</Button>
+                
+                
             </DialogActions>
         </Paper>
     )

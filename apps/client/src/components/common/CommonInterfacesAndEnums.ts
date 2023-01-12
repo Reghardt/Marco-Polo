@@ -3,18 +3,15 @@ export interface ICell
     x: number;
     y: number;
     displayData: string;
-    editableData: string;
-    //geocodedResults: google.maps.GeocoderResult[];
+
     geocodedDataAndStatus: IGeoStatusAndRes | null;
     selectedGeocodedAddressIndex: number;
     formula: string; // default ""
-    isAddressValidAndAccepted: boolean;
+    isAddressAccepted: boolean;
 }
 
 export interface IRow //each row contains a bumch of cell objects
 {
-    //rowNumber: number;
-    //rowId: number;
     cells: ICell[];
     children: IRow[];
 }
@@ -28,13 +25,13 @@ export interface ICellAndRange
 export enum EColumnDesignations{
     Data = 1,
     Address = 2,
-    GoTo = 3
+    LinkAddress = 3
 }
 
 export interface IGeoStatusAndRes
 {
-    results: google.maps.GeocoderResult[] | null;
     status: google.maps.GeocoderStatus;
+    results: google.maps.GeocoderResult[] | null;
 }
 
 
