@@ -16,7 +16,7 @@ const GridRow: React.FC<TGridRow> = ({children, draggableId}) => {
         {
             for(let i = 0; i < collection.length; i++)
             {
-                if(collection[i].classList.contains(className)) 
+                if(collection[i]?.classList.contains(className)) 
                 {
                     return collection[i]
                 }

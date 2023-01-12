@@ -36,13 +36,17 @@ function generateCellsFromCoordinates(userSelection: string)
     for(let i = 0; i < ranges.length; i++)
     {
         const range = ranges[i];
-        for(let j = range.start.x; j <= range.stop.x; j++)
+        if(range)
         {
-            for(let k = range.start.y; k <= range.stop.y; k++)
+            for(let j = range.start.x; j <= range.stop.x; j++)
             {
-                selectionData.insertCell({x: j, y: k, displayData: "", editableData: "", geocodedDataAndStatus: null, selectedGeocodedAddressIndex: 0,  formula: "", isAddressValidAndAccepted: false});
+                for(let k = range.start.y; k <= range.stop.y; k++)
+                {
+                    selectionData.insertCell({x: j, y: k, displayData: "", editableData: "", geocodedDataAndStatus: null, selectedGeocodedAddressIndex: 0,  formula: "", isAddressValidAndAccepted: false});
+                }
             }
         }
+
     }
     return selectionData
 }
@@ -53,18 +57,22 @@ function decodeRangeString(userSelection: string): Range[]
     const rangesAsString = userSelection.split(','); // splits Sheet2!D3:D7,Sheet2!F4:F8... into seperate ranges by ","
     for(let i = 0; i < rangesAsString.length; i++)
     {
-        rangesAsString[i] = rangesAsString[i].split('!')[1]; //throws away "sheetX!" part
-        if(rangesAsString[i].split(':').length > 1) //if is a range
+        if(rangesAsString[i]?.split('!')[1])
         {
-            const startCoords = addressToCoordinates(rangesAsString[i].split(':')[0]) // TODO, 2 splits inneficient
-            const stopCoords = addressToCoordinates(rangesAsString[i].split(':')[1])
-            ranges.push({start: startCoords, stop: stopCoords})
+            rangesAsString[i] = rangesAsString[i]?.split('!')[1]!; //throws away "sheetX!" part
+            if(rangesAsString[i]!.split(':')!.length > 1) //if is a range
+            {
+                const startCoords = addressToCoordinates(rangesAsString[i]!.split(':')[0]!) // TODO, 2 splits inneficient
+                const stopCoords = addressToCoordinates(rangesAsString[i]!.split(':')[1]!)
+                ranges.push({start: startCoords, stop: stopCoords})
+            }
+            else //else is single cell
+            {
+                const startCoords = addressToCoordinates(rangesAsString[i]!.split(':')[0]!)
+                ranges.push({start: startCoords, stop: startCoords}) //use same start and end coordinates as its only a cell
+            }
         }
-        else //else is single cell
-        {
-            const startCoords = addressToCoordinates(rangesAsString[i].split(':')[0])
-            ranges.push({start: startCoords, stop: startCoords}) //use same start and end coordinates as its only a cell
-        }   
+   
     }
     //console.log(ranges)
     return ranges

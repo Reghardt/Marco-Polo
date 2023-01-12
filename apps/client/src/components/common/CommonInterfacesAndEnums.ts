@@ -26,8 +26,9 @@ export interface ICellAndRange
 }
 
 export enum EColumnDesignations{
-    Data = 0,
-    Address = 1
+    Data = 1,
+    Address = 2,
+    GoTo = 3
 }
 
 export interface IGeoStatusAndRes

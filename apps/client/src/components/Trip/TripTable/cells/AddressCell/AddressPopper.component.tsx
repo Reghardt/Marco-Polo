@@ -10,7 +10,6 @@ import { geocodeAddress } from "../../../../../Services/Trip.service";
 
 
 interface IAddressCellPopperProps{
-    currentAddress: string;
     closePopper : () => void;
     cellRef: ICell;
     //recalculateRoute(departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number): Promise<void>
@@ -18,7 +17,6 @@ interface IAddressCellPopperProps{
 
 const AddressPopper: React.FC<IAddressCellPopperProps> = (
     {
-        currentAddress, 
         closePopper, 
         cellRef,
     }) => {
@@ -26,7 +24,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     const [geoStatusAndRes, setGeoStatusAndRes] = useState(cellRef.geocodedDataAndStatus);
 
     const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(cellRef.selectedGeocodedAddressIndex)
-    const [textboxContent, setTextboxContent] = useState(currentAddress)
+    const [textboxContent, setTextboxContent] = useState(cellRef.displayData)
     const [errorMessage, setErrorMessage] = useState("")
 
 

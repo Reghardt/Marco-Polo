@@ -80,7 +80,7 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
     useEffect(() => {
         if(tripDirections && tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            const legs = tripDirections?.result?.routes[0].legs
+            const legs = tripDirections?.result?.routes[0]?.legs
             const labels: string[] = []
             const dataValues: number[] = [];
 
@@ -90,7 +90,6 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
                 for(let i = 0; i < legs.length; i++)
                 {
                     const cost = ((legs[i]?.distance?.value ?? 0) / 1000) * pricePerKm(fuelPrice, litersKm)
-                    console.log(i, legs[i].distance, cost)
                     
                     totalCost += cost;
                     labels.push(i.toString())

@@ -57,7 +57,7 @@ const TimeGraph : React.FC<ITimeGraph> = ({tripDirections}) => {
     useEffect(() => {
         if(tripDirections && tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            const legs = tripDirections.result?.routes[0].legs
+            const legs = tripDirections.result?.routes[0]?.legs
             const labels: string[] = []
             const dataValues: number[] = [];
             dataValues.push(0)

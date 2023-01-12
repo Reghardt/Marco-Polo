@@ -3,7 +3,7 @@ import React from "react";
 import { TLeg } from "trpc-server/trpc/models/Workspace";
 import { IRow, EColumnDesignations,  IGeoStatusAndRes, ITripDirections, ICell } from "../Components/common/CommonInterfacesAndEnums";
 import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressCell.component";
-import ColumnDecorator from "../Components/Trip/TripTable/cells/ColumnDecorator.component";
+import ColumnDesignationSelector from "../Components/Trip/TripTable/cells/ColumnDesignationSelector.component";
 import DataCell from "../Components/Trip/TripTable/cells/DataCell.component";
 import HeadingCell from "../Components/Trip/TripTable/cells/HeadingCell.component";
 import { useMapsStore } from "../Zustand/mapsStore";
@@ -14,38 +14,47 @@ const BlankColumnComponent: React.FC = () => <div style={{height: "100%", width:
 //this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : {status: boolean, reason: string}
 {
-  if(referenceRow === null) //reference row to test against, otherwise use the first row of the rows
+  if(referenceRow === null && rows[0]) //reference row to test against, otherwise use the first row of the rows
   {
     referenceRow = rows[0]
-  }
-  
-  for(let i = 0; i < rows.length; i++)
-  {
-    const row = rows[i]
-    if(row.cells.length === referenceRow.cells.length) //are lengths equal
+    for(let i = 0; i < rows.length; i++)
     {
-      for(let j = 0; j < row.cells.length; j++)
+      const row = rows[i]
+      if(row && row.cells.length === referenceRow.cells.length) //are lengths equal
       {
-        if(row.cells[j].x !== referenceRow.cells[j].x) //do all x coord of this row allign with the referece row's x coords
+        for(let j = 0; j < row.cells.length; j++)
         {
-          return {status: false, reason: "Columns don't align"}
+          if(row.cells[j]?.x !== referenceRow.cells[j]?.x) //do all x coord of this row allign with the referece row's x coords
+          {
+            return {status: false, reason: "Columns don't align"}
+          }
         }
       }
-    }
-    else
-    {
-      return {status: false, reason: "Rows not of equal length"}
+      else
+      {
+        return {status: false, reason: "Rows not of equal length"}
+      }
     }
   }
+
   return {status: true, reason: ""}
+  
 }
 
 export function reorder(list: IRow[], startIndex: number, endIndex: number )
 {
   const result = Array.from(list)
   const [removed] = result.splice(startIndex, 1)
-  result.splice(endIndex, 0, removed)
-  return result
+  if(removed)
+  {
+    result.splice(endIndex, 0, removed)
+    return result
+  }
+  else
+  {
+    return result
+  }
+
 }
 
 export function isAllAddressesInColumnValidAndAccepted(column: number)
@@ -59,8 +68,8 @@ export function isAllAddressesInColumnValidAndAccepted(column: number)
 
   for(let i = 0; i < Z_tripRows.length; i++)
   {
-    const cell = Z_tripRows[i].cells[column]
-    if(cell.geocodedDataAndStatus?.status !== google.maps.GeocoderStatus.OK || !cell.isAddressValidAndAccepted)
+    const cell = Z_tripRows[i]?.cells[column]
+    if(cell?.geocodedDataAndStatus?.status !== google.maps.GeocoderStatus.OK || cell.isAddressValidAndAccepted === false)
     {
       return false
     }
@@ -71,6 +80,7 @@ export function isAllAddressesInColumnValidAndAccepted(column: number)
 export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesignations: Readonly<EColumnDesignations[]>, columnVisibility: boolean[]) : JSX.Element
 {
   const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex;
+  const Z_toAddressColumnIndex = useTripStore.getState().data.goToAddressColumnIndex;
   const Z_tableMode = useTripStore.getState().data.tabelMode;
   const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
   const ZF_setErrorMessage = useTripStore.getState().reducers.setErrorMessage
@@ -91,20 +101,9 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
 
   const SequenceIndicatorComponent: React.FC<{sequenceNumber: number}> = ({sequenceNumber}) => <div draggable="true" style={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white", paddingLeft: "2px", paddingRight: "2px"}} variant="body1">{sequenceNumber + 1}</Typography></div>
 
-  if(row.cells[0].y >= 0)
+  if(row.cells[0] && row.cells[0].y >= 0)
   {
-    if(Z_tableMode !== ETableMode.EditMode)
-    {
-      const cell = row.cells[Z_addressColumnIndex]
-      return(
-        <>
-          <SequenceIndicatorComponent sequenceNumber={nr}/>
-          <AddressCell cellRef={cell} glanceMode={true}/>
-          <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
-        </>
-      )
-    }
-    else
+    if(Z_tableMode === ETableMode.EditMode)
     {
       return(
         <>
@@ -113,6 +112,11 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
             if(columnVisibility[index])
             {
               if(columnDesignations[index] === EColumnDesignations.Address){
+                return(
+                  <AddressCell key={`cell=${index}`} cellRef={cell} glanceMode={false}/>
+                )
+              }
+              else if(columnDesignations[index] === EColumnDesignations.GoTo){
                 return(
                   <AddressCell key={`cell=${index}`} cellRef={cell} glanceMode={false}/>
                 )
@@ -130,6 +134,44 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
           })}
         </>
       )
+    }
+    else if(Z_tableMode === ETableMode.AddressSolveMode)
+    {
+      const cell = row.cells[Z_addressColumnIndex]
+      if(cell)
+      {
+        return(
+          <>
+            <SequenceIndicatorComponent sequenceNumber={nr}/>
+            <AddressCell cellRef={cell} glanceMode={true}/>
+            <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+          </>
+        )
+      }
+      else
+      {
+        return <></>
+      }
+
+    }
+    else //toAddressSolveMode
+    {
+      const cell = row.cells[Z_toAddressColumnIndex]
+      if(cell)
+      {
+        return(
+          <>
+            <SequenceIndicatorComponent sequenceNumber={nr}/>
+            <AddressCell cellRef={cell} glanceMode={true}/>
+            <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+          </>  
+        )
+      }
+      else
+      {
+        return <></>
+      }
+
     }
   }
   else
@@ -182,9 +224,9 @@ export function geocodeAddress(address: string) : Promise<IGeoStatusAndRes>
 }
 
 
-export function createColumnVisibilityOptions(columnNames: IRow, columnVisibility: boolean[])
+export function createColumnVisibilityCheckboxes(columnNames: IRow, columnVisibility: boolean[])
 {
-  const visibilityElements = 
+  return (
     <Grid container sx={{paddingTop: "0.3em"}}>
       {columnNames.cells.map((elem, idx) => {
         return  (<Grid item xs="auto" sx={{margin: 0, padding: 0}}>
@@ -195,15 +237,13 @@ export function createColumnVisibilityOptions(columnNames: IRow, columnVisibilit
                 </Grid>)
       })}
     </Grid>
-    
-
-
-  return visibilityElements
+  )
 }
 
-export function createColumnDecorators(columnVisibility: boolean[]) : JSX.Element
+export function createColumnDesignationSelectors(columnVisibility: boolean[]) : JSX.Element
 {
     const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
+    const Z_toAddressColumIndex = useTripStore.getState().data.goToAddressColumnIndex;
     const Z_tableMode = useTripStore.getState().data.tabelMode;
 
     if(Z_tableMode === ETableMode.EditMode)
@@ -214,7 +254,7 @@ export function createColumnDecorators(columnVisibility: boolean[]) : JSX.Elemen
           {columnVisibility.map((visibility,index) => {
               if(visibility === true)
               {
-                return <ColumnDecorator colIdx={index}/>
+                return <ColumnDesignationSelector columnIndex={index}/>
               }
               else
               {
@@ -225,13 +265,23 @@ export function createColumnDecorators(columnVisibility: boolean[]) : JSX.Elemen
         </>
       )
     }
-    else
+    else if(Z_tableMode === ETableMode.AddressSolveMode)
     {
       return(
         <>
           <BlankColumnComponent/>
-          <ColumnDecorator colIdx={Z_addressColumIndex}/>
-          <div style={{height: "100%", width: "100%"}}></div>
+          <ColumnDesignationSelector columnIndex={Z_addressColumIndex}/>
+          <BlankColumnComponent/>
+        </>
+      )
+    }
+    else //toAddressSolveMode
+    {
+      return(
+        <>
+          <BlankColumnComponent/>
+          <ColumnDesignationSelector columnIndex={Z_toAddressColumIndex}/>
+          <BlankColumnComponent/>
         </>
       )
     }
@@ -240,6 +290,7 @@ export function createColumnDecorators(columnVisibility: boolean[]) : JSX.Elemen
 export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: boolean[])
 {
   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex;
+  const Z_toAddressColumIndex = useTripStore.getState().data.goToAddressColumnIndex;
   const Z_tableMode = useTripStore.getState().data.tabelMode;
 
   if(Z_tableMode === ETableMode.EditMode)
@@ -262,16 +313,61 @@ export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: 
       </>
     )
   }
-  else
+  else if(Z_tableMode === ETableMode.AddressSolveMode)
   {
-    const cell = jobHeadings.cells[Z_addressColumIndex]
-    return(
-      <>
-        <BlankColumnComponent/>
-        <HeadingCell colNumber={cell.x}/>
-        <div style={{height: "100%", width: "100%"}}></div>
-      </>
-    )
+    if(Z_addressColumIndex < 0)
+    {
+      return <></>
+    }
+    else
+    {
+      const cell = jobHeadings.cells[Z_addressColumIndex]
+      if(cell)
+      {
+        return(
+          <>
+            <BlankColumnComponent/>
+            <HeadingCell colNumber={cell.x}/>
+            <div style={{height: "100%", width: "100%"}}></div>
+          </>
+        )
+      }
+      else
+      {
+        return <></>
+      }
+
+    }
+
+
+  }
+  else //toAddressSolve mode
+  {
+    if(Z_toAddressColumIndex < 0)
+    {
+      return <></>
+    }
+    else
+    {
+      const cell = jobHeadings.cells[Z_toAddressColumIndex]
+      if(cell)
+      {
+        return(
+          <>
+            <BlankColumnComponent/>
+            <HeadingCell colNumber={cell.x}/>
+            <div style={{height: "100%", width: "100%"}}></div>
+          </>
+        )
+      }
+      else
+      {
+        return <></>
+      }
+
+    }
+
+
   }
 
 }
@@ -282,14 +378,22 @@ export function removeRowParentChildRelations(rows: IRow[])
     const noRelationRows: IRow[] = [];
     for(let i = 0; i < rows.length; i++)
     {
-        noRelationRows.push(rows[i])
-        const children = rows[i].children
-        
-        for(let j = 0; j < children.length; j++)
+        const row = rows[i]
+        if(row)
         {
-        noRelationRows.push(children[j])
+          noRelationRows.push(row)
+          const children = row.children
+          
+          for(let j = 0; j < children.length; j++)
+          {
+            const child = children[j]
+            if(child)
+            noRelationRows.push(child)
+          }
+          row.children = []
         }
-        rows[i].children = []
+
+
     }
     return noRelationRows
 }
@@ -306,35 +410,50 @@ export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: nu
 
     for(let i = 0; i < rows.length; i++)
     {
-        if(rows[i].cells[addressColumnIndex].displayData !== "")
+      if(rows[i]?.cells[addressColumnIndex]?.displayData !== "")
+      {
+        const row = rows[i]
+        if(row)
         {
-        parentWithChildrenRows.push(rows[i])
+          parentWithChildrenRows.push(row)
+        }
+        
+      }
+      else
+      {
+        if(parentWithChildrenRows.length > 0 && parentWithChildrenRows[parentWithChildrenRows.length - 1]?.cells[addressColumnIndex]?.displayData !== "")
+        {
+          const lastParent = parentWithChildrenRows[parentWithChildrenRows.length - 1]
+          const row = rows[i]
+          if(row)
+          {
+            lastParent?.children.push(row)
+          } 
         }
         else
         {
-            if(parentWithChildrenRows.length > 0 && parentWithChildrenRows[parentWithChildrenRows.length - 1].cells[addressColumnIndex].displayData !== "")
-            {
-                const lastParent = parentWithChildrenRows[parentWithChildrenRows.length - 1]
-                lastParent.children.push(rows[i])
-            }
-            else
-            {
-                parentWithChildrenRows.push(rows[i])
-            }
+          const row = rows[i]
+          if(row)
+          {
+            parentWithChildrenRows.push(row)
+          } 
+          
         }
+      }
     }
     return parentWithChildrenRows
 }
 
-function getTopRowYValue(rows: IRow[]): number
+function getTopRowYValue(rows: IRow[]): number | undefined
 {
-    let topRowNr = rows[0].cells[0].y
+    let topRowNr = rows[0]?.cells[0]?.y
     for(let i = 0; i<  rows.length; i++)
     {
-        if(rows[i].cells[0].y < topRowNr)
-        {
-            topRowNr = rows[i].cells[0].y
-        }
+      const y = rows[i]?.cells[0]?.y
+      if(y && topRowNr && y < topRowNr)
+      {
+          topRowNr = y
+      }
     }
     return topRowNr
 }
@@ -343,9 +462,16 @@ function getXValuesOfRowCellsInBody(rows: IRow[]) : number[]
 {
     const row = rows[0]
     const cellXVals: number[] = []
-    for(let i = 0; i < row.cells.length; i++)
+    if(row?.cells)
     {
-        cellXVals.push(row.cells[i].x)
+      for(let i = 0; i < row.cells.length; i++)
+      {
+        const cell = row.cells[i]
+        if(cell?.x)
+        {
+          cellXVals.push(cell.x)
+        }
+      }
     }
     return cellXVals
 }
@@ -354,14 +480,22 @@ export function preSyncRowDataForDeletion(row: IRow, sheet: Excel.Worksheet): vo
 {
     for(let j = 0; j < row.cells.length; j++)
     {
-        const cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
+      const cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
+      if(cell)
+      {
         const range = sheet.getCell(cell.y - 1, cell.x - 1)
         range.values = [[""]]
+      }
     }
 
     for(let i = 0; i < row.children.length; i++)
     {
-        preSyncRowDataForDeletion(row.children[i], sheet)
+      const child = row.children[i]
+      if(child)
+      {
+        preSyncRowDataForDeletion(child, sheet)
+      }
+      
     }
 }
 
@@ -370,7 +504,7 @@ function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): void
     for(let j = 0; j < row.cells.length; j++)
     {
         const cell = row.cells[j]
-        if(cell.formula !== "") //if cell is formula
+        if(cell && cell.formula !== "") //if cell is formula
         {
             //write formula
             const range = sheet.getCell(cell.y - 1, cell.x - 1)
@@ -380,14 +514,21 @@ function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): void
         else //cell only has data
         {
             //write data
-            const range = sheet.getCell(cell.y - 1, cell.x - 1)
-            range.values = [[cell.displayData]]
+            if(cell)
+            {
+              const range = sheet.getCell(cell.y - 1, cell.x - 1)
+              range.values = [[cell.displayData]]
+          }
         }
     }
 
     for(let i = 0; i < row.children.length; i++)
     {
-        preSyncRowDataForWriteBack(row.children[i], sheet)
+      const child = row.children[i]
+      if(child)
+      {
+        preSyncRowDataForWriteBack(child, sheet)
+      }
     }
 }
 
@@ -401,12 +542,22 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
   //assign new coords for write back
   for(let i = 0; i < writeBackRows.length; i++)
   {
-      const row = writeBackRows[i]
+    const row = writeBackRows[i]
+    if(row)
+    {
       for(let j = 0; j < row.cells.length; j++)
       {
-          row.cells[j].x = xCoords[j]
-          row.cells[j].y = topYVal + i
+        const cell = row.cells[j];
+        const xCoord = xCoords[j]
+        if(cell && xCoord && topYVal)
+        {
+          cell.x = xCoord
+          cell.y = topYVal + i
+        }
+          
       }
+    }
+
   }
 
   //writeBackRows = makeRowParentChildRelations(writeBackRows, addressColumnIndex)
@@ -419,14 +570,14 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
     let shouldDelete = true;
     for(let j = 0; j < writeBackRows.length; j++)
     {
-      if(row.cells[0].y === writeBackRows[j].cells[0].y)
+      if(row?.cells[0] && row.cells[0].y === writeBackRows[j]?.cells[0]?.y)
       {
         shouldDelete = false;
         break;
       }
     }
 
-    if(shouldDelete === true)
+    if(shouldDelete === true && row)
     {
       rowsToDelete.push(row)
     }
@@ -439,11 +590,18 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
       const sheet = context.workbook.worksheets.getActiveWorksheet()
       for(let i = 0; i < writeBackRows.length; i++)
       {
-        preSyncRowDataForWriteBack(writeBackRows[i], sheet)
+        const singleWriteBackRow = writeBackRows[i]
+        if(singleWriteBackRow)
+        {
+          preSyncRowDataForWriteBack(singleWriteBackRow, sheet)
+        }
+        
       }
       for(let j = 0; j < rowsToDelete.length; j++)
       {
-        preSyncRowDataForDeletion(rowsToDelete[j], sheet)
+        const singleRowToDelete = rowsToDelete[j]
+        if(singleRowToDelete)
+        preSyncRowDataForDeletion(singleRowToDelete, sheet)
       }
       await context.sync()
       
@@ -477,9 +635,12 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
 {
   const Z_departureAddress = useTripStore.getState().data.departureAddress
   const Z_returnAddress = useTripStore.getState().data.returnAddress
-
   const Z_tripRows = useTripStore.getState().data.rows
   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex
+
+  const ZF_setRowOrderPerWaypoints = useTripStore.getState().reducers.setRowOrderPerWaypoints
+  const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
+  const ZF_setTripDirections = useTripStore.getState().reducers.setTripDirections
 
   if(Z_departureAddress === null || Z_returnAddress === null) //test if not "none"
   {
@@ -492,12 +653,12 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
     {
       for(let i = 0; i < Z_tripRows.length; i++)
       {
-        const cell = Z_tripRows[i].cells[Z_addressColumIndex]
+        const cell = Z_tripRows[i]?.cells[Z_addressColumIndex]
   
-        if(cell.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0 && cell.isAddressValidAndAccepted)
+        if(cell?.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0 && cell.isAddressValidAndAccepted)
         {
           const cellGeoAddress = cell.geocodedDataAndStatus.results[cell.selectedGeocodedAddressIndex]
-          waypoints.push({location: cellGeoAddress.formatted_address, stopover: true})
+          waypoints.push({location: cellGeoAddress?.formatted_address, stopover: true})
         }
         else{
           return {status: false, msg: "Error: Check if all addresses are confirmed"}
@@ -510,11 +671,11 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
 
       if(directionsResult.status === google.maps.DirectionsStatus.OK)
       {
-        if(directionsResult.result?.routes[0].waypoint_order)
+        if(directionsResult.result?.routes[0]?.waypoint_order)
         {
-          useTripStore.getState().reducers.setRowOrderPerWaypoints(directionsResult.result?.routes[0].waypoint_order);
-          useMapsStore.getState().reducers.setPreserveViewport(preserveViewport);
-          useTripStore.getState().reducers.setTripDirections(directionsResult);
+          ZF_setRowOrderPerWaypoints(directionsResult.result?.routes[0].waypoint_order);
+          ZF_setPreserveViewport(preserveViewport);
+          ZF_setTripDirections(directionsResult);
           console.log(directionsResult)
 
           return {status: true, msg: ""}
@@ -533,6 +694,7 @@ export async function calcRoute(shouldOptimize: boolean, preserveViewport: boole
   }
 }
 
+//TODO rework this function
 export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
 {
   const Z_tripRows = useTripStore.getState().data.rows
@@ -555,24 +717,33 @@ export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
   {
     const legDetails: {name: string, value: string}[] = []
     const row = Z_tripRows[i];
-    for(let j = 0; j < row.cells.length; j++)
+    if(row)
     {
-      if(j !== Z_addressColumIndex) //skip address
+      for(let j = 0; j < row.cells.length; j++)
       {
-        const cell = row.cells[j];
-        legDetails.push({name: "", value: cell.displayData})
+        if(j !== Z_addressColumIndex) //skip address
+        {
+          const cell = row.cells[j];
+          if(cell)
+          legDetails.push({name: "", value: cell.displayData})
+        }
       }
+  
+      const addressCell = row.cells[Z_addressColumIndex]
+      if(addressCell?.isAddressValidAndAccepted === false)
+      {
+        return {errorMsg: "Trip not valid, one or more addresses were not confirmed", legs: []}
+      }
+
+      const fullAddress = addressCell?.geocodedDataAndStatus!.results![addressCell.selectedGeocodedAddressIndex]?.formatted_address
+
+      if(addressCell && fullAddress)
+      tripLegs.push({givenAddress: addressCell.displayData, fullAddressStr: fullAddress, legDetails: legDetails, avoidTolls: false, legStatus: 0})
     }
 
-    const addressCell = row.cells[Z_addressColumIndex]
-    if(addressCell.isAddressValidAndAccepted === false)
-    {
-      return {errorMsg: "Trip not valid, one or more addresses were not confirmed", legs: []}
-    }
 
 
-    const fullAddress = addressCell.geocodedDataAndStatus!.results![addressCell.selectedGeocodedAddressIndex].formatted_address
-    tripLegs.push({givenAddress: addressCell.displayData, fullAddressStr: fullAddress, legDetails: legDetails, avoidTolls: false, legStatus: 0})
+
   }
 
   if(Z_returnAddress)
@@ -587,4 +758,45 @@ export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
   console.log(tripLegs)
   return {errorMsg: "", legs: tripLegs}
 
+}
+
+//this function is used in the ColumnDesignationSelector component. It is called when the designation changes
+export async function solveAddresses(columnIndex: number)
+{
+  const Z_tripRows = useTripStore.getState().data.rows
+  const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
+
+  if(columnIndex >= 0)
+  {
+    for(let i = 0; i < Z_tripRows.length; i++)
+    {
+      const row = Z_tripRows[i];
+      const addressCell = row?.cells[columnIndex]
+
+      if(addressCell?.geocodedDataAndStatus === null) //if the cell has no geocoded address, find one
+      {
+        const geoRes = await geocodeAddress(addressCell.displayData)
+        ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
+        // return;
+      }
+      // else if(addressCell?.geocodedDataAndStatus && addressCell.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
+      // {
+      //   await setTimeout(() => {
+      //     ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: null});
+      //   }, 2000)
+      //   return;
+      // }
+    }
+  }
+}
+
+//sets column designation. And if the designation is not data, solve the addresses in the columns
+export function handleColumnDesignationAndSolveColumnAddresses(columnIndex: number, columnDesignation: EColumnDesignations)
+{
+  useTripStore.getState().reducers.updateColumnDesignation({columnIndex: columnIndex, designation: columnDesignation})
+  //solve addresses in column if not edit mode
+  if(useTripStore.getState().data.tabelMode !== ETableMode.EditMode)
+  {
+    solveAddresses(columnIndex)
+  }
 }

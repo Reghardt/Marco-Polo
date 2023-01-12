@@ -3,7 +3,6 @@ import { addressBookRouter } from "./addressBookRouter"
 import { authRouter } from "./authRouter"
 import { driverRouter } from "./driverRouter"
 import { vehicleRouter } from "./vehicleRouter"
-
 import { workspaceRouter } from "./workspaceRouter"
 
 export const appRouter = router({
@@ -11,7 +10,8 @@ export const appRouter = router({
     workspaces: workspaceRouter,
     addressBook: addressBookRouter,
     vehicle: vehicleRouter,
-    driver: driverRouter
+    driver: driverRouter,
+
 })
 
 export type AppRouter = typeof appRouter

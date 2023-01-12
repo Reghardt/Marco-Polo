@@ -23,9 +23,9 @@ export function createCustomMapMarkers(
         {
             //const row: IRow = rows[i]
             const label = (i + 1).toString()
-            const cell = rows[i].cells[addressColumnIndex]
+            const cell = rows[i]?.cells[addressColumnIndex]
 
-            if(cell.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0)
+            if(cell?.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0)
             {
                 const addressRes = cell.geocodedDataAndStatus.results[cell.selectedGeocodedAddressIndex]
                 if(addressRes)

@@ -26,6 +26,7 @@
     
     "strictNullChecks": true,
     "allowUnreachableCode": false,
+    "noUncheckedIndexedAccess": true
   },
   "include": [
     "src"

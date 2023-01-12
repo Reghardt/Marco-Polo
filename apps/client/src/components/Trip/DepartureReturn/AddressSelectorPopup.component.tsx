@@ -68,9 +68,10 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
 
       function saveAddress()
       {
-        if(geocodedResults.length > 0)
+        const geoResult = geocodedResults[selectedAddressIdx]
+        if(geocodedResults.length > 0 && geoResult)
         {
-          addressSetter(geocodedResults[selectedAddressIdx])
+          addressSetter(geoResult)
           setGeocodedResults([])
           toggleShow()
         }

@@ -104,10 +104,12 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
     function saveAddressToAddressBook()
     {
-        if(addressDescription)
+        const geoResult = geocodedResults[selectedAddressIdx]
+        if(addressDescription && geoResult)
         {
+            
             createAddressBookEntry.mutate({
-                physicalAddress: geocodedResults[selectedAddressIdx].formatted_address, 
+                physicalAddress: geoResult.formatted_address, 
                 addressDescription: addressDescription})
         }
         else

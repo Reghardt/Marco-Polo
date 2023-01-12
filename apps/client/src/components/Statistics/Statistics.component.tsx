@@ -49,7 +49,7 @@ const Statistics: React.FC = () => {
     {
         if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            const legs = R_tripDirections?.result?.routes[0].legs
+            const legs = R_tripDirections?.result?.routes[0]?.legs
             let roundTripDistance = 0;
             let roundTripTime = 0;
 

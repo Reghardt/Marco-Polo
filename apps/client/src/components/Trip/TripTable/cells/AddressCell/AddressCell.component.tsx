@@ -1,6 +1,7 @@
 import { useFloating, offset, useDismiss, useInteractions, autoUpdate, flip } from "@floating-ui/react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useState } from "react";
+
 import { ICell } from "../../../../common/CommonInterfacesAndEnums";
 import AddressPopper from "./AddressPopper.component";
 
@@ -12,6 +13,9 @@ type AddressCellProps = {
 const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 {
   const [open, setOpen] = useState(false);
+  // const geocodeStarted = useRef(false)
+
+  // const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
 
   const {x, y, reference, floating, strategy, context} = useFloating({
     middleware: [
@@ -32,7 +36,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 
   function getAddressStatus(): {status: string, color: string, hoverColor: string}
   {
-    if(cellRef.geocodedDataAndStatus)
+    if(cellRef?.geocodedDataAndStatus)
     {
       if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OK)
       {
@@ -40,10 +44,10 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
         {
           if(cellRef.isAddressValidAndAccepted)
           {
-            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex].formatted_address, color: "green", hoverColor: "#006e09"}
+            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]!.formatted_address, color: "green", hoverColor: "#006e09"}
           }
           else{
-            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex].formatted_address, color: "#f57c00", hoverColor: "#df6400"}
+            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]!.formatted_address, color: "#f57c00", hoverColor: "#df6400"}
           }
           
         }
@@ -63,8 +67,6 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
       {
         return {status: cellRef.geocodedDataAndStatus.status.toString(), color: "#ff5100", hoverColor: "#ca2800"}
       }
-
-      
     }
     else{
       return {status: "loading...", color: "#f57c00", hoverColor: "#df6400"}
@@ -75,6 +77,24 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
   {
     setOpen(!open)
   }
+
+  // useEffect(() => {
+  //   if(cellRef.geocodedDataAndStatus === null && geocodeStarted.current === false)
+  //   {
+  //     console.log("execute geocode")
+  //     geocodeStarted.current = true;
+  //     (async () => {
+  //       const geocodeAddressResult = await geocodeAddress(cellRef.displayData)
+  //       ZF_updateBodyCell({...cellRef, geocodedDataAndStatus: geocodeAddressResult});
+  //       if(geocodeAddressResult.status === google.maps.GeocoderStatus.OK)
+  //       {
+  //         return
+  //       }
+  //     })()
+  //   }
+
+
+  // }, [])
 
   return(
     <React.Fragment>
@@ -113,7 +133,6 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
           >
               {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
               <AddressPopper 
-                currentAddress={cellRef.displayData} 
                 closePopper={closePopper} 
                 cellRef={cellRef}
                 />

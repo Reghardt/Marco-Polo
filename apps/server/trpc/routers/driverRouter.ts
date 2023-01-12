@@ -29,13 +29,20 @@ export const driverRouter = router({
     .query(async ({ctx}) => {
         console.log("FIRED: getDrivers")
             const driversInWorkspace = (await Workspace.findOne({_id: ctx.workspaceId}, {drivers: 1}))?.drivers
-        if(driversInWorkspace)
+        if(driversInWorkspace !== undefined)
         {
             console.log("found at least one driver", driversInWorkspace)
             const driverIds: mongoose.Types.ObjectId[] = []
             for(let i = 0; i < driversInWorkspace.length; i++)
             {
-                driverIds.push(new mongoose.Types.ObjectId(driversInWorkspace[i].driverId))
+                const driver = driversInWorkspace[i]
+                if(driver)
+                {
+                    driverIds.push(new mongoose.Types.ObjectId(driver.driverId))
+                }
+                
+                
+                
             }
             const driverDetails = await DriverModel.find({_id: { $in: [...driverIds]}}, {password: 0})
             return driverDetails

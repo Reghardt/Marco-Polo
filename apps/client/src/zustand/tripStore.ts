@@ -3,7 +3,18 @@ import create from 'zustand';
 import produce from 'immer';
 import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Services/Trip.service";
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
+import { WritableDraft } from "immer/dist/internal";
 
+export enum EDepartReturn{
+    return,
+    different
+}
+
+export enum ETableMode{
+    EditMode = 1,
+    AddressSolveMode = 2,
+    GoToAddressSolveMode = 3
+}
 
 function getAddressColumn(columnDesignations: EColumnDesignations[])
 {
@@ -17,15 +28,46 @@ function getAddressColumn(columnDesignations: EColumnDesignations[])
     return -1;
 }
 
-export enum EDepartReturn{
-    return,
-    different
+function getToAddressColumn(columnDesignations: EColumnDesignations[])
+{
+    for(let i = 0; i < columnDesignations.length; i++)
+    {
+        if(columnDesignations[i] === EColumnDesignations.GoTo)
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 
-export enum ETableMode{
-    EditMode = 1,
-    SolveAddressMode = 2,
+
+//sets the column to the desired designation. Changes the table mode if an address needs to be solved
+function updateColumnDesignationHelper(state: WritableDraft<ITripState>, payload: {columnIndex: number, designation: EColumnDesignations})
+{
+    //set all columns that match the designation to data. This is necesarry for if a column designation is moved from one column to the other. The previous designation has to be cleared
+    for(let i = 0; i < state.data.columnDesignations.length; i++)
+    {
+        if(state.data.columnDesignations[i] === payload.designation)
+        {
+            state.data.columnDesignations[i] = EColumnDesignations.Data
+            break;
+        }
+    }
+    state.data.columnDesignations[payload.columnIndex] = payload.designation //set column designation. 
+
+    //check if addresses in column needs solving, if so, enter the appropriate solve mode
+    for(let i = 0; i < state.data.rows.length; i++)
+    {
+        const cell = state.data.rows[i]?.cells[payload.columnIndex];
+        if(cell?.isAddressValidAndAccepted === false)
+        {
+            state.data.tabelMode = payload.designation === EColumnDesignations.Address ? ETableMode.AddressSolveMode : ETableMode.GoToAddressSolveMode;
+            break;
+        }
+    }
 }
+
+
 
 interface ITrip{
     departureAddress: google.maps.GeocoderResult | null;
@@ -36,6 +78,7 @@ interface ITrip{
     columnVisibility: boolean[];
     rows: IRow[];
     addressColumnIndex: number; 
+    goToAddressColumnIndex: number;
 
     tripDirections: ITripDirections | null;
 
@@ -82,6 +125,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
         columnVisibility: [],
         rows: [],
         addressColumnIndex: -1,
+        goToAddressColumnIndex: -1,
         tripDirections: null,
 
         vehicle: null,
@@ -115,13 +159,18 @@ export const useTripStore = create<ITripState>()(((set) => ({
         },
         setRowsAsNewTrip(payload) {
             set(produce<ITripState>((state) => {
-                const rowLength = payload[0].cells.length
-                state.data.columnDesignations = new Array<EColumnDesignations>(rowLength).fill(EColumnDesignations.Data)
-                state.data.columnVisibility = new Array<boolean>(rowLength).fill(true)
-                state.data.rows = payload;
-                state.data.addressColumnIndex = -1
+                const rowLength = payload[0]?.cells.length
+                if(rowLength)
+                {
+                    state.data.columnDesignations = new Array<EColumnDesignations>(rowLength).fill(EColumnDesignations.Data)
+                    state.data.columnVisibility = new Array<boolean>(rowLength).fill(true)
+                    state.data.rows = payload;
+                    state.data.addressColumnIndex = -1;
+                    state.data.goToAddressColumnIndex = -1;
+                    state.data.tripDirections = null;
+                    state.data.tabelMode = ETableMode.EditMode
+                }
 
-                state.data.tripDirections = null;
             }))
         },
         setTripRows(rows) {
@@ -136,15 +185,19 @@ export const useTripStore = create<ITripState>()(((set) => ({
                 for(let i = 0; i < state.data.rows.length; i++) //loops over rows
                 {
                     const row = state.data.rows[i]
-                    if(row.cells[0].y === cell.y) //if the row of the desired cell is found, loop over row until the desired cell is found
+                    if(row?.cells[0] && row.cells[0].y === cell.y) //if the row of the desired cell is found, loop over row until the desired cell is found
                     {
                         for(let j = 0; j < row.cells.length; j++) //loops over cells
                         {
                             const cellInRow = row.cells[j]
-                            if(cellInRow.x === cell.x) //if x coordinate of cell matches, cell is found
+                            if(cellInRow?.x === cell.x) //if x coordinate of cell matches, cell is found
                             {
                                 console.log("cell found")
-                                state.data.rows[i].cells[j] = cell
+                                if(state.data.rows[i]?.cells[j])
+                                {
+                                    state.data.rows[i]!.cells[j] = cell
+                                }
+                                
                                 return;
                             }
                         }
@@ -162,33 +215,14 @@ export const useTripStore = create<ITripState>()(((set) => ({
                         state.data.columnDesignations[payload.columnIndex] = payload.designation
                         state.data.tabelMode = ETableMode.EditMode;
                     }
-                    else if(payload.designation === EColumnDesignations.Address) // if it is an address, loop through the current designations, set the current column designated as address to data, then set the new specified column as the address
+                    else // column either set to address or goToAddress
                     {
-                        //if its the first time a column is set as address the loop will fall through
-                        for(let i = 0; i < state.data.columnDesignations.length; i++)
-                        {
-                            if(state.data.columnDesignations[i] === EColumnDesignations.Address)
-                            {
-                                state.data.columnDesignations[i] = EColumnDesignations.Data
-                                break;
-                            }
-                        }
-                        state.data.columnDesignations[payload.columnIndex] = payload.designation
-
-                        //check if addresses in column needs solving, if so, enter solve mode
-                        for(let i = 0; i < state.data.rows.length; i++)
-                        {
-                            const cell = state.data.rows[i].cells[payload.columnIndex];
-                            if(cell.isAddressValidAndAccepted === false)
-                            {
-                                state.data.tabelMode = ETableMode.SolveAddressMode;
-                                console.log("Solve address mode")
-                                break;
-                            }
-                        }
-                    }                
+                        updateColumnDesignationHelper(state, payload)
+                    }
                     
+                    //get both the address column and goToAddress column as one might have been set to the other and have thus been over written
                     state.data.addressColumnIndex = getAddressColumn(state.data.columnDesignations); //save the new address columns index
+                    state.data.goToAddressColumnIndex = getToAddressColumn(state.data.columnDesignations); //save the new to address columns index
                     state.data.rows = makeRowParentChildRelations(removeRowParentChildRelations(state.data.rows), state.data.addressColumnIndex) //new parent child relations may be needed, recalculate them
                 }
             }))
@@ -206,7 +240,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                 for(let i = 0; i < state.data.rows.length; i++)
                 {
                     const row = state.data.rows[i];
-                    if(row.cells[0].y === rowYCoord)
+                    if(row?.cells[0] && row.cells[0].y === rowYCoord)
                     {
                         const deletedRow = JSON.parse(JSON.stringify(state.data.rows.splice(i, 1))) 
                         Excel.run(async (context) => {
@@ -235,9 +269,11 @@ export const useTripStore = create<ITripState>()(((set) => ({
         setRowOrderPerWaypoints(waypoints) {
             set(produce<ITripState>((state) => {
                 const inSequenceRows: IRow[] = [];
-                for(let i = 0; i < waypoints.length; i++)
+                for(const waypoint of waypoints)
                 {
-                    inSequenceRows.push(state.data.rows[waypoints[i]])
+                    const row = state.data.rows[waypoint]
+                    if(row)
+                    inSequenceRows.push(row)
                 }
                 state.data.rows = inSequenceRows;
             }))

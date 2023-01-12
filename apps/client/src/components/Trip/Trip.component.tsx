@@ -19,9 +19,11 @@ const Trip : React.FC = () => {
     function retrieveUserSelectionFromSpreadsheetAndSet()
     {
       loadSelection().then((selection) => {
+        console.log(selection)
         if(selection.length > 0)
         {
           const conformRes = doRowsConform(selection)
+          console.log(conformRes)
           if(conformRes.status === false)
           {
             ZF_setRowsAsNewTrip([])

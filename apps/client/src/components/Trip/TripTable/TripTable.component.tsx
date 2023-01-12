@@ -2,12 +2,13 @@ import { PanToolOutlined } from "@mui/icons-material"
 import { Box, Button, Stack, Typography } from "@mui/material"
 import React, { useEffect } from "react"
 import { ETableMode, useTripStore } from "../../../Zustand/tripStore"
-import { calcRoute, createColumnDecorators, createColumnVisibilityOptions, CreateTableHeadingElements, createTripTableRow, doRowsConform, geocodeAddress, isAllAddressesInColumnValidAndAccepted, writeBackToSpreadsheet } from "../../../Services/Trip.service"
+import { calcRoute, createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, isAllAddressesInColumnValidAndAccepted, writeBackToSpreadsheet } from "../../../Services/Trip.service"
 import { loadSelection } from "../Worksheet/worksheet.service"
 import { Driver } from "./Driver/Driver.component"
-import TripTableLegends from "./TripTableLegends.component"
+import TripTableLegends from "./Legends/TripTableLegends.component"
 import GridContainer from "../../DragAndDrop/GridContainer"
 import GridRow from "../../DragAndDrop/GridRow"
+import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
 
 
 const TripTable: React.FC = () => {
@@ -16,55 +17,61 @@ const TripTable: React.FC = () => {
   const Z_columnVisibility = useTripStore(store => store.data.columnVisibility)
   const Z_columnDesignations = useTripStore(store => store.data.columnDesignations)
   const Z_addressColumnIndex = useTripStore(store => store.data.addressColumnIndex)
-
+  const Z_toAddressColumnIndex = useTripStore(store => store.data.goToAddressColumnIndex)
   const Z_tabelMode = useTripStore(store => store.data.tabelMode)
-
   const Z_errorMessage = useTripStore(store => store.data.errorMessage)
 
   const ZF_setTripRows = useTripStore(store => store.reducers.setTripRows)
   const ZF_appendRows = useTripStore(store => store.reducers.appendRows)
   const ZF_reverseRows = useTripStore(store => store.reducers.reverseRows)
-
   const ZF_setErrorMessage = useTripStore(store => store.reducers.setErrorMessage)
-
-  const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
-
+  // const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
   const ZF_setTableMode = useTripStore(store => store.reducers.setTableMode)
 
 
-  async function solveAddresses(){
-    if(Z_addressColumnIndex >= 0)
-    {
-      for(let i = 0; i < Z_tripRows.length; i++)
-      {
-        const row = Z_tripRows[i];
-        const addressCell = row.cells[Z_addressColumnIndex]
+  // async function solveAddresses(columnIndex: number){
+  //   if(columnIndex >= 0)
+  //   {
+  //     for(let i = 0; i < Z_tripRows.length; i++)
+  //     {
+  //       const row = Z_tripRows[i];
+  //       const addressCell = row.cells[columnIndex]
 
-        
-
-        if(addressCell.geocodedDataAndStatus === null) //if the cell has no geocoded address, find one
-        {
-          const geoRes = await geocodeAddress(addressCell.displayData)
-          ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
-          return;
-        }
-        else if(addressCell.geocodedDataAndStatus && addressCell.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
-        {
-          await setTimeout(() => {
-            ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: null});
-          }, 2000)
-          return;
-        }
-      }
-    }
-  }
+  //       if(addressCell.geocodedDataAndStatus === null) //if the cell has no geocoded address, find one
+  //       {
+  //         const geoRes = await geocodeAddress(addressCell.displayData)
+  //         ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
+  //         return;
+  //       }
+  //       else if(addressCell.geocodedDataAndStatus && addressCell.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
+  //       {
+  //         await setTimeout(() => {
+  //           ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: null});
+  //         }, 2000)
+  //         return;
+  //       }
+  //     }
+  //   }
+  // }
 
   useEffect(() => {
-    if(isAllAddressesInColumnValidAndAccepted(Z_addressColumnIndex))
+    if(Z_tabelMode === ETableMode.AddressSolveMode)
     {
-      ZF_setTableMode(ETableMode.EditMode)
+      if(isAllAddressesInColumnValidAndAccepted(Z_addressColumnIndex))
+      {
+        ZF_setTableMode(ETableMode.EditMode)
+      }
+      //solveAddresses(Z_addressColumnIndex) //TODO make solveAddresses event based, only needs to fire on solve modes
     }
-    solveAddresses()
+    else if(Z_tabelMode === ETableMode.GoToAddressSolveMode)
+    {
+      if(isAllAddressesInColumnValidAndAccepted(Z_toAddressColumnIndex))
+      {
+        ZF_setTableMode(ETableMode.EditMode)
+      }
+      //solveAddresses(Z_toAddressColumnIndex) //TODO make solveAddresses event based, only needs to fire on solve modes
+    }
+
   }, [Z_tripRows])
 
   function onDragEnd(sequence: number[])
@@ -75,7 +82,7 @@ const TripTable: React.FC = () => {
     {
       for(let j = 0; j < Z_tripRows.length; j++)
       {
-        if(Z_tripRows[j].cells[0].y === sequence[i])
+        if(Z_tripRows[j]?.cells[0]?.y === sequence[i])
         {
           rearrangedRows.push(Z_tripRows[j])
         }
@@ -118,7 +125,6 @@ const TripTable: React.FC = () => {
   async function handleCalcFastestRoute()
   {
     const routeRes = await calcRoute(true, false)
-    console.log(routeRes.status)
     if(routeRes.status){
       ZF_setErrorMessage("");
     }
@@ -127,35 +133,7 @@ const TripTable: React.FC = () => {
     }
   }
 
-  function ConfirmAllAddressesAsAcceptedButton()
-  {
-    function confirmAll()
-    {
-      for(let i = 0; i < Z_tripRows.length; i++)
-      {
-        const cell = Z_tripRows[i].cells[Z_addressColumnIndex]
-        if(cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
-        {
-          ZF_updateBodyCell({...cell, isAddressValidAndAccepted: true})
-        }
-        else
-        {
-          ZF_setErrorMessage("Error: An address has a problem")
-          return;
-        }
-      }
-    }
 
-    if(Z_tabelMode !== ETableMode.EditMode)
-    {
-      return(
-        <Box sx={{display: "flex", justifyContent:"right"}}>
-          <Button onClick={() => confirmAll()} variant="outlined">Confirm all</Button>
-        </Box>
-      )
-    }
-    return <></>
-  }
 
 
 
@@ -164,7 +142,7 @@ const TripTable: React.FC = () => {
 
     let tracks = "min-content "
 
-    if(Z_tabelMode === ETableMode.SolveAddressMode)
+    if(Z_tabelMode === ETableMode.AddressSolveMode || Z_tabelMode === ETableMode.GoToAddressSolveMode)
     {
       tracks += "auto min-content"
     }
@@ -192,18 +170,18 @@ const TripTable: React.FC = () => {
 
           <Box sx={{marginBottom: "0.5em"}}>
             <Typography variant="body2">Show/Hide Columns:</Typography>
-            {createColumnVisibilityOptions(Z_tripRows[0], Z_columnVisibility)}
+            {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
           </Box>
 
           <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
 
-            {createColumnDecorators(Z_columnVisibility)}
+            {createColumnDesignationSelectors(Z_columnVisibility)}
 
-            {CreateTableHeadingElements(Z_tripRows[0], Z_columnVisibility)}
+            {CreateTableHeadingElements(Z_tripRows[0]!, Z_columnVisibility)}
 
             {Z_tripRows.map((row, idx) => {
               return(
-                <GridRow key={Math.random()} draggableId={row.cells[0].y}>
+                <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
                   {
                     createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
                   }
@@ -214,7 +192,7 @@ const TripTable: React.FC = () => {
           </GridContainer>
 
           <Stack sx={{marginTop: "1em"}} spacing={1}>
-            <ConfirmAllAddressesAsAcceptedButton/>
+            <ConfirmAllAddresses/>
 
             {Z_errorMessage && (
               <Box>
