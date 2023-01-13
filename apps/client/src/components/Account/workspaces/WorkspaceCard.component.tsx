@@ -28,7 +28,7 @@ export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descrip
     
     return(
         <>
-            <Paper sx={{width: "100%"}} elevation={0} > 
+            <div style={{width: "300px", boxShadow: "",}}> 
                 <Stack direction={"row"} alignItems="center">
                     
                     <Box sx={{width: "90%"}}>
@@ -36,13 +36,14 @@ export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descrip
                             <Paper sx={{background: "transparent", width: "100%", height: "100%"}} elevation={0}>
                                 <Stack>
                                     <Typography variant="subtitle1" sx={{color:"#1976d2"}}>{workspaceName}</Typography>
+                                    {/* <hr style={{borderTop: "1px solid #a5a5a5", width: "110px", padding: "0", margin: "0"}}/> */}
                                     <Typography variant="body2">{descriptionPurpose}</Typography>
                                     <Typography variant="body2">{tokens}</Typography>
                                 </Stack>
                             </Paper>
                         </Button>
                     </Box>
-                    <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%"}}>
+                    <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%", marginX: "5px"}}>
                         <Tooltip title={"Delete Workspace"}>
                             <IconButton>
                                 <DeleteOutline color="error"/>
@@ -50,7 +51,7 @@ export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descrip
                         </Tooltip>
                     </Box>
                 </Stack>
-            </Paper>
+            </div>
         </>
     )
 }

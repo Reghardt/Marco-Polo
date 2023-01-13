@@ -9,7 +9,7 @@ import TripTableLegends from "./Legends/TripTableLegends.component"
 import GridContainer from "../../DragAndDrop/GridContainer"
 import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
-import { handleCalculateFastestRoute } from "../../../Services/GMap.service"
+import { handleCalculateFastestDirections } from "../../../Services/GMap.service"
 
 
 const TripTable: React.FC = () => {
@@ -231,7 +231,7 @@ const TripTable: React.FC = () => {
                 
             </Box>
             <Box sx={{width: "100%"}}>
-                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestRoute()} variant="contained">Find Route</Button>
+                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestDirections()} variant="contained">Find Route</Button>
             </Box>
             
             

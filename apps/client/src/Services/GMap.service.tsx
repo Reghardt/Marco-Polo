@@ -3,6 +3,7 @@ import React from "react";
 import { IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
 import BodyMarker, { EMarkerType } from "../Components/Maps/CustomMarker/BodyMarker.component";
 import DepRetMarker from "../Components/Maps/CustomMarker/DepRetMarker.component";
+import { useMapsStore } from "../Zustand/mapsStore";
 import { useTripStore } from "../Zustand/tripStore";
 import { createDirections } from "./Trip.service";
 
@@ -17,7 +18,7 @@ export function createCustomMapMarkers(
     ): JSX.Element[]
 {
 
-    const Z_goToAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
+    const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
 
     const newMarkers: JSX.Element[] = []
 
@@ -29,7 +30,13 @@ export function createCustomMapMarkers(
             
 
             {
-                const label = (i + 1).toString()
+                let label = (i + 1).toString()
+                const linkAddressCell = rows[i]?.cells[Z_linkAddressColumnIndex]
+                if(linkAddressCell?.geocodedDataAndStatus?.results && linkAddressCell.geocodedDataAndStatus.results.length > 0)
+                {
+                    label+= "->"
+                }
+
                 const cell = rows[i]?.cells[addressColumnIndex]
                 if(cell?.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0)
                 {
@@ -52,11 +59,11 @@ export function createCustomMapMarkers(
                 }
             }
 
-            const goToAddressCell = rows[i]?.cells[Z_goToAddressColumnIndex]
+            const linkAddressCell = rows[i]?.cells[Z_linkAddressColumnIndex]
             const label = `->${(i + 1).toString()}`
-            if(goToAddressCell?.geocodedDataAndStatus?.results && goToAddressCell.geocodedDataAndStatus.results.length > 0)
+            if(linkAddressCell?.geocodedDataAndStatus?.results && linkAddressCell.geocodedDataAndStatus.results.length > 0)
             {
-                const addressRes = goToAddressCell.geocodedDataAndStatus.results[goToAddressCell.selectedGeocodedAddressIndex]
+                const addressRes = linkAddressCell.geocodedDataAndStatus.results[linkAddressCell.selectedGeocodedAddressIndex]
                 if(addressRes)
                 {
 
@@ -182,7 +189,7 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
     
 }
 
-function calculateRouteFromWaypoints() : Promise<ITripDirections> | null
+function calculateDirectionsFromWaypoints() : Promise<ITripDirections> | null
 {   const Z_departureAddress = useTripStore.getState().data.departureAddress
     const Z_returnAddress = useTripStore.getState().data.returnAddress
     const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
@@ -227,8 +234,18 @@ function calculateRouteFromWaypoints() : Promise<ITripDirections> | null
     }
 }
 
-export async function handleCalculateFastestRoute()
+export async function handleCalculateFastestDirections()
 {
-    const route = await calculateRouteFromWaypoints()
-    console.log(route)
+    const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
+    const ZF_setTripDirections = useTripStore.getState().reducers.setTripDirections
+    
+    const directions = await calculateDirectionsFromWaypoints()
+    console.log(directions)
+
+    ZF_setPreserveViewport(false);
+    if(directions)
+    {
+        ZF_setTripDirections(directions);
+    }
+    
 }

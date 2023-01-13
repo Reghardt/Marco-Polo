@@ -66,7 +66,7 @@ export const CreateWorkspace: React.FC<ICreateWorkspaceTab> = ({setTabValue}) =>
                 </Box>
 
                 <Box>
-                    <TextField sx={{width: "40em"}} size="small" id="descriptionPurpose" label="Short description or purpose" variant="outlined"  value={descriptionPurpose} onChange={(e) => setDescriptionPurpose(e.target.value)} />
+                    <TextField sx={{width: "90%"}} size="small" id="descriptionPurpose" label="Short description or purpose" variant="outlined"  value={descriptionPurpose} onChange={(e) => setDescriptionPurpose(e.target.value)} />
                 </Box>
                 {errorMessage.length > 0 && (
                     <Box>
@@ -74,7 +74,7 @@ export const CreateWorkspace: React.FC<ICreateWorkspaceTab> = ({setTabValue}) =>
                     </Box>
                 )}
                 <Box>
-                    <Button type="submit" onClick={() => {handleWorkspaceMutation()}}>Create</Button>
+                    <Button variant="contained" type="submit" onClick={() => {handleWorkspaceMutation()}}>Create</Button>
                 </Box>
             </Stack>
             

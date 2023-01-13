@@ -32,6 +32,10 @@ export default function WorkSpaces()
 
             <TabPanel value={tabValue} index={0}>
                 <Box sx={{p: "0.5em"}}>
+
+                    <div>
+                        <Typography style={{paddingLeft:"3px", fontWeight: "bold"}} variant="body1">Select a workspace:</Typography>
+                    </div>
                     {workspaces.data && workspaces.data.length > 0 && (
                         <Box>
                             {workspaces.data.map((elem, idx) => {

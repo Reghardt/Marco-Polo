@@ -1,5 +1,5 @@
 import { Menu, NavigateBefore } from "@mui/icons-material"
-import { Box, IconButton, Stack, Typography } from "@mui/material"
+import { Box, IconButton,  Typography } from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom";
 import MenuDrawer from "../Menu/MenuDrawer.component";
@@ -43,40 +43,42 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
     }
 
     return(
-        <Box sx={{backgroundColor:"#1976d2", paddingTop: '0.6em', paddingBottom: '0.6em'}}>
-            <Stack direction={"row"} justifyContent='space-between' sx={{paddingLeft: "0.4em", paddingRight: "1em"}}>
-                <Box alignContent={"left"}>
-                    <Stack direction={"row"} spacing={1}>
-                        {backNavStr.length > 0 && (
-                            <Box>
-                                <IconButton onClick={() => {navigate(backNavStr, {replace: true})}}>
-                                    <NavigateBefore sx={{color: "white"}}/>
-                                </IconButton>
-                            </Box>
-                        )}
-                        
+        <Box>
+            <div style={{display: "flex", justifyContent: "space-between", margin: "3px"}}>
+                
+                <div style={{display: "flex", alignItems: "center"}}>
+                    
+                    {backNavStr.length > 0 && (
                         <Box>
-                            <Typography variant="h4" sx={{color: "white"}}>{title}</Typography>
+                            <IconButton size="small" onClick={() => {navigate(backNavStr, {replace: true})}}>
+                                <NavigateBefore fontSize="small" sx={{color: "#1976d2", paddingBottom: "2px"}}/>
+                            </IconButton>
                         </Box>
-                    </Stack>
-                </Box>
-                <Stack direction={"row"} justifyContent="flex-end" spacing={1} alignItems="center" sx={{p: 0}}>
+                    )}
+
+                    <div style={{marginLeft: "5px"}}>
+                        <Typography variant="body1" sx={{color: "#1976d2", fontWeight: "bold"}}>{title}</Typography>
+                    </div>
+                </div>
+                
+                <div style={{display: "flex", alignItems: "center",  gap: "5px"}}>
                     {tokenCountConfig === 2 && (
                         <Box>
                             {/* <Button sx={{padding: 0, paddingLeft: 0.5, paddingRight: 0.5, borderColor: 'white' }} variant="outlined">
                                 <Typography sx={{color: "white"}} variant="h6" >Tokens: {R_tokens}</Typography>
                             </Button> */}
-                            Tokens
+                            
+                            <Typography variant="body1" sx={{color: "#1976d2"}}>Tokens</Typography>
                         </Box>
                     )}
                     
                     <Box>
-                        <IconButton onClick={() => handleDrawerState()}>
-                            <Menu sx={{color:"white", padding: 0}} fontSize="medium"/>
+                        <IconButton size="small" onClick={() => handleDrawerState()}>
+                            <Menu sx={{color:"#1976d2", padding: 0}} fontSize="medium"/>
                         </IconButton>
                     </Box>
-                </Stack>
-            </Stack>
+                </div>
+            </div>
 
             <MenuDrawer drawerState={drawerState} handleDrawerState={handleDrawerState} tokenStoreConfig={tokenStoreConfig} adminPanelConfig={adminPanelConfig}/>
         </Box>

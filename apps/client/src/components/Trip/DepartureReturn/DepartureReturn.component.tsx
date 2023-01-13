@@ -23,7 +23,7 @@ const DepartureReturn: React.FC = () => {
     useGetAddressBookQuery()
     
     return(
-        <Box sx={{marginTop: "1em", marginBottom: "1em"}}>
+        <Box>
             <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Trip Type</Typography>
             <Stack direction={"row"} alignItems="center" spacing={1} sx={{marginBottom: "1em"}}>
                 <Box>
