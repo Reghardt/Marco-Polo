@@ -1,4 +1,4 @@
-import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material"
+import { Box, Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from "@mui/material"
 
 import React, { useEffect, useState } from "react"
 import { useTripStore } from "../../../../../Zustand/tripStore";
@@ -84,37 +84,35 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
 
     //TODO delete button to remove address. View on map option to preview location
     return(
-        <Paper variant="elevation" elevation={20}>
-            <DialogTitle sx={{paddingTop: "0.5em", paddingBottom: 0}}>
-                <Stack direction={"row"} alignItems="center" spacing={1}>
-                    <Box>
-                        <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Address Checker</Typography> 
-                    </Box>
-                    <Box>
-                        <HelpTooltip title={"Check the given address against Google Maps to confirm its validity and existence"}/>
-                    </Box>
-                </Stack>
-            </DialogTitle>
-            
-            <DialogContent sx={{padding: "0.8em"}}>
+        <div className={"shadow-2xl bg-white"}>
+            <div className={"bg-[#1976d2] w-full h-1"}></div>
+            <div className={"p-4 space-y-2"}>
 
-                <Stack spacing={1} sx={{paddingTop: "1em"}}>
-                    <Box>
-                        <TextField 
-                            onChange={(e)=> captureInput(e.target.value)}  
-                            defaultValue={textboxContent} 
-                            size="medium" 
-                            label="Address"
-                            fullWidth
-                        />
-                    </Box>
-                    <Box>
-                        <Button variant="contained" onClick={()=> generateGeocodeResults(textboxContent)}>Search</Button>
-                    </Box>
-                </Stack>
+
+                <div className={"flex space-x-2 "}>
+                    <div>
+                        <div className={"text-[#1976d2] text-base"}>Address Checker</div> 
+                    </div>
+                    <div>
+                        <HelpTooltip title={"Check the given address against Google Maps to confirm its validity and existence"}/>
+                    </div>
+                </div>
+
+                <div>
+                    <TextField 
+                        onChange={(e)=> captureInput(e.target.value)}  
+                        defaultValue={textboxContent} 
+                        size="medium" 
+                        label="Address"
+                        fullWidth
+                    />
+                </div>
+                <div>
+                    <Button variant="contained" onClick={()=> generateGeocodeResults(textboxContent)}>Search</Button>
+                </div>
 
                 {geoStatusAndRes?.results  && (
-                    <Box>
+                    <div>
                         <FormControl>
                             <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
                             <RadioGroup
@@ -128,7 +126,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
                                     })}
                             </RadioGroup>
                         </FormControl>
-                    </Box>
+                    </div>
                     
                 )}
 
@@ -136,18 +134,16 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
                     <Box>
                         <p style={{color: "red"}}>{errorMessage}</p>
                     </Box>
-                        
-                    )}
-            </DialogContent>
+                )}
 
-            <DialogActions>
-                <Button variant="text" color="error" onClick={() => handleDeleteRow(cellRef.y)}>Delete Row</Button>
-                <Button variant="text" onClick={() => closePopper()}>Cancel</Button>
-                <Button variant="contained" onClick={() => handleSaveAndClose()}>Save</Button>
-                
-                
-            </DialogActions>
-        </Paper>
+                <div>
+                    <Button variant="contained" onClick={() => handleSaveAndClose()}>Save</Button>
+                    <Button variant="text" onClick={() => closePopper()}>Cancel</Button>
+                    <Button variant="text" color="error" onClick={() => handleDeleteRow(cellRef.y)}>Delete Row</Button>
+                </div>
+            </div>
+           
+        </div>
     )
 }
 

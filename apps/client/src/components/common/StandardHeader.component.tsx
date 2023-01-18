@@ -44,7 +44,7 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
 
     return(
         <div>
-            <div className={"flex justify-between m-1"}>
+            <div className={"flex justify-between p-1 bg-slate-50"}>
                 
                 <div style={{display: "flex", alignItems: "center"}}>
                     

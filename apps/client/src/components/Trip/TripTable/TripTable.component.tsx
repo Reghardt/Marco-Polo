@@ -202,17 +202,17 @@ const TripTable: React.FC = () => {
             )}
     
 
-            <Box>
-              <Stack direction={"row"} spacing={1}>
-                <Box>
-                  <Typography variant="body2">Note: drag and drop rows to change the route sequence </Typography>
-                </Box>
-                <Box>
-                  <PanToolOutlined fontSize="small"/>
-                </Box>
-              </Stack>
+
+            <div className={"flex space-x-2"}>
+              <div>
+                <div className={"text-sm"}>Note: drag and drop rows to change the route sequence </div>
+              </div>
+              <div>
+                <PanToolOutlined fontSize="small"/>
+              </div>
+            </div>
               
-            </Box>
+
             <Box>
                 <Stack direction={"row"} spacing={1} >
                   <Box >

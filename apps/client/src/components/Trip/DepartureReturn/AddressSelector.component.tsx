@@ -1,4 +1,3 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useState } from "react";
 import AddressSelectorPopup from "./AddressSelectorPopup.component";
 import { useFloating, shift, offset, useDismiss, useInteractions, autoUpdate } from "@floating-ui/react";
@@ -13,7 +12,6 @@ interface IAddressSelectorProps{
 
 const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSetter, title}) =>
 {
-
   const [open, setOpen] = useState(false);
 
   const {x, y, reference, floating, strategy, context} = useFloating({
@@ -45,34 +43,36 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
   return(
     <React.Fragment>
 
-      <Stack spacing={0} sx={{margin: "0", padding: "0"}}>
-        <Box>
-          <Typography variant="body1">{title}: </Typography>
-        </Box>
-        
-        <Box>
-          <Button variant="contained" {...getReferenceProps()} ref={reference} onClick={()=> setOpen(!open)} style={{textTransform: "none"}} sx={{fontStyle: (address === null ? "italic" : "normal")}}>
-            {(address === null ? "click to specify address" : address.formatted_address)}
-        </Button>
-        </Box>
+      <div>
+        <button {...getReferenceProps()} ref={reference} onClick={()=> setOpen(!open)} className={"p-3 mb-2 text-left bg-slate-50 rounded-md hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}>
+          <div className={"space-y-2"}>
+            <div className={" text-sm"}>{title}:</div>
+            {
+              address?.formatted_address 
+              ? <div className={"text-[#1976d2]"}>{address?.formatted_address}</div>
+              : <div className={" drop-shadow text-red-600"}>{"click to select address"}</div>
+            }
+            
+          </div>
+        </button>
+      </div>
 
-      </Stack>
 
-        {open && (
-                <div 
-                  ref={floating}
-                  style={{
-                    position: strategy,
-                    top: y ?? 0,
-                    left: x ?? 0,
-                    width: 'max-content',
-                    zIndex: 1
-                  }}
-                  {...getFloatingProps()}
-                >
-                  {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
-                  <AddressSelectorPopup title={title} address={address} addressSetter={addressSetter} toggleShow={toggleShow}/>
-                </div>
+      {open && (
+              <div 
+                ref={floating}
+                style={{
+                  position: strategy,
+                  top: y ?? 0,
+                  left: x ?? 0,
+                  width: 'max-content',
+                  zIndex: 1
+                }}
+                {...getFloatingProps()}
+              >
+                {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
+                <AddressSelectorPopup title={title} address={address} addressSetter={addressSetter} toggleShow={toggleShow}/>
+              </div>
         )}
     </React.Fragment>
   )

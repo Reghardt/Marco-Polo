@@ -1,45 +1,45 @@
-import { Box, Grid, Stack, Typography } from "@mui/material"
+import { Grid, Stack} from "@mui/material"
 import React from "react"
 
 const TripTableLegends: React.FC = () => {
     return(
-        <Box>
-            <Typography variant="body2">Table Legends:</Typography>
-            <Grid container sx={{paddingTop: "0.3em"}}>
+        <div>
+            {/* <div className={"text-sm"}>Table Legends:</div> */}
+            <div className={"flex flex-wrap"}>
                 <Grid item xs="auto" sx={{margin: 0, padding: 0, marginRight: "0.5em"}}>
                     <Stack direction={"row"} spacing={0.1} alignItems="center">
-                        <Box>
-                            <Typography variant="body2">Needs attention:</Typography>
-                        </Box>
-                        <Box sx={{backgroundColor: "#ff9800", height: "1em", width: "1em"}}>
+                        <div className={"text-sm"}>
+                            <div>Needs attention:</div>
+                        </div>
+                        <div className={" bg-orange-400 h-3 w-3"}>
                             
-                        </Box>
+                        </div>
                     </Stack>
                 </Grid>
                 <Grid item xs="auto" sx={{margin: 0, padding: 0, marginRight: "0.5em"}}>
                     <Stack direction={"row"} spacing={0.1} alignItems="center">
-                        <Box>
-                            <Typography variant="body2">Solved Address:</Typography>
-                        </Box>
-                        <Box sx={{backgroundColor: "green", height: "1em", width: "1em"}}>
+                        <div className={"text-sm"}>
+                            <div>Solved Address:</div>
+                        </div>
+                        <div className={" bg-green-700 h-3 w-3"}>
                             
-                        </Box>
+                        </div>
                     </Stack>
                 </Grid>
 
                 <Grid item xs="auto" sx={{margin: 0, padding: 0}}>
                     <Stack direction={"row"} spacing={0.1} alignItems="center">
-                        <Box>
+                        <div className={"text-sm"}>
                             
-                            <Typography variant="body2">Data (Draggable):</Typography>
-                        </Box>
-                        <Box sx={{backgroundColor: "#1976d2", height: "1em", width: "1em"}}>
+                            <div>Data (Draggable):</div>
+                        </div>
+                        <div className={" bg-[#1976d2] h-3 w-3"}>
                             
-                        </Box>
+                        </div>
                     </Stack>
                 </Grid>
-            </Grid>
-        </Box>
+            </div>
+        </div>
         
     )
 }

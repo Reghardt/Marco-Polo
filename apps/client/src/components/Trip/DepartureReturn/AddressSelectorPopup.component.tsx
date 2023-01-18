@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup, Stack, TextField} from "@mui/material"
+import {  Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField} from "@mui/material"
 import React, { useState } from "react"
 import { geocodeAddress } from "../../../Services/Trip.service";
 import AddressBookDialog from "./AddressBookDialog.component";
@@ -96,70 +96,67 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
 
     
     return(
-        <Paper elevation={15}>
-            <DialogTitle variant="h5" gutterBottom sx={{color:"#1976d2"}}>{title}</DialogTitle>
-            <DialogContent>
-              <Stack spacing={1}>
-                <Box>
-                  <Button variant="outlined" onClick={() => setIsModalOpen(!isModalOpen)}>Address Book</Button>
-                </Box>
-                <Box>
-                  <TextField value={physicalAddressStr} onChange={(e)=> captureInput(e.target.value)} size="medium" label="Address" fullWidth></TextField>
-                </Box>
 
-                <Box>
-                  <Button onClick={()=> generateGeocodeResults(physicalAddressStr)}>Search</Button>
-                </Box>
+      <div className={"shadow-2xl bg-white"}>
+        <div className={"bg-[#1976d2] w-full h-1"}></div>
+        <div className={"p-4 text-[#1976d2] text-base mb-4"}>
+          <div className={""}>{title}</div>
 
-                {geocodedResults.length > 0 && (
-                  <Box>
-                    <FormControl>
-                      <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
-                      <RadioGroup
-                          aria-labelledby="demo-radio-buttons-group-label"
-                          name="radio-buttons-group"
-                          onChange={(e) => handleAddressSelection(e.target.value)}
-                          value={selectedAddressIdx}
-                      >
-                          {geocodedResults.map((elem, idx) => {
-                              return <FormControlLabel key={`dep-ret-${idx}`} value={idx} control={<Radio />} label={elem.formatted_address} />
-                              })}
-                      </RadioGroup>
-                    </FormControl>
-                  </Box>
-                )}
+          <div className={"space-y-4"}>
+            <div>
+              <Button variant="contained" onClick={() => setIsModalOpen(!isModalOpen)}>Address Book</Button>
+            </div>
+            <div>
+              <TextField style={{marginTop: "4px", width: "30em"}} value={physicalAddressStr} onChange={(e)=> captureInput(e.target.value)} size="medium" label="Address"></TextField>
+            </div>
 
-                {errorMessage && (
-                  <Box>
-                    <p style={{color: "red"}}>{errorMessage}</p>
-                  </Box> 
-                )}
+            <div>
+              <Button variant="contained" onClick={()=> generateGeocodeResults(physicalAddressStr)}>Search</Button>
+            </div>
 
-              </Stack>
+            {geocodedResults.length > 0 && (
+              <div>
+                <FormControl>
+                  <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
+                  <RadioGroup
+                      aria-labelledby="demo-radio-buttons-group-label"
+                      name="radio-buttons-group"
+                      onChange={(e) => handleAddressSelection(e.target.value)}
+                      value={selectedAddressIdx}
+                  >
+                      {geocodedResults.map((elem, idx) => {
+                          return <FormControlLabel key={`dep-ret-${idx}`} value={idx} control={<Radio />} label={elem.formatted_address} />
+                          })}
+                  </RadioGroup>
+                </FormControl>
+              </div>
+            )}
 
-              <Dialog
-               PaperProps={{sx: {width: "80%", minHeight: "90%"}}}
-                open={isModalOpen}
-                scroll={"body"}
-                //onClose={}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-              >
-                <AddressBookDialog setIsModalOpen={setIsModalOpen} applyAddressBookSelection={applyAddressBookSelection}/>
-              </Dialog>
+            {errorMessage && (
+              <div>
+                <p style={{color: "red"}}>{errorMessage}</p>
+              </div> 
+            )}
 
-                
+          <div>
+            <Button variant="text" onClick={() => saveAddress()}>Save</Button>
+            <Button variant="text" color="error" onClick={() => {handleCancel()}}>Cancel</Button>
+          </div>
 
-                
-            </DialogContent>
+          </div>
 
-            
-
-            <DialogActions>
-                <Button variant="outlined" onClick={() => saveAddress()}>Save</Button>
-                <Button variant="outlined" onClick={() => {handleCancel()}}>Cancel</Button>
-            </DialogActions>
-        </Paper>
+          <Dialog
+            PaperProps={{sx: {width: "80%", minHeight: "90%"}}}
+            open={isModalOpen}
+            scroll={"body"}
+            //onClose={}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <AddressBookDialog setIsModalOpen={setIsModalOpen} applyAddressBookSelection={applyAddressBookSelection}/>
+          </Dialog>
+        </div>
+      </div>
     )
 }
 

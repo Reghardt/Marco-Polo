@@ -1,4 +1,4 @@
-import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
+import { FormControlLabel, Switch } from "@mui/material"
 import React from "react"
 import { useGetAddressBookQuery } from "../../../trpc-hooks/trpcHooks"
 
@@ -23,52 +23,43 @@ const DepartureReturn: React.FC = () => {
     useGetAddressBookQuery()
     
     return(
-        <Box>
-            <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Trip Type</Typography>
-            <Stack direction={"row"} alignItems="center" spacing={1} sx={{marginBottom: "1em"}}>
-                <Box>
-                    <ToggleButtonGroup
-                        sx={{maxHeight:"100%", height: "100%"}}
-                        size="small"
-                        color="primary"
-                        value={Z_departReturnState}
-                        exclusive
-                        onChange={(_e, v) => {
-                            if(v !== null)
-                            {
-                                Z_setDepartReturnState(v)
-                            }
-                            
-                        }}
-                        aria-label="Address Type"
-                        >
-                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDepartReturn.return}>Return Trip</ToggleButton>
-                        <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EDepartReturn.different}>Non Return Trip</ToggleButton>
-                    </ToggleButtonGroup>
-                </Box>
-                <Box>
-                    <HelpTooltip title="With Return Trip the vehicle departs from and returns to the same address. With Non Return Trip, the depart and return addresses may be specified individually"/>
-                </Box>
-            </Stack>
-
-            {Z_departReturnState === EDepartReturn.return && (
-                <React.Fragment>
+        <div>
+            <div className={"flex items-center"}>
+                <div>
+                    <FormControlLabel control={
+                        <Switch
+                            checked={Z_departReturnState === EDepartReturn.return ? true : false}
+                            onChange={(_e, v) => {
+                                if(v !== null)
+                                {
+                                    Z_setDepartReturnState(v ? EDepartReturn.return : EDepartReturn.different)
+                                }
+                                
+                            }}
+                            />} 
+                        label="Circuit" />
                     
 
-                    <AddressSelector address={Z_departureAddress} addressSetter={Z_setDepartureAddress} title={"Departure & Return Address"}/>
-                </React.Fragment>
+                </div>
+                <div>
+                    <HelpTooltip title="If circuit is enabled, the Depart address is used as the return address"/>
+                </div>
+            </div>
+
+            {Z_departReturnState === EDepartReturn.return && (
+                    <AddressSelector address={Z_departureAddress} addressSetter={Z_setDepartureAddress} title={"Departure Address"}/>
             )}
 
             {Z_departReturnState === EDepartReturn.different && (
-                <React.Fragment>
-
+                <div>
                     <AddressSelector address={Z_departureAddress} addressSetter={Z_setDepartureAddress} title={"Departure Address"}/>
                     <AddressSelector address={Z_returnAddress} addressSetter={Z_setReturnAddress} title={"Return Address"}/>
-                </React.Fragment>
+                </div>
+                    
             )}
             
             
-        </Box>
+        </div>
     )
 }
 

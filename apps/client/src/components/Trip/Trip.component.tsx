@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material"
+import { Button } from "@mui/material"
 import React from "react"
 import { useTripStore } from "../../Zustand/tripStore"
 import StandardHeader from "../common/StandardHeader.component"
@@ -38,16 +38,18 @@ const Trip : React.FC = () => {
 
 
     return(
-        <Box >
+        <div >
 
           <StandardHeader title="Trip Builder" backNavStr="/workspaces"/> {/*Trip? Job? Route?*/}
 
-          <Box sx={{p: "0.5em"}}>
+          <div className={"p-2"}>
             <TripNetwork/>
 
             <DepartureReturn/>
-            <Button variant="outlined" sx={{marginBottom: "1em"}} onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Use Current Selection</Button>
-
+            <div className={"mb-2"}>
+              <Button variant="contained"  onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Use Current Selection</Button>
+            </div>
+            
             <TripTable/>
 
             <GMap/>
@@ -55,10 +57,10 @@ const Trip : React.FC = () => {
             <Statistics/>
 
             
-          </Box>
+          </div>
 
           
-        </Box>
+        </div>
     )
 }
 
