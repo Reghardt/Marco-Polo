@@ -1,5 +1,5 @@
 import { Menu, NavigateBefore } from "@mui/icons-material"
-import { Box, IconButton,  Typography } from "@mui/material"
+import { IconButton,  Typography } from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom";
 import MenuDrawer from "../Menu/MenuDrawer.component";
@@ -43,17 +43,17 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
     }
 
     return(
-        <Box>
-            <div style={{display: "flex", justifyContent: "space-between", margin: "3px"}}>
+        <div>
+            <div className={"flex justify-between m-1"}>
                 
                 <div style={{display: "flex", alignItems: "center"}}>
                     
                     {backNavStr.length > 0 && (
-                        <Box>
+                        <div>
                             <IconButton size="small" onClick={() => {navigate(backNavStr, {replace: true})}}>
                                 <NavigateBefore fontSize="small" sx={{color: "#1976d2", paddingBottom: "2px"}}/>
                             </IconButton>
-                        </Box>
+                        </div>
                     )}
 
                     <div style={{marginLeft: "5px"}}>
@@ -63,25 +63,25 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
                 
                 <div style={{display: "flex", alignItems: "center",  gap: "5px"}}>
                     {tokenCountConfig === 2 && (
-                        <Box>
+                        <div>
                             {/* <Button sx={{padding: 0, paddingLeft: 0.5, paddingRight: 0.5, borderColor: 'white' }} variant="outlined">
                                 <Typography sx={{color: "white"}} variant="h6" >Tokens: {R_tokens}</Typography>
                             </Button> */}
                             
                             <Typography variant="body1" sx={{color: "#1976d2"}}>Tokens</Typography>
-                        </Box>
+                        </div>
                     )}
                     
-                    <Box>
+                    <div>
                         <IconButton size="small" onClick={() => handleDrawerState()}>
                             <Menu sx={{color:"#1976d2", padding: 0}} fontSize="medium"/>
                         </IconButton>
-                    </Box>
+                    </div>
                 </div>
             </div>
 
             <MenuDrawer drawerState={drawerState} handleDrawerState={handleDrawerState} tokenStoreConfig={tokenStoreConfig} adminPanelConfig={adminPanelConfig}/>
-        </Box>
+        </div>
     )
 }
 

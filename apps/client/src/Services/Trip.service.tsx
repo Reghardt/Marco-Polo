@@ -6,7 +6,6 @@ import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressC
 import ColumnDesignationSelector from "../Components/Trip/TripTable/cells/ColumnDesignationSelector.component";
 import DataCell from "../Components/Trip/TripTable/cells/DataCell.component";
 import HeadingCell from "../Components/Trip/TripTable/cells/HeadingCell.component";
-import { useMapsStore } from "../Zustand/mapsStore";
 import { ETableMode, useTripStore } from "../Zustand/tripStore";
 
 const BlankColumnComponent: React.FC = () => <div style={{height: "100%", width: "100%"}}></div> //used for layout alignment
@@ -291,6 +290,11 @@ export function createColumnDesignationSelectors(columnVisibility: boolean[]) : 
         </>
       )
     }
+}
+
+export function numberToAlphabetical(num: number)
+{
+  return String.fromCharCode(num - 1 + 'A'.charCodeAt(0))
 }
 
 export function CreateTableHeadingElements(jobHeadings: IRow, columnVisibility: boolean[])
@@ -619,7 +623,7 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
   
 }
 
-export function createDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
+export function createSimplePointToPointDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
 
   var request: google.maps.DirectionsRequest = {
     origin: departureAddress,
@@ -637,85 +641,104 @@ export function createDirections(departureAddress: string, returnAddress: string
   })  
 }
 
-export async function calcRoute(shouldOptimize: boolean, preserveViewport: boolean)
-{
-  const Z_departureAddress = useTripStore.getState().data.departureAddress
-  const Z_returnAddress = useTripStore.getState().data.returnAddress
-  const Z_tripRows = useTripStore.getState().data.rows
-  const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex
-  const Z_goToaddressColumIndex = useTripStore.getState().data.linkAddressColumnIndex
+//TODO modify function to use dijikstras algorithm to calulate shortest path for when link addresses are present
+export function createLinkedAddressesDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[]) {
 
-  const ZF_setRowOrderPerWaypoints = useTripStore.getState().reducers.setRowOrderPerWaypoints
-  const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
-  const ZF_setTripDirections = useTripStore.getState().reducers.setTripDirections
+  var request: google.maps.DirectionsRequest = {
+    origin: departureAddress,
+    destination: returnAddress,
+    waypoints: waypoints,
+    travelMode: google.maps.TravelMode.DRIVING,
+    optimizeWaypoints: false,
+  };
 
-  if(Z_departureAddress === null || Z_returnAddress === null) //test if not "none"
-  {
-    return {status: false, msg: "Error: Check if Departure and/or Return addresses are set"}
-  }
-  else{
-    const waypoints: google.maps.DirectionsWaypoint[]  = [];
-
-    if(Z_addressColumIndex > -1)
-    {
-      for(let i = 0; i < Z_tripRows.length; i++)
-      {
-        {
-          const addressCell = Z_tripRows[i]?.cells[Z_addressColumIndex]
-          if(addressCell?.geocodedDataAndStatus?.results && addressCell.geocodedDataAndStatus.results.length > 0 && addressCell.isAddressAccepted)
-          {
-            const addressCellGeoAddress = addressCell.geocodedDataAndStatus.results[addressCell.selectedGeocodedAddressIndex]
-            waypoints.push({location: addressCellGeoAddress?.formatted_address, stopover: true})
-          }
-          else{
-            return {status: false, msg: "Error: Check if all addresses are confirmed"}
-          }
-        }
-
-        if(Z_goToaddressColumIndex > -1)
-        {
-          const goToAddressCell = Z_tripRows[i]?.cells[Z_goToaddressColumIndex]
-          if(goToAddressCell?.geocodedDataAndStatus?.results && goToAddressCell.geocodedDataAndStatus.results.length > 0 && goToAddressCell.isAddressAccepted)
-          {
-            const goToAddressCellGeoAddress = goToAddressCell.geocodedDataAndStatus.results[goToAddressCell.selectedGeocodedAddressIndex]
-            waypoints.push({location: goToAddressCellGeoAddress?.formatted_address, stopover: true})
-          }
-        }
-      }
-
-      //TODO check if there are enought tokens available
-
-      //if goToAddress exists dont optimize
-      const directionsResult = await createDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, Z_goToaddressColumIndex > -1 ? false : shouldOptimize)
-
-      if(directionsResult.status === google.maps.DirectionsStatus.OK)
-      {
-        if(directionsResult.result?.routes[0]?.waypoint_order)
-        {
-          if(!(Z_goToaddressColumIndex > -1))
-          {
-            ZF_setRowOrderPerWaypoints(directionsResult.result?.routes[0].waypoint_order);
-          }
-          
-          ZF_setPreserveViewport(preserveViewport);
-          ZF_setTripDirections(directionsResult);
-          console.log(directionsResult)
-
-          return {status: true, msg: ""}
-        }
-        else{
-          return {status: false, msg: "Error: Something went wrong with finding a route"}
-        }
-      }
-      else{
-        return {status: false, msg: "Error: Something went wrong with finding a route"}
-      }
-    }
-    else{
-      return {status: false, msg: "Error: No address column set"}
-    }
-  }
+  return new Promise<ITripDirections>((resolve) => {
+    const directionsService = new google.maps.DirectionsService();
+    directionsService.route(request, (result, status) => {
+        resolve({result, status})
+    });
+  })  
 }
+
+// export async function calcRoute(shouldOptimize: boolean, preserveViewport: boolean)
+// {
+//   const Z_departureAddress = useTripStore.getState().data.departureAddress
+//   const Z_returnAddress = useTripStore.getState().data.returnAddress
+//   const Z_tripRows = useTripStore.getState().data.rows
+//   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex
+//   const Z_goToaddressColumIndex = useTripStore.getState().data.linkAddressColumnIndex
+
+//   const ZF_setRowOrderPerWaypoints = useTripStore.getState().reducers.setRowOrderPerWaypoints
+//   const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
+//   const ZF_setTripDirections = useTripStore.getState().reducers.setTripDirections
+
+//   if(Z_departureAddress === null || Z_returnAddress === null) //test if not "none"
+//   {
+//     return {status: false, msg: "Error: Check if Departure and/or Return addresses are set"}
+//   }
+//   else{
+//     const waypoints: google.maps.DirectionsWaypoint[]  = [];
+
+//     if(Z_addressColumIndex > -1)
+//     {
+//       for(let i = 0; i < Z_tripRows.length; i++)
+//       {
+//         {
+//           const addressCell = Z_tripRows[i]?.cells[Z_addressColumIndex]
+//           if(addressCell?.geocodedDataAndStatus?.results && addressCell.geocodedDataAndStatus.results.length > 0 && addressCell.isAddressAccepted)
+//           {
+//             const addressCellGeoAddress = addressCell.geocodedDataAndStatus.results[addressCell.selectedGeocodedAddressIndex]
+//             waypoints.push({location: addressCellGeoAddress?.formatted_address, stopover: true})
+//           }
+//           else{
+//             return {status: false, msg: "Error: Check if all addresses are confirmed"}
+//           }
+//         }
+
+//         if(Z_goToaddressColumIndex > -1)
+//         {
+//           const goToAddressCell = Z_tripRows[i]?.cells[Z_goToaddressColumIndex]
+//           if(goToAddressCell?.geocodedDataAndStatus?.results && goToAddressCell.geocodedDataAndStatus.results.length > 0 && goToAddressCell.isAddressAccepted)
+//           {
+//             const goToAddressCellGeoAddress = goToAddressCell.geocodedDataAndStatus.results[goToAddressCell.selectedGeocodedAddressIndex]
+//             waypoints.push({location: goToAddressCellGeoAddress?.formatted_address, stopover: true})
+//           }
+//         }
+//       }
+
+//       //TODO check if there are enought tokens available
+
+//       //if goToAddress exists dont optimize
+//       const directionsResult = await createDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, Z_goToaddressColumIndex > -1 ? false : shouldOptimize)
+
+//       if(directionsResult.status === google.maps.DirectionsStatus.OK)
+//       {
+//         if(directionsResult.result?.routes[0]?.waypoint_order)
+//         {
+//           if(!(Z_goToaddressColumIndex > -1))
+//           {
+//             ZF_setRowOrderPerWaypoints(directionsResult.result?.routes[0].waypoint_order);
+//           }
+          
+//           ZF_setPreserveViewport(preserveViewport);
+//           ZF_setTripDirections(directionsResult);
+//           console.log(directionsResult)
+
+//           return {status: true, msg: ""}
+//         }
+//         else{
+//           return {status: false, msg: "Error: Something went wrong with finding a route"}
+//         }
+//       }
+//       else{
+//         return {status: false, msg: "Error: Something went wrong with finding a route"}
+//       }
+//     }
+//     else{
+//       return {status: false, msg: "Error: No address column set"}
+//     }
+//   }
+// }
 
 //TODO rework this function
 export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}

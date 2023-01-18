@@ -5,8 +5,16 @@ import BodyMarker, { EMarkerType } from "../Components/Maps/CustomMarker/BodyMar
 import DepRetMarker from "../Components/Maps/CustomMarker/DepRetMarker.component";
 import { useMapsStore } from "../Zustand/mapsStore";
 import { useTripStore } from "../Zustand/tripStore";
-import { createDirections } from "./Trip.service";
+import { createLinkedAddressesDirections, createSimplePointToPointDirections } from "./Trip.service";
 
+
+export type TDirectionsLeg= {
+    distance : google.maps.Distance, 
+    duration: google.maps.Duration, 
+    path: google.maps.LatLng[]
+    startAddress: string,
+    endAddress: string
+}
 
 export function createCustomMapMarkers(
     rows: IRow[], 
@@ -107,7 +115,7 @@ export function createCustomMapMarkers(
 }
 
 //retuns a directions waypoint, unless something goes wrong, then null gets returned
-function createDirectionsWaypoint(row: IRow, columnIndex: number): google.maps.DirectionsWaypoint | null
+export function isValidAddress(row: IRow, columnIndex: number): boolean
 {
     const cell = row.cells[columnIndex]
     if(cell)
@@ -118,23 +126,28 @@ function createDirectionsWaypoint(row: IRow, columnIndex: number): google.maps.D
             const location = cell.geocodedDataAndStatus?.results[cell.selectedGeocodedAddressIndex]?.formatted_address
             if(location)
             {
-                return {location: location, stopover: true}
+                return true
             }
             else
             {
-                return null
+                return false
             }
 
         }
         else
         {   
-            return null
+            return false
         }
     }
     else
     {
-        return null
+        return false
     }
+}
+
+function createWaypoint(row: IRow, columnIndex: number) : google.maps.DirectionsWaypoint
+{
+    return {location: row.cells[columnIndex]!.displayData, stopover: true}
 }
 
 function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
@@ -151,16 +164,16 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
             const row = Z_rows[i]
             if(row)
             {
-                const addressWaypoint = createDirectionsWaypoint(row, Z_addressColumnIndex)
-                if(addressWaypoint)
+                const addressWaypoint = isValidAddress(row, Z_addressColumnIndex)
+                if(addressWaypoint) //check if address is valid, if true, a waypoint can be created from it
                 {
-                    waypoints.push(addressWaypoint)
+                    waypoints.push(createWaypoint(row, Z_addressColumnIndex)) //create the waypoint
                     if(Z_linkAddressColumnIndex >= 0)
                     {
-                        const linkAddressWaypoint = createDirectionsWaypoint(row, Z_linkAddressColumnIndex)
+                        const linkAddressWaypoint = isValidAddress(row, Z_linkAddressColumnIndex)
                         if(linkAddressWaypoint)
                         {
-                            waypoints.push(linkAddressWaypoint)
+                            waypoints.push(createWaypoint(row, Z_linkAddressColumnIndex))
                         }
                         else 
                         {
@@ -170,7 +183,7 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
                                 return null
                             }
                         }
-                    }
+                    } //mo else, there is no linkAddressColumn
                 }
                 else
                 {
@@ -189,10 +202,12 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
     
 }
 
-function calculateDirectionsFromWaypoints() : Promise<ITripDirections> | null
+async function calculateDirectionsFromWaypoints(): Promise<ITripDirections | null>
 {   const Z_departureAddress = useTripStore.getState().data.departureAddress
     const Z_returnAddress = useTripStore.getState().data.returnAddress
     const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
+
+    const ZF_setRowOrderPerWaypoints = useTripStore.getState().reducers.setRowOrderPerWaypoints
 
     const waypoints = createWaypointsListFromRows()
     console.log(waypoints)
@@ -200,17 +215,28 @@ function calculateDirectionsFromWaypoints() : Promise<ITripDirections> | null
     {
         if(Z_departureAddress)
         {
-            
             if(Z_returnAddress)
             {
                 if(Z_linkAddressColumnIndex < 0) //no link addresses
                 {
-                    return createDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, true )
+                    const pointToPointDirections = await createSimplePointToPointDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, true )
+                    if(pointToPointDirections.result?.routes[0])
+                    {
+                        //reorder row as per optimized route
+                        ZF_setRowOrderPerWaypoints(pointToPointDirections.result?.routes[0].waypoint_order);
+                        return pointToPointDirections
+                    }
+                    else
+                    {
+                        return null
+                    }
+                    
+                    
                 }
                 else //there are link addresses
                 {
-                    //TODO create function using dijikstras algorithm to calulate shortest path for when link addresses are present
-                    return createDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, false )
+                    //TODO modify function to use dijikstras algorithm to calulate shortest path for when link addresses are present
+                    return await createLinkedAddressesDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints )
                 }
             }
             else
@@ -234,6 +260,8 @@ function calculateDirectionsFromWaypoints() : Promise<ITripDirections> | null
     }
 }
 
+
+
 export async function handleCalculateFastestDirections()
 {
     const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
@@ -248,4 +276,39 @@ export async function handleCalculateFastestDirections()
         ZF_setTripDirections(directions);
     }
     
+}
+
+export function createPolyPathsFromDirections(directions: ITripDirections) : TDirectionsLeg[] | null
+{
+    
+    if(directions.result?.routes[0])
+    {
+        const route = directions.result?.routes[0]
+        const directionsLegs: TDirectionsLeg[] = []
+        
+        for(let i = 0; i < route.legs.length; i++)
+        {
+            const legPath: google.maps.LatLng[] = []
+            const leg = route.legs[i]
+            if(leg)
+            {
+                for( let j = 0; j < leg.steps.length; j++)
+                {
+                    const step = leg.steps[j]
+                    if(step)
+                    {
+                        legPath.push(...step.path)
+                    }
+                }
+                
+                
+                directionsLegs.push({distance: leg.distance ?? {text: "", value: 0}, duration: leg.duration ?? {text: "", value: 0}, path: legPath, startAddress: leg.start_address, endAddress: leg.end_address})
+            }
+        }
+        return directionsLegs
+    }
+    else
+    {
+        return null
+    }
 }

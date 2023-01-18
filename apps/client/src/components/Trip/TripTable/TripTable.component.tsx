@@ -2,7 +2,7 @@ import { PanToolOutlined } from "@mui/icons-material"
 import { Box, Button, Stack, Typography } from "@mui/material"
 import React, { useEffect } from "react"
 import { ETableMode, useTripStore } from "../../../Zustand/tripStore"
-import { calcRoute, createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, isAllAddressesInColumnValidAndAccepted, writeBackToSpreadsheet } from "../../../Services/Trip.service"
+import { createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, isAllAddressesInColumnValidAndAccepted, writeBackToSpreadsheet } from "../../../Services/Trip.service"
 import { loadSelection } from "../Worksheet/worksheet.service"
 import { Driver } from "./Driver/Driver.component"
 import TripTableLegends from "./Legends/TripTableLegends.component"
@@ -92,13 +92,13 @@ const TripTable: React.FC = () => {
     console.log(sequence, rearrangedRows)
 
     ZF_setTripRows(rearrangedRows)
-    calcRoute(false, true)
+    // calcRoute(false, true) //todo replace calc route with the new function
   }
 
   function handleReverseOrder()
   {
     ZF_reverseRows()
-    calcRoute(false, true)
+    // calcRoute(false, true)
   }
 
   function appendRows()

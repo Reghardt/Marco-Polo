@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from "@mui/material"
+import { Paper } from "@mui/material"
 import { Instance } from "@popperjs/core";
 import React, { useEffect, useRef, useState } from "react"
 // import { useMapsStore } from "../../Zustand/mapsStore";
@@ -6,9 +6,11 @@ import { useTripStore } from "../../Zustand/tripStore";
 
 
 
-import { createCustomMapMarkers } from "../../Services/GMap.service"
+import { createCustomMapMarkers, createPolyPathsFromDirections, TDirectionsLeg } from "../../Services/GMap.service"
 import GMapLegends from "./GMapLegends.component";
-import { ITripDirections } from "../common/CommonInterfacesAndEnums";
+import { createPortal } from "react-dom";
+import LegsListControl from "./LegsListControl.component";
+// import { createPortal } from "react-dom";
 
 // export enum EMapPopperStates{
 //     CLOSE,
@@ -23,15 +25,23 @@ const GMap: React.FC = () => {
     const Z_addresColumIndex = useTripStore(state => state.data.addressColumnIndex)
     const Z_departureAddress = useTripStore(state => state.data.departureAddress)
     const Z_returnAddress = useTripStore(state => state.data.returnAddress)
+
+    
     
     const map = useRef<google.maps.Map>()
     const popperRefs = useRef<Array<Instance | null>>([])
 
-    const directionRenderers = useRef<google.maps.DirectionsRenderer[]>([])
+    const polyLines = useRef<google.maps.Polyline[]>([])
+
+    const controlContainer = useRef<HTMLDivElement | null>(null)
    
 
     
     const [markers, setMarkers] = useState<JSX.Element[]>([])
+
+    
+    // testControl.textContent = "center";
+    // testControl.title = "click me"
 
     //const Z_preserveViewport = useMapsStore(state => state.data.preserveViewport)
 
@@ -48,11 +58,13 @@ const GMap: React.FC = () => {
     //Creates map on mount
     useEffect(() => {
         const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
-        map.current = new google.maps.Map(document.getElementById("map") as HTMLElement, {center, zoom: 8, disableDoubleClickZoom: true})
-              
+        map.current = new google.maps.Map(document.getElementById("map") as HTMLElement, {center, zoom: 8, disableDoubleClickZoom: true});
+        
+        controlContainer.current = document.createElement("div");
+        controlContainer.current.style.marginLeft = '10px';
 
-        //directionsRenderer.current = new google.maps.DirectionsRenderer()
-
+        map.current.controls[google.maps.ControlPosition.LEFT_TOP]?.push(controlContainer.current)
+        
         map.current.addListener("drag", () => {
             console.log("drag")
             for(let i = 0; i < popperRefs.current.length; i++)
@@ -92,140 +104,117 @@ const GMap: React.FC = () => {
     useEffect(() => {
         if(Z_tripDirections && Z_tripDirections.status === "OK")
         {
-            handleRouteToDisplay()    
+            displayDirections()
         }
         else
         {
-            for(let i = 0; i < directionRenderers.current.length; i++)
+            for(let i = 0; i < polyLines.current.length; i++)
             {
-                directionRenderers.current[i]?.setMap(null)
+                polyLines.current[i]?.setMap(null)
             }
-            directionRenderers.current = []
+            polyLines.current = []
         }
     }, [Z_tripDirections])
 
-    function createCustomLeg(leg: google.maps.DirectionsLeg, writabelDirections: ITripDirections, strokeColor: string)
+    function createPolyLinePath(directionsLeg: TDirectionsLeg, strokeColor: string)
     {
-        console.log(leg)
-        const customDirections: ITripDirections = {result: {...writabelDirections!.result!}, status: writabelDirections.status}
-        if(customDirections.result?.routes[0]?.legs)
-        {
-            customDirections.result.routes[0].legs = [] //point to new empty legs array
-            customDirections.result.routes[0].legs.push(leg)
-            directionRenderers.current.push(
-                new google.maps.DirectionsRenderer(
-                {
-                    map: map.current,
-                    suppressMarkers: true,
-                    preserveViewport: true,
-                    directions: customDirections.result,
-                    polylineOptions: {
-                        strokeColor: strokeColor,
-                        strokeWeight: 5,
-                        // strokeOpacity: 0.5
-                    }
-                }
-            ))
-        }
-            
-        
+        // polyLines.current.push(
+        //     new google.maps.Polyline({
+        //     path: directionsLeg.path,
+        //     strokeColor: strokeColor,
+        //     strokeWeight: 5,
+        //     map: map.current
+        //     })
+        // ) 
+
+        return new google.maps.Polyline({
+            path: directionsLeg.path,
+            strokeColor: strokeColor,
+            strokeWeight: 5,
+            map: map.current
+        })
+         
     }
 
-    function handleRouteToDisplay()
+    function displayDirections()
     {
-        const Z_rows = useTripStore.getState().data.rows
         const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
 
-
-        console.log("handleRouteToDisplay fired ")
-        if(Z_tripDirections?.result && Z_tripDirections.status === google.maps.DirectionsStatus.OK)
+        if(Z_tripDirections)
         {
-            for(let i = 0; i < directionRenderers.current.length; i++)
-            {
-                directionRenderers.current[i]?.setMap(null)
-            }
-            directionRenderers.current = []
+            const directionsLegs = createPolyPathsFromDirections(Z_tripDirections)  
 
-            const route = Z_tripDirections.result?.routes[0]
-            if(route)
+            if(directionsLegs)
             {
-                const legs = JSON.parse(JSON.stringify(route.legs)) as google.maps.DirectionsLeg[]
-
-                for(let i = 0; i < Z_rows.length; i++)
+                
+    
+                for(let i = 0; i < polyLines.current.length; i++)
                 {
-                    const row = Z_rows[i]
+                    polyLines.current[i]?.setMap(null)
+                }
+                polyLines.current = []
+               
+                for(let i = 0; i < Z_tripRows.length; i++)
+                {
+                    const row = Z_tripRows[i];
                     if(row)
                     {
-                        const leg = legs.shift()
+                        const leg = directionsLegs.shift()
+                        console.log(leg)
+                        
                         if(leg)
                         {
-                            //stringify and parse to create a copy of trip directions that is writable. The one from google is not writable
-                            //only the legs inside the writableDirections object is written over as needed
-                            const writabelDirections = JSON.parse(JSON.stringify(Z_tripDirections)) as ITripDirections
-                            createCustomLeg(leg, writabelDirections, "hsl(208, 100%, 48%, 0.70)")
-                        }   
+                            polyLines.current.push(createPolyLinePath(leg, "hsl(208, 100%, 48%, 0.70)")) //blue
+                        }
+        
                         if(row.cells[Z_linkAddressColumnIndex]?.isAddressAccepted)
                         {
-                            const linkLeg = legs.shift()
+                            const linkLeg = directionsLegs.shift()
                             if(linkLeg)
                             {
-                                const writabelDirections = JSON.parse(JSON.stringify(Z_tripDirections)) as ITripDirections
-                                createCustomLeg(linkLeg, writabelDirections, "hsl(125, 100%, 36%, 0.70)")
+                                polyLines.current.push(createPolyLinePath(linkLeg, "hsl(125, 100%, 36%, 0.70)")) //green
                             }
-                            
                         }
-                       
+        
                     }
                 }
 
-                const writabelDirections = JSON.parse(JSON.stringify(Z_tripDirections)) as ITripDirections
-                const finalLeg = legs.shift()
-               
+                const finalLeg = directionsLegs.shift()
+        
                 if(finalLeg)
                 {
-                    createCustomLeg(finalLeg, writabelDirections, "hsl(208, 100%, 48%, 0.70)")
+                    polyLines.current.push(createPolyLinePath(finalLeg, "hsl(208, 100%, 48%, 0.70)")) //blue
                 }
+
             }
-
-            
-
-            // directionsRenderer.current = new google.maps.DirectionsRenderer(
-            //     {
-            //         map: map.current,
-            //         suppressMarkers: true,
-            //         preserveViewport: preserveViewport,
-            //         directions: Z_tripDirections.result,
-            //         // polylineOptions: {
-            //         //     strokeColor: "lightblue"
-            //         // }
-            //     }
-            // )
+ 
         }
+
+        
+
 
     }
 
-    // function printPopperRefs()
-    // {
-    //     console.log(popperRefs.current)
-    // }
-    
-
+    // {{color:"#1976d2"}}
     return(
-        <Box>
-            <Typography variant="h5" gutterBottom sx={{color:"#1976d2"}}>Google Maps</Typography>   
-            {/* <Button onClick={() => printPopperRefs()}>Print</Button>          */}
-            <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
-            <GMapLegends/>
+        <>
+            <div className={"py-2"}>
+                {/* <Button onClick={() => printPopperRefs()}>Print</Button>          */}
+                <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
+                <GMapLegends/>
 
-            
+                {markers.length > 0 && (
+                    markers.map((marker) => {
+                        return marker
+                    })
+                )}
 
-            {markers.length > 0 && (
-                markers.map((marker) => {
-                    return marker
-                })
-            )}
-        </Box>
+                {controlContainer.current && createPortal(<><LegsListControl polyLines={polyLines}/></>, controlContainer.current)}
+            </div>
+        </>
     )
+        
+
 }
 
 export default GMap

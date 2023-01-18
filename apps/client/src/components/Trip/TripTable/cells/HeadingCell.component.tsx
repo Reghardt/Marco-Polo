@@ -1,5 +1,6 @@
 import { Button } from "@mui/material";
 import React from "react";
+import { numberToAlphabetical } from "../../../../Services/Trip.service";
 
 
 type HeadingCellProps = {
@@ -9,7 +10,7 @@ type HeadingCellProps = {
 const HeadingCell: React.FC<HeadingCellProps> = ({colNumber}) =>
 {
 
-  const col = String.fromCharCode(colNumber - 1 + 'A'.charCodeAt(0))
+  const col = numberToAlphabetical(colNumber)
 
     
     return(
