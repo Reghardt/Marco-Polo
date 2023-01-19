@@ -1,59 +1,25 @@
-import { Paper } from "@mui/material"
-import { Instance } from "@popperjs/core";
-import React, { useEffect, useRef, useState } from "react"
-// import { useMapsStore } from "../../Zustand/mapsStore";
+import { Paper } from "@mui/material";
+import React, { useEffect, useRef } from "react";
 import { useTripStore } from "../../Zustand/tripStore";
-
-
-
-import { createCustomMapMarkers, createPolyPathsFromDirections, TDirectionsLeg } from "../../Services/GMap.service"
+import { createCustomMapMarkers, createMarker, createPolyPathsFromDirections, TDirectionsLeg } from "../../Services/GMap.service";
 import GMapLegends from "./GMapLegends.component";
 import { createPortal } from "react-dom";
 import LegsListControl from "./LegsListControl.component";
-// import { createPortal } from "react-dom";
-
-// export enum EMapPopperStates{
-//     CLOSE,
-//     OPEN,
-//     RESUME
-// }
+import { tolls } from "./Tolls";
+import { EMarkerType } from "./CustomMarker/CustomMarker";
 
 const GMap: React.FC = () => {
 
     const Z_tripDirections = useTripStore(state => state.data.tripDirections)
     const Z_tripRows = useTripStore(state => state.data.rows)
     const Z_addresColumIndex = useTripStore(state => state.data.addressColumnIndex)
+    const Z_linkAddressColumnIndex = useTripStore(state => state.data.linkAddressColumnIndex)
     const Z_departureAddress = useTripStore(state => state.data.departureAddress)
     const Z_returnAddress = useTripStore(state => state.data.returnAddress)
 
-    
-    
     const map = useRef<google.maps.Map>()
-    const popperRefs = useRef<Array<Instance | null>>([])
-
     const polyLines = useRef<google.maps.Polyline[]>([])
-
     const controlContainer = useRef<HTMLDivElement | null>(null)
-   
-
-    
-    const [markers, setMarkers] = useState<JSX.Element[]>([])
-
-    
-    // testControl.textContent = "center";
-    // testControl.title = "click me"
-
-    //const Z_preserveViewport = useMapsStore(state => state.data.preserveViewport)
-
-    useEffect(() => {
-        popperRefs.current = popperRefs.current.slice(0, Z_tripRows.length) //creates new refs array?
-        
-        setMarkers(createCustomMapMarkers(Z_tripRows, Z_addresColumIndex, map, Z_departureAddress, Z_returnAddress, popperRefs))
-        for(let i = 0; i < popperRefs.current.length; i++)
-        {
-            popperRefs.current[i]?.update()
-        }
-    }, [Z_tripRows, Z_addresColumIndex, Z_departureAddress, Z_returnAddress])
 
     //Creates map on mount
     useEffect(() => {
@@ -65,40 +31,7 @@ const GMap: React.FC = () => {
 
         map.current.controls[google.maps.ControlPosition.LEFT_TOP]?.push(controlContainer.current)
         
-        map.current.addListener("drag", () => {
-            console.log("drag")
-            for(let i = 0; i < popperRefs.current.length; i++)
-            {
-                popperRefs.current[i]?.update()
-            }
-        })
 
-        map.current.addListener("dragend", () => {
-            console.log("dragged")
-            if(map && map.current)
-            {
-                
-                const mapCenter = map.current.getCenter()
-                if(mapCenter)
-                map.current.setCenter(mapCenter)
-            }
-            
-        });
-
-        map.current.addListener("idle", () => {
-            if(map && map.current)
-            {
-                const mapCenter = map.current.getCenter()
-                if(mapCenter)
-                map.current.setCenter(mapCenter)
-
-                for(let i = 0; i < popperRefs.current.length; i++)
-                {
-                    popperRefs.current[i]?.update()
-                }
-            }
-            
-        });
     }, [])
 
     useEffect(() => {
@@ -189,10 +122,6 @@ const GMap: React.FC = () => {
             }
  
         }
-
-        
-
-
     }
 
     // {{color:"#1976d2"}}
@@ -203,11 +132,11 @@ const GMap: React.FC = () => {
                 <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
                 <GMapLegends/>
 
-                {markers.length > 0 && (
-                    markers.map((marker) => {
-                        return marker
-                    })
-                )}
+                {createCustomMapMarkers(Z_tripRows, map, Z_addresColumIndex, Z_linkAddressColumnIndex, Z_departureAddress, Z_returnAddress)}
+
+                {tolls.map((toll) => {
+                    return createMarker(toll.name, toll.name, map, toll.coordinates, EMarkerType.TOLL)
+                })}
 
                 {controlContainer.current && createPortal(<><LegsListControl polyLines={polyLines}/></>, controlContainer.current)}
             </div>

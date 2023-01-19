@@ -1,12 +1,9 @@
-import { Instance } from "@popperjs/core";
 import React from "react";
 import { IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
-import BodyMarker, { EMarkerType } from "../Components/Maps/CustomMarker/BodyMarker.component";
-import DepRetMarker from "../Components/Maps/CustomMarker/DepRetMarker.component";
+import CustomMarker, { EMarkerType } from "../Components/Maps/CustomMarker/CustomMarker";
 import { useMapsStore } from "../Zustand/mapsStore";
 import { useTripStore } from "../Zustand/tripStore";
 import { createLinkedAddressesDirections, createSimplePointToPointDirections } from "./Trip.service";
-
 
 export type TDirectionsLeg= {
     distance : google.maps.Distance, 
@@ -16,77 +13,76 @@ export type TDirectionsLeg= {
     endAddress: string
 }
 
+export function createMarker(
+
+    keyId: string, 
+    label: string, 
+    map: React.MutableRefObject<google.maps.Map | undefined>,
+    position: google.maps.LatLng,
+    markerType: EMarkerType)
+{
+    return <CustomMarker
+        key={`custom-marker-${keyId}`}
+        label={label} 
+        map={map.current} 
+        position={position} 
+        markerType={markerType}
+    />
+}
+
 export function createCustomMapMarkers(
     rows: IRow[], 
-    addressColumnIndex: number, 
     map: React.MutableRefObject<google.maps.Map | undefined>, 
+    addressColumnIndex: number,
+    linkAddressColumnIndex: number,
     departureAddress: google.maps.GeocoderResult | null, 
-    returnAddress: google.maps.GeocoderResult | null,
-    popperRefs: React.MutableRefObject<(Instance | null)[]>,
-    ): JSX.Element[]
+    returnAddress: google.maps.GeocoderResult | null
+    )
 {
+    if(departureAddress && returnAddress)
+    {
 
-    const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
+    }
 
-    const newMarkers: JSX.Element[] = []
+
+
+    const addressMarkers: JSX.Element[] = []
 
     if(addressColumnIndex > -1)
     {
         for(let i = 0; i < rows.length; i++)
         {
-            //const row: IRow = rows[i]
-            
-
+            const row = rows[i]
+            if(row)
             {
-                let label = (i + 1).toString()
-                const linkAddressCell = rows[i]?.cells[Z_linkAddressColumnIndex]
+                const addressCell = addressColumnIndex > -1 ? row.cells[addressColumnIndex] : undefined
+                const linkAddressCell = linkAddressColumnIndex > -1 ? row.cells[linkAddressColumnIndex] : undefined
+                
+                if(addressCell?.geocodedDataAndStatus?.results && addressCell.geocodedDataAndStatus.results.length > 0)
+                {
+                    const selectedAddressRes = addressCell.geocodedDataAndStatus.results[addressCell.selectedGeocodedAddressIndex]
+                    if(selectedAddressRes)
+                    {
+                        let label = (i + 1).toString()
+                        if(linkAddressCell?.geocodedDataAndStatus?.results && linkAddressCell.geocodedDataAndStatus.results.length > 0) //add -> to label if row has a valid link address
+                        {
+                            label+= "->"
+                        }
+                        addressMarkers.push(createMarker(label ,label, map, selectedAddressRes.geometry.location, EMarkerType.ADDRESS))
+                    }
+                }
+                
                 if(linkAddressCell?.geocodedDataAndStatus?.results && linkAddressCell.geocodedDataAndStatus.results.length > 0)
                 {
-                    label+= "->"
-                }
-
-                const cell = rows[i]?.cells[addressColumnIndex]
-                if(cell?.geocodedDataAndStatus?.results && cell.geocodedDataAndStatus.results.length > 0)
-                {
-                    const addressRes = cell.geocodedDataAndStatus.results[cell.selectedGeocodedAddressIndex]
-                    if(addressRes)
+                    const selectedAddressRes = linkAddressCell.geocodedDataAndStatus.results[linkAddressCell.selectedGeocodedAddressIndex]
+                    if(selectedAddressRes)
                     {
-
-                        newMarkers.push(
-                            <BodyMarker 
-                                key={`custom-marker-${i}`}
-                                ref={el => {popperRefs.current[i] = el; console.log("Hello")}} 
-                                label={label} 
-                                map={map.current} 
-                                position={addressRes.geometry.location} 
-                                markerType={EMarkerType.ADDRESS}
-                                //markerRowNumber={i} //takes into consideration the depart and return markers
-                            />)
+                        const label = `->${(i + 1).toString()}`
+                        addressMarkers.push(createMarker(label ,label, map, selectedAddressRes.geometry.location, EMarkerType.ADDRESS))
                     }
-                    
                 }
             }
 
-            const linkAddressCell = rows[i]?.cells[Z_linkAddressColumnIndex]
-            const label = `->${(i + 1).toString()}`
-            if(linkAddressCell?.geocodedDataAndStatus?.results && linkAddressCell.geocodedDataAndStatus.results.length > 0)
-            {
-                const addressRes = linkAddressCell.geocodedDataAndStatus.results[linkAddressCell.selectedGeocodedAddressIndex]
-                if(addressRes)
-                {
-
-                    newMarkers.push(
-                        <BodyMarker 
-                            key={`custom-marker-to-${i}`}
-                            ref={el => {popperRefs.current[i] = el; console.log("Hello")}} 
-                            label={label} 
-                            map={map.current} 
-                            position={addressRes.geometry.location} 
-                            markerType={EMarkerType.ADDRESS}
-                            //markerRowNumber={i} //takes into consideration the depart and return markers
-                        />)
-                }
-            }
         }
     }
 
@@ -94,24 +90,24 @@ export function createCustomMapMarkers(
     {
         if(departureAddress)
         {
-            newMarkers.unshift(<DepRetMarker label={"D+R"} map={map.current} position={departureAddress.geometry.location} markerType={EMarkerType.DEP_RET}/>)
+            const label = "D+R"
+            addressMarkers.unshift(createMarker(label ,label, map, departureAddress.geometry.location, EMarkerType.DEP_RET))
         }
     }
     else
     {
         if(departureAddress)
         {
-            newMarkers.unshift(<DepRetMarker label={"Dep"} map={map.current} position={departureAddress.geometry.location} markerType={EMarkerType.DEP_RET}/>)
+            const label = "Dep"
+            addressMarkers.unshift(createMarker(label ,label, map, departureAddress.geometry.location, EMarkerType.DEP_RET))
         }
         if(returnAddress)
         {
-            newMarkers.push(<DepRetMarker label={"Ret"} map={map.current} position={returnAddress.geometry.location} markerType={EMarkerType.DEP_RET}/>)
+            const label = "Ret"
+            addressMarkers.push(createMarker(label ,label, map, returnAddress.geometry.location, EMarkerType.DEP_RET))
         }
     }
-
-    
-
-    return newMarkers;
+    return addressMarkers;
 }
 
 //retuns a directions waypoint, unless something goes wrong, then null gets returned
