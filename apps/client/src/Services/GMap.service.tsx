@@ -1,6 +1,8 @@
 import React from "react";
 import { IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
-import CustomMarker, { EMarkerType } from "../Components/Maps/CustomMarker/CustomMarker";
+import AddressMarker, { EAddressMarkerType } from "../Components/Maps/CustomMarker/AddressMarker";
+import CustomMarker from "../Components/Maps/CustomMarker/CustomMarker";
+
 import { useMapsStore } from "../Zustand/mapsStore";
 import { useTripStore } from "../Zustand/tripStore";
 import { createLinkedAddressesDirections, createSimplePointToPointDirections } from "./Trip.service";
@@ -14,20 +16,19 @@ export type TDirectionsLeg= {
 }
 
 export function createMarker(
-
     keyId: string, 
-    label: string, 
     map: React.MutableRefObject<google.maps.Map | undefined>,
     position: google.maps.LatLng,
-    markerType: EMarkerType)
+    content: React.ReactNode,
+    )
 {
     return <CustomMarker
         key={`custom-marker-${keyId}`}
-        label={label} 
         map={map.current} 
         position={position} 
-        markerType={markerType}
-    />
+    >
+        {content}
+    </CustomMarker>
 }
 
 export function createCustomMapMarkers(
@@ -68,7 +69,13 @@ export function createCustomMapMarkers(
                         {
                             label+= "->"
                         }
-                        addressMarkers.push(createMarker(label ,label, map, selectedAddressRes.geometry.location, EMarkerType.ADDRESS))
+                        addressMarkers.push(
+                            createMarker(
+                                label, 
+                                map, 
+                                selectedAddressRes.geometry.location, 
+                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS}/>
+                            ))
                     }
                 }
                 
@@ -78,7 +85,13 @@ export function createCustomMapMarkers(
                     if(selectedAddressRes)
                     {
                         const label = `->${(i + 1).toString()}`
-                        addressMarkers.push(createMarker(label ,label, map, selectedAddressRes.geometry.location, EMarkerType.ADDRESS))
+                        addressMarkers.push(
+                            createMarker(
+                                label, 
+                                map, 
+                                selectedAddressRes.geometry.location, 
+                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS}/>
+                            ))
                     }
                 }
             }
@@ -91,7 +104,13 @@ export function createCustomMapMarkers(
         if(departureAddress)
         {
             const label = "D+R"
-            addressMarkers.unshift(createMarker(label ,label, map, departureAddress.geometry.location, EMarkerType.DEP_RET))
+            addressMarkers.unshift(
+                createMarker(
+                    label, 
+                    map, 
+                    departureAddress.geometry.location, 
+                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET}/>
+                ))
         }
     }
     else
@@ -99,12 +118,24 @@ export function createCustomMapMarkers(
         if(departureAddress)
         {
             const label = "Dep"
-            addressMarkers.unshift(createMarker(label ,label, map, departureAddress.geometry.location, EMarkerType.DEP_RET))
+            addressMarkers.unshift(
+                createMarker(
+                    label, 
+                    map, 
+                    departureAddress.geometry.location, 
+                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET}/>
+                ))
         }
         if(returnAddress)
         {
             const label = "Ret"
-            addressMarkers.push(createMarker(label ,label, map, returnAddress.geometry.location, EMarkerType.DEP_RET))
+            addressMarkers.push(
+                createMarker(
+                    label, 
+                    map, 
+                    returnAddress.geometry.location, 
+                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET}/>
+                ))
         }
     }
     return addressMarkers;

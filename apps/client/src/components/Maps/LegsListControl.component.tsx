@@ -149,7 +149,7 @@ const LegsListControl: React.FC<ILegsListControl> = ({polyLines}) => {
     }
 
     return (
-        <div className={"bg-white p-1 text-base"}>
+        <div className={"bg-white p-1 text-base mt-8"}>
             <div>Leg Visibility</div>
             {createLegControlElements()}
 

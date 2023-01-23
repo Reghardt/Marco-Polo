@@ -6,7 +6,7 @@ import GMapLegends from "./GMapLegends.component";
 import { createPortal } from "react-dom";
 import LegsListControl from "./LegsListControl.component";
 import { tolls } from "./Tolls";
-import { EMarkerType } from "./CustomMarker/CustomMarker";
+import TollMarker from "./CustomMarker/TollMarker";
 
 const GMap: React.FC = () => {
 
@@ -128,15 +128,23 @@ const GMap: React.FC = () => {
     return(
         <>
             <div className={"py-2"}>
-                {/* <Button onClick={() => printPopperRefs()}>Print</Button>          */}
+
                 <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
                 <GMapLegends/>
 
-                {createCustomMapMarkers(Z_tripRows, map, Z_addresColumIndex, Z_linkAddressColumnIndex, Z_departureAddress, Z_returnAddress)}
+                
 
                 {tolls.map((toll) => {
-                    return createMarker(toll.name, toll.name, map, toll.coordinates, EMarkerType.TOLL)
+                    return createMarker(
+                        toll.name, 
+                        map, 
+                        toll.coordinates, 
+                        <TollMarker tollInfo={toll}/>,
+                        // index * -1,
+                    )
                 })}
+
+                {createCustomMapMarkers(Z_tripRows, map, Z_addresColumIndex, Z_linkAddressColumnIndex, Z_departureAddress, Z_returnAddress)}
 
                 {controlContainer.current && createPortal(<><LegsListControl polyLines={polyLines}/></>, controlContainer.current)}
             </div>

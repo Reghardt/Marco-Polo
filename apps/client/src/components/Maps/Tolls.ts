@@ -1,6 +1,6 @@
 
 
-interface IToll{
+export interface IToll{
     name: string;
     coordinates: google.maps.LatLng;
     tarrif: {class1: number, class2: number, class3: number, class4: number}
@@ -18,8 +18,8 @@ export const tolls: IToll[] = [
         tarrif: {class1: 50.50, class2: 137.00, class3: 189.00, class4: 227.00}
     },
     {
-        name: "NYL", 
-        coordinates: new google.maps.LatLng({lat: -24.289633621836114, lng: 28.97962286245042}), //-24.289633621836114, 28.97962286245042
+        name: "NYL", //-24.290593999020043, 28.97890204646285
+        coordinates: new google.maps.LatLng({lat: -24.290593999020043, lng: 28.97890204646285}),
         tarrif: {class1: 50.50, class2: 137.00, class3: 189.00, class4: 227.00}
     },
     {

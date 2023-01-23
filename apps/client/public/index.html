@@ -11,6 +11,11 @@
     />
 
     <script type="text/javascript">
+
+      function onGoogleMapsLoad()
+      {
+        console.log("Google Maps Loaded")
+      }
       // Office js deletes window.history.pushState and window.history.replaceState. Cache them and restore them
       window._historyCache = {
           replaceState: window.history.replaceState,
@@ -43,7 +48,7 @@
     </script>
 
     <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHosZeACjXs7beA9UlErOZRXn4f51byP8&region=ZA&v=weekly"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHosZeACjXs7beA9UlErOZRXn4f51byP8&region=ZA&v=weekly&libraries=geometry&callback=onGoogleMapsLoad"
     defer
     ></script>
 
