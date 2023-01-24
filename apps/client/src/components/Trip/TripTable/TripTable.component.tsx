@@ -22,38 +22,11 @@ const TripTable: React.FC = () => {
   const Z_tabelMode = useTripStore(store => store.data.tabelMode)
   const Z_errorMessage = useTripStore(store => store.data.errorMessage)
 
-  const ZF_setTripRows = useTripStore(store => store.reducers.setTripRows)
-  const ZF_appendRows = useTripStore(store => store.reducers.appendRows)
-  const ZF_reverseRows = useTripStore(store => store.reducers.reverseRows)
-  // const ZF_setErrorMessage = useTripStore(store => store.reducers.setErrorMessage)
-  // const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
-  const ZF_setTableMode = useTripStore(store => store.reducers.setTableMode)
+  const ZF_setTripRows = useTripStore(store => store.actions.setTripRows)
+  const ZF_appendRows = useTripStore(store => store.actions.appendRows)
+  const ZF_reverseRows = useTripStore(store => store.actions.reverseRows)
+  const ZF_setTableMode = useTripStore(store => store.actions.setTableMode)
 
-
-  // async function solveAddresses(columnIndex: number){
-  //   if(columnIndex >= 0)
-  //   {
-  //     for(let i = 0; i < Z_tripRows.length; i++)
-  //     {
-  //       const row = Z_tripRows[i];
-  //       const addressCell = row.cells[columnIndex]
-
-  //       if(addressCell.geocodedDataAndStatus === null) //if the cell has no geocoded address, find one
-  //       {
-  //         const geoRes = await geocodeAddress(addressCell.displayData)
-  //         ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
-  //         return;
-  //       }
-  //       else if(addressCell.geocodedDataAndStatus && addressCell.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
-  //       {
-  //         await setTimeout(() => {
-  //           ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: null});
-  //         }, 2000)
-  //         return;
-  //       }
-  //     }
-  //   }
-  // }
 
   useEffect(() => {
     if(Z_tabelMode === ETableMode.AddressSolveMode)
@@ -92,13 +65,13 @@ const TripTable: React.FC = () => {
     console.log(sequence, rearrangedRows)
 
     ZF_setTripRows(rearrangedRows)
-    // calcRoute(false, true) //todo replace calc route with the new function
+    handleCalculateFastestDirections(false)
   }
 
   function handleReverseOrder()
   {
     ZF_reverseRows()
-    // calcRoute(false, true)
+    handleCalculateFastestDirections(false)
   }
 
   function appendRows()
@@ -212,7 +185,6 @@ const TripTable: React.FC = () => {
               </div>
             </div>
               
-
             <Box>
                 <Stack direction={"row"} spacing={1} >
                   <Box >
@@ -231,7 +203,7 @@ const TripTable: React.FC = () => {
                 
             </Box>
             <Box sx={{width: "100%"}}>
-                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestDirections()} variant="contained">Find Route</Button>
+                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestDirections(true)} variant="contained">Find Route</Button>
             </Box>
             
             

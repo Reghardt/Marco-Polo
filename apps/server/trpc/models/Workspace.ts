@@ -31,6 +31,7 @@ export interface IDrivers{
     accepted: boolean;
 }
 
+//TODO rename to drivable leg or driver leg, leg is not specific enough
 export const Leg_ZodSchema = z.object({
     givenAddress: z.string(),
     fullAddressStr: z.string(),

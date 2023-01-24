@@ -11,8 +11,8 @@ const ConfirmAllAddresses: React.FC = () => {
     const Z_goToAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
     const Z_tripRows = useTripStore(store => store.data.rows)
 
-    const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
-    const ZF_setErrorMessage = useTripStore(store => store.reducers.setErrorMessage)
+    const ZF_updateBodyCell = useTripStore(store => store.actions.updateBodyCell)
+    const ZF_setErrorMessage = useTripStore(store => store.actions.setErrorMessage)
 
     function confirmAll()
     {

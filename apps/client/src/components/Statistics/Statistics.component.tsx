@@ -17,13 +17,13 @@ enum EGraphType{
 
 const Statistics: React.FC = () => {
 
-    const R_tripDirections = useTripStore(state => state.data.tripDirections)
+    const Z_tripDirections = useTripStore(state => state.data.tripDirections)
     const [graphType, setGraphType] = useState<EGraphType>(EGraphType.Time)
 
     const [fuelPrice, setFuelPrice] = useState("")
     const [litersKm, setLitersKm] = useState("")
 
-    const ZF_setVehicle = useTripStore(state => state.reducers.setVehicle)
+    const ZF_setVehicle = useTripStore(state => state.actions.setVehicle)
     const Z_vehicle = useTripStore(state => state.data.vehicle)
 
     // const R_bearer = useAccountStore(state => state.values.bearer)
@@ -48,9 +48,9 @@ const Statistics: React.FC = () => {
     function calculateSimpleStatistics()
     {
         console.log("calculate trip directions fired")
-        if(R_tripDirections && R_tripDirections.status === google.maps.DirectionsStatus.OK)
+        if(Z_tripDirections && Z_tripDirections.status === google.maps.DirectionsStatus.OK)
         {
-            const legs = R_tripDirections?.result?.routes[0]?.legs
+            const legs = Z_tripDirections?.result?.routes[0]?.legs
             let roundTripDistance = 0;
             let roundTripTime = 0;
 
@@ -138,15 +138,15 @@ const Statistics: React.FC = () => {
             </ToggleButtonGroup>
 
             {graphType === EGraphType.Time && (
-                <TimeGraph tripDirections={R_tripDirections}/>
+                <TimeGraph tripDirections={Z_tripDirections}/>
             )}
 
             {graphType === EGraphType.Distance && (
-                <DistanceGraph tripDirections={R_tripDirections}/>
+                <DistanceGraph tripDirections={Z_tripDirections}/>
             )}
 
             {graphType === EGraphType.Cost && (
-                <CostGraph tripDirections={R_tripDirections} fuelPrice={fuelPrice} litersKm={litersKm} setFuelPrice={setFuelPrice} setLitersKm={setLitersKm}/>
+                <CostGraph tripDirections={Z_tripDirections} fuelPrice={fuelPrice} litersKm={litersKm} setFuelPrice={setFuelPrice} setLitersKm={setLitersKm}/>
             )}
 
         </Box>

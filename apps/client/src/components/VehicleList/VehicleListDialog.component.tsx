@@ -31,7 +31,7 @@ const VehicleListDialog: React.FC<IVehicleListDialog> = ({setIsModalOpen}) => {
 
     const [tabValue, setTabValue] = useState(0)
 
-    const ZF_setVehicle = useTripStore(state => state.reducers.setVehicle)
+    const ZF_setVehicle = useTripStore(state => state.actions.setVehicle)
 
     const [vehicleDescription, setVehicleDescription] = useState("")
     const [vehicleLicencePlate, setVehicleLicencePlate] = useState("")

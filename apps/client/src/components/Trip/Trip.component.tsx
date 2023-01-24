@@ -14,7 +14,7 @@ import Statistics from "../Statistics/Statistics.component"
 const Trip : React.FC = () => {
   console.log("Trip Refresh")
 
-  const ZF_setRowsAsNewTrip = useTripStore(store => store.reducers.setRowsAsNewTrip)
+  const ZF_setRowsAsNewTrip = useTripStore(store => store.actions.setRowsAsNewTrip)
 
     function retrieveUserSelectionFromSpreadsheetAndSet()
     {

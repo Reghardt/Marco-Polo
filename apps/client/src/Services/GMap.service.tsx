@@ -7,13 +7,20 @@ import { useMapsStore } from "../Zustand/mapsStore";
 import { useTripStore } from "../Zustand/tripStore";
 import { createLinkedAddressesDirections, createSimplePointToPointDirections } from "./Trip.service";
 
-export type TDirectionsLeg= {
+type TMouldedDirectionsLeg= {
     distance : google.maps.Distance, 
     duration: google.maps.Duration, 
-    path: google.maps.LatLng[]
+    path: google.maps.LatLng[],
+    polyLine: google.maps.Polyline | null,
     startAddress: string,
     endAddress: string
 }
+
+export type TMouldedDirectionsSection = {
+    legs: TMouldedDirectionsLeg[]
+}
+
+
 
 export function createMarker(
     keyId: string, 
@@ -229,12 +236,12 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
     
 }
 
-async function calculateDirectionsFromWaypoints(): Promise<ITripDirections | null>
+async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITripDirections | null>
 {   const Z_departureAddress = useTripStore.getState().data.departureAddress
     const Z_returnAddress = useTripStore.getState().data.returnAddress
     const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
 
-    const ZF_setRowOrderPerWaypoints = useTripStore.getState().reducers.setRowOrderPerWaypoints
+    const ZF_setRowOrderPerWaypoints = useTripStore.getState().actions.setRowOrderPerWaypoints
 
     const waypoints = createWaypointsListFromRows()
     console.log(waypoints)
@@ -246,7 +253,7 @@ async function calculateDirectionsFromWaypoints(): Promise<ITripDirections | nul
             {
                 if(Z_linkAddressColumnIndex < 0) //no link addresses
                 {
-                    const pointToPointDirections = await createSimplePointToPointDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, true )
+                    const pointToPointDirections = await createSimplePointToPointDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, optimize )
                     if(pointToPointDirections.result?.routes[0])
                     {
                         //reorder row as per optimized route
@@ -289,12 +296,12 @@ async function calculateDirectionsFromWaypoints(): Promise<ITripDirections | nul
 
 
 
-export async function handleCalculateFastestDirections()
+export async function handleCalculateFastestDirections(optimize: boolean)
 {
     const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
-    const ZF_setTripDirections = useTripStore.getState().reducers.setTripDirections
+    const ZF_setTripDirections = useTripStore.getState().actions.setTripDirections
     
-    const directions = await calculateDirectionsFromWaypoints()
+    const directions = await calculateDirectionsFromWaypoints(optimize)
     console.log(directions)
 
     ZF_setPreserveViewport(false);
@@ -305,37 +312,138 @@ export async function handleCalculateFastestDirections()
     
 }
 
-export function createPolyPathsFromDirections(directions: ITripDirections) : TDirectionsLeg[] | null
+function createLatLngPathFromLeg(leg: google.maps.DirectionsLeg)
 {
-    
-    if(directions.result?.routes[0])
+    const path: google.maps.LatLng[] = [];
+    for( let j = 0; j < leg.steps.length; j++)
     {
-        const route = directions.result?.routes[0]
-        const directionsLegs: TDirectionsLeg[] = []
-        
-        for(let i = 0; i < route.legs.length; i++)
+        const step = leg.steps[j]
+        if(step)
         {
-            const legPath: google.maps.LatLng[] = []
-            const leg = route.legs[i]
-            if(leg)
+            path.push(...step.path)
+        }
+    }
+
+    return path
+
+}
+
+function createPolyLineFromPath(path: google.maps.LatLng[], strokeColor: string, map: React.MutableRefObject<google.maps.Map | undefined>)
+{
+    return new google.maps.Polyline({
+        path: path,
+        strokeColor: strokeColor,
+        strokeWeight: 5,
+        map: map.current
+    })
+}
+
+//TODO error handeling feedback
+export function mouldDirections(rows: IRow[], directions: ITripDirections, addressColumnIndex: number, linkAddressColumnIndex: number, map: React.MutableRefObject<google.maps.Map | undefined>): TMouldedDirectionsSection[] | null
+{
+    if(addressColumnIndex < 0)
+    {
+        return null //no address column
+    }
+
+    const route = directions.result?.routes[0]
+
+    if(route)
+    {
+        let routeLegIndex = 0; //used to crawl down the list of legs of the route. 
+        const mouldedDirections: TMouldedDirectionsSection[] = []
+        for(let i = 0; i < rows.length; i++)
+        {
+            const row = rows[i]
+            if(row)
             {
-                for( let j = 0; j < leg.steps.length; j++)
+                const addressCell = row.cells[addressColumnIndex]
+                if(addressCell && addressCell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
                 {
-                    const step = leg.steps[j]
-                    if(step)
+                    if(!mouldedDirections[i]) //if undefined at index, create new empty array at index
                     {
-                        legPath.push(...step.path)
+                        mouldedDirections[i] = {legs: []}
+                    }
+
+                    const leg = route.legs[routeLegIndex]
+                    if(leg)
+                    {
+                        const path = createLatLngPathFromLeg(leg)
+                        mouldedDirections[i]?.legs.push(
+                            {
+                                distance: leg.distance ?? {text: "", value: 0}, 
+                                duration: leg.duration ?? {text: "", value: 0}, 
+                                path: path, 
+                                polyLine: createPolyLineFromPath(path, "hsl(208, 100%, 48%, 0.70)" , map), //blue
+                                startAddress: leg.start_address, 
+                                endAddress: leg.end_address
+                            }
+                        )
+                        routeLegIndex++; //increment on success
+                    }
+                    else
+                    {
+                        return null //leg does not exist
                     }
                 }
-                
-                
-                directionsLegs.push({distance: leg.distance ?? {text: "", value: 0}, duration: leg.duration ?? {text: "", value: 0}, path: legPath, startAddress: leg.start_address, endAddress: leg.end_address})
+                else
+                {
+                    return null //address cell not valid
+                }
+
+                if(linkAddressColumnIndex > -1) //if there are link addresses
+                {
+                    const linkAddressCell = row.cells[linkAddressColumnIndex]
+                    if(linkAddressCell && linkAddressCell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
+                    {
+                        const linkLeg = route.legs[routeLegIndex]
+                        if(linkLeg)
+                        {
+                            const path = createLatLngPathFromLeg(linkLeg)
+                            mouldedDirections[i]?.legs.push(
+                                {
+                                    distance: linkLeg.distance ?? {text: "", value: 0}, 
+                                    duration: linkLeg.duration ?? {text: "", value: 0}, 
+                                    path: path, 
+                                    polyLine: createPolyLineFromPath(path, "hsl(125, 100%, 36%, 0.70)", map), //green
+                                    startAddress: linkLeg.start_address, 
+                                    endAddress: linkLeg.end_address
+                                }
+                            )
+                            routeLegIndex++
+                        }
+                        else
+                        {
+                            return null //leg does not exist
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return null //row does not exist
             }
         }
-        return directionsLegs
+
+        const retunLeg = route.legs.at(-1)
+        if(retunLeg)
+        {
+            const path = createLatLngPathFromLeg(retunLeg)
+            mouldedDirections.push({legs: [
+                {
+                    distance: retunLeg.distance ?? {text: "", value: 0}, 
+                    duration: retunLeg.duration ?? {text: "", value: 0},
+                    path: path,
+                    polyLine: createPolyLineFromPath(path, "hsl(208, 100%, 48%, 0.70)", map),
+                    startAddress: retunLeg.start_address, 
+                    endAddress: retunLeg.end_address
+                }
+            ]})
+        }
+        return mouldedDirections
     }
     else
     {
-        return null
+        return null //no route has been calculated
     }
 }

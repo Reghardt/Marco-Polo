@@ -29,8 +29,8 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
 
 
 
-    const ZR_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
-    const ZR_deleteRow = useTripStore((state) => state.reducers.deleteRow)
+    const ZR_updateBodyCell = useTripStore(store => store.actions.updateBodyCell)
+    const ZR_deleteRow = useTripStore((state) => state.actions.deleteRow)
 
     useEffect( () => {
         if(cellRef.geocodedDataAndStatus === null)

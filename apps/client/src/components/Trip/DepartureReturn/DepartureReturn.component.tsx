@@ -12,13 +12,13 @@ import AddressSelector from "./AddressSelector.component"
 const DepartureReturn: React.FC = () => {
 
     const Z_returnAddress = useTripStore(store => store.data.returnAddress)
-    const Z_setReturnAddress = useTripStore(store => store.reducers.setReturnAddress)
+    const Z_setReturnAddress = useTripStore(store => store.actions.setReturnAddress)
 
     const Z_departureAddress = useTripStore(store => store.data.departureAddress)
-    const Z_setDepartureAddress = useTripStore(store => store.reducers.setDepartureAddress)
+    const Z_setDepartureAddress = useTripStore(store => store.actions.setDepartureAddress)
 
     const Z_departReturnState = useTripStore(store => store.data.departureReturnState)
-    const Z_setDepartReturnState = useTripStore(store => store.reducers.setDepartureReturnState)
+    const Z_setDepartReturnState = useTripStore(store => store.actions.setDepartureReturnState)
 
     useGetAddressBookQuery()
     

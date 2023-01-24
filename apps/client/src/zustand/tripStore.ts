@@ -90,7 +90,7 @@ interface ITrip{
 
 interface ITripState {
     data: ITrip
-    reducers: {
+    actions: {
         setDepartureAddress: (departureAddress: google.maps.GeocoderResult) => void;
         setReturnAddress: (returnAddress: google.maps.GeocoderResult) => void;
         setDepartureReturnState: (departureReturnState: EDepartReturn) => void;
@@ -133,7 +133,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
         errorMessage: "",
         tabelMode: ETableMode.EditMode
     },
-    reducers: {
+    actions: {
         setDepartureAddress(departureAddress) {
             set(produce<ITripState>((state) => {
                 state.data.departureAddress = departureAddress;

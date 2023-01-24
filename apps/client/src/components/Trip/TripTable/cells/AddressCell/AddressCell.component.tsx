@@ -86,23 +86,6 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
     setOpen(!open)
   }
 
-  // useEffect(() => {
-  //   if(cellRef.geocodedDataAndStatus === null && geocodeStarted.current === false)
-  //   {
-  //     console.log("execute geocode")
-  //     geocodeStarted.current = true;
-  //     (async () => {
-  //       const geocodeAddressResult = await geocodeAddress(cellRef.displayData)
-  //       ZF_updateBodyCell({...cellRef, geocodedDataAndStatus: geocodeAddressResult});
-  //       if(geocodeAddressResult.status === google.maps.GeocoderStatus.OK)
-  //       {
-  //         return
-  //       }
-  //     })()
-  //   }
-
-
-  // }, [])
 
   return(
     <React.Fragment>

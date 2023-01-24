@@ -69,32 +69,35 @@ const TollMarker: React.FC<ITollMarker> = ({tollInfo}) => {
 
             {open && (
                 <div 
-                    className={"bg-white shadow-xl p-2 grid"}
+                    className={"bg-white shadow-xl p-2"}
                     ref={floating}
                     style={{
                     position: strategy,
                     top: y ?? 0,
                     left: x ?? 0,
                     width: 'auto',
-                    gridTemplateColumns: "max-content 1fr",
-                    columnGap: "4px"
+                    // gridTemplateColumns: "max-content 1fr",
                     }}
                     {...getFloatingProps()}
                 >
                     <div className={"text-sm"}>{tollInfo.name}</div> 
-                    <div></div>
+                    <div className={"grid"} style={{gridTemplateColumns: "max-content 1fr", columnGap: "8px"}}>
+                        <div className={"flex items-center"}>Class 1: R</div>
+                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class1.toPrecision(4)}</div>
 
-                    <div className={"flex items-center"}>Class 1: R</div>
-                    <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class1.toPrecision(4)}</div>
+                        <div className={"flex items-center"}>Class 2: R  </div>
+                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class2.toFixed(2)}</div>
 
-                    <div className={"flex items-center"}>Class 2: R  </div>
-                    <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class2.toFixed(2)}</div>
+                        <div className={"flex items-center"}>Class 3: R  </div>
+                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class3.toFixed(2)}</div>
 
-                    <div className={"flex items-center"}>Class 3: R  </div>
-                    <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class3.toFixed(2)}</div>
+                        <div className={"flex items-center"}>Class 4: R  </div>
+                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class4.toFixed(2)}</div>
+                    </div>
+                    
 
-                    <div className={"flex items-center"}>Class 4: R  </div>
-                    <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class4.toFixed(2)}</div>
+
+
                     
                 </div>
             )}

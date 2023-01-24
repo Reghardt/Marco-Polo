@@ -30,7 +30,7 @@ const CostGraph: React.FC<ICostGraph> = ({tripDirections, fuelPrice, litersKm, s
     const [roundTripCost, setRoundTripCost] = useState(0)
     const [averageCost, setAverageCost] = useState(0)
 
-    const ZF_setVehicle = useTripStore(state => state.reducers.setVehicle)
+    const ZF_setVehicle = useTripStore(state => state.actions.setVehicle)
 
     const TM_fuelPriceMutation = useSetFuelPriceMutation()
 

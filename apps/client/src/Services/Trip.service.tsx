@@ -87,8 +87,8 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
   const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex;
   const Z_toAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex;
   const Z_tableMode = useTripStore.getState().data.tabelMode;
-  const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
-  const ZF_setErrorMessage = useTripStore.getState().reducers.setErrorMessage
+  const ZF_updateBodyCell = useTripStore.getState().actions.updateBodyCell
+  const ZF_setErrorMessage = useTripStore.getState().actions.setErrorMessage
 
 
   function setVerified(cell: ICell)
@@ -237,7 +237,7 @@ export function createColumnVisibilityCheckboxes(columnNames: IRow, columnVisibi
         return  (<Grid item xs="auto" sx={{margin: 0, padding: 0}}>
                   <FormControlLabel  control={<Checkbox sx={{paddingTop: 0, paddingBottom: 0}} checked={columnVisibility[idx]} 
                     onChange={() => {
-                      useTripStore.getState().reducers.updateColumnVisibility(idx)
+                      useTripStore.getState().actions.updateColumnVisibility(idx)
                     }}/>} label={String.fromCharCode(elem.x - 1 + 'A'.charCodeAt(0))} />
                 </Grid>)
       })}
@@ -660,85 +660,6 @@ export function createLinkedAddressesDirections(departureAddress: string, return
   })  
 }
 
-// export async function calcRoute(shouldOptimize: boolean, preserveViewport: boolean)
-// {
-//   const Z_departureAddress = useTripStore.getState().data.departureAddress
-//   const Z_returnAddress = useTripStore.getState().data.returnAddress
-//   const Z_tripRows = useTripStore.getState().data.rows
-//   const Z_addressColumIndex = useTripStore.getState().data.addressColumnIndex
-//   const Z_goToaddressColumIndex = useTripStore.getState().data.linkAddressColumnIndex
-
-//   const ZF_setRowOrderPerWaypoints = useTripStore.getState().reducers.setRowOrderPerWaypoints
-//   const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
-//   const ZF_setTripDirections = useTripStore.getState().reducers.setTripDirections
-
-//   if(Z_departureAddress === null || Z_returnAddress === null) //test if not "none"
-//   {
-//     return {status: false, msg: "Error: Check if Departure and/or Return addresses are set"}
-//   }
-//   else{
-//     const waypoints: google.maps.DirectionsWaypoint[]  = [];
-
-//     if(Z_addressColumIndex > -1)
-//     {
-//       for(let i = 0; i < Z_tripRows.length; i++)
-//       {
-//         {
-//           const addressCell = Z_tripRows[i]?.cells[Z_addressColumIndex]
-//           if(addressCell?.geocodedDataAndStatus?.results && addressCell.geocodedDataAndStatus.results.length > 0 && addressCell.isAddressAccepted)
-//           {
-//             const addressCellGeoAddress = addressCell.geocodedDataAndStatus.results[addressCell.selectedGeocodedAddressIndex]
-//             waypoints.push({location: addressCellGeoAddress?.formatted_address, stopover: true})
-//           }
-//           else{
-//             return {status: false, msg: "Error: Check if all addresses are confirmed"}
-//           }
-//         }
-
-//         if(Z_goToaddressColumIndex > -1)
-//         {
-//           const goToAddressCell = Z_tripRows[i]?.cells[Z_goToaddressColumIndex]
-//           if(goToAddressCell?.geocodedDataAndStatus?.results && goToAddressCell.geocodedDataAndStatus.results.length > 0 && goToAddressCell.isAddressAccepted)
-//           {
-//             const goToAddressCellGeoAddress = goToAddressCell.geocodedDataAndStatus.results[goToAddressCell.selectedGeocodedAddressIndex]
-//             waypoints.push({location: goToAddressCellGeoAddress?.formatted_address, stopover: true})
-//           }
-//         }
-//       }
-
-//       //TODO check if there are enought tokens available
-
-//       //if goToAddress exists dont optimize
-//       const directionsResult = await createDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, Z_goToaddressColumIndex > -1 ? false : shouldOptimize)
-
-//       if(directionsResult.status === google.maps.DirectionsStatus.OK)
-//       {
-//         if(directionsResult.result?.routes[0]?.waypoint_order)
-//         {
-//           if(!(Z_goToaddressColumIndex > -1))
-//           {
-//             ZF_setRowOrderPerWaypoints(directionsResult.result?.routes[0].waypoint_order);
-//           }
-          
-//           ZF_setPreserveViewport(preserveViewport);
-//           ZF_setTripDirections(directionsResult);
-//           console.log(directionsResult)
-
-//           return {status: true, msg: ""}
-//         }
-//         else{
-//           return {status: false, msg: "Error: Something went wrong with finding a route"}
-//         }
-//       }
-//       else{
-//         return {status: false, msg: "Error: Something went wrong with finding a route"}
-//       }
-//     }
-//     else{
-//       return {status: false, msg: "Error: No address column set"}
-//     }
-//   }
-// }
 
 //TODO rework this function
 export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
@@ -810,7 +731,7 @@ export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
 export async function solveAddresses(columnIndex: number)
 {
   const Z_tripRows = useTripStore.getState().data.rows
-  const ZF_updateBodyCell = useTripStore.getState().reducers.updateBodyCell
+  const ZF_updateBodyCell = useTripStore.getState().actions.updateBodyCell
 
   if(columnIndex >= 0)
   {
@@ -843,7 +764,7 @@ export async function solveAddresses(columnIndex: number)
 //sets column designation. And if the designation is not data, solve the addresses in the columns
 export function handleColumnDesignationAndSolveColumnAddresses(columnIndex: number, columnDesignation: EColumnDesignations)
 {
-  useTripStore.getState().reducers.updateColumnDesignation({columnIndex: columnIndex, designation: columnDesignation})
+  useTripStore.getState().actions.updateColumnDesignation({columnIndex: columnIndex, designation: columnDesignation})
   //solve addresses in column if not edit mode
   if(useTripStore.getState().data.tabelMode !== ETableMode.EditMode)
   {

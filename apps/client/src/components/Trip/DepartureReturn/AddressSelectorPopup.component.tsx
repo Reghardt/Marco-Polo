@@ -21,13 +21,6 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    // useEffect(() => {
-    //     if(physicalAddressStr === "")
-    //     {
-    //       setPhysicalAddressStr("Specify Address")
-    //     }
-    //   }, [])
-
     function generateGeocodeResults(address: string)
     {
       if(address)
