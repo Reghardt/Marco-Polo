@@ -18,7 +18,7 @@ const TripTable: React.FC = () => {
   const Z_columnVisibility = useTripStore(store => store.data.columnVisibility)
   const Z_columnDesignations = useTripStore(store => store.data.columnDesignations)
   const Z_addressColumnIndex = useTripStore(store => store.data.addressColumnIndex)
-  const Z_toAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
+  const Z_LinkAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
   const Z_tabelMode = useTripStore(store => store.data.tabelMode)
   const Z_errorMessage = useTripStore(store => store.data.errorMessage)
 
@@ -28,6 +28,7 @@ const TripTable: React.FC = () => {
   const ZF_setTableMode = useTripStore(store => store.actions.setTableMode)
 
 
+  //TODO make solveAddresses event based, only needs to fire on solve modes
   useEffect(() => {
     if(Z_tabelMode === ETableMode.AddressSolveMode)
     {
@@ -35,15 +36,13 @@ const TripTable: React.FC = () => {
       {
         ZF_setTableMode(ETableMode.EditMode)
       }
-      //solveAddresses(Z_addressColumnIndex) //TODO make solveAddresses event based, only needs to fire on solve modes
     }
     else if(Z_tabelMode === ETableMode.LinkAddressSolveMode)
     {
-      if(isAllAddressesInColumnValidAndAccepted(Z_toAddressColumnIndex, Z_tabelMode))
+      if(isAllAddressesInColumnValidAndAccepted(Z_LinkAddressColumnIndex, Z_tabelMode))
       {
         ZF_setTableMode(ETableMode.EditMode)
       }
-      //solveAddresses(Z_toAddressColumnIndex) //TODO make solveAddresses event based, only needs to fire on solve modes
     }
 
   }, [Z_tripRows])
@@ -65,13 +64,13 @@ const TripTable: React.FC = () => {
     console.log(sequence, rearrangedRows)
 
     ZF_setTripRows(rearrangedRows)
-    handleCalculateFastestDirections(false)
+    handleCalculateFastestDirections(false, true)
   }
 
   function handleReverseOrder()
   {
     ZF_reverseRows()
-    handleCalculateFastestDirections(false)
+    handleCalculateFastestDirections(false, true)
   }
 
   function appendRows()
@@ -95,21 +94,6 @@ const TripTable: React.FC = () => {
     console.log(newRows)
     ZF_setTripRows(newRows)
   }
-
-  // async function handleCalcFastestRoute()
-  // {
-  //   const routeRes = await calcRoute(true, false)
-  //   if(routeRes.status){
-  //     ZF_setErrorMessage("");
-  //   }
-  //   else{
-  //     ZF_setErrorMessage(routeRes.msg)
-  //   }
-  // }
-
-
-
-
 
   function createGridTracks(columnVisibility: boolean[])
   {
@@ -203,7 +187,7 @@ const TripTable: React.FC = () => {
                 
             </Box>
             <Box sx={{width: "100%"}}>
-                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestDirections(true)} variant="contained">Find Route</Button>
+                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestDirections(true, false)} variant="contained">Find Route</Button>
             </Box>
             
             

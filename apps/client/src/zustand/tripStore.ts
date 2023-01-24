@@ -1,9 +1,10 @@
-import { EColumnDesignations, ICell, IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
+import { EColumnDesignations, ICell, IRow } from "../Components/common/CommonInterfacesAndEnums";
 import create from 'zustand';
 import produce from 'immer';
 import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Services/Trip.service";
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
 import { WritableDraft } from "immer/dist/internal";
+import { TMouldedDirectionsSection } from "../Services/GMap.service";
 
 export enum EDepartReturn{
     return,
@@ -80,7 +81,7 @@ interface ITrip{
     addressColumnIndex: number; 
     linkAddressColumnIndex: number;
 
-    tripDirections: ITripDirections | null;
+    tripDirections: TMouldedDirectionsSection[] | null;
 
     vehicle: IVehicleListEntry | null;
     errorMessage: string;
@@ -105,7 +106,7 @@ interface ITripState {
         reverseRows: () => void;
 
         setRowOrderPerWaypoints: (waypoints: number[]) => void;
-        setTripDirections: (tripDirections: ITripDirections) => void;
+        setTripDirections: (tripDirections: TMouldedDirectionsSection[]) => void;
 
         setVehicle: (vehicle: IVehicleListEntry | null) => void;
 
@@ -167,7 +168,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                     state.data.rows = payload;
                     state.data.addressColumnIndex = -1;
                     state.data.linkAddressColumnIndex = -1;
-                    state.data.tripDirections = null;
+                    // state.data.tripDirections = null;
                     state.data.tabelMode = ETableMode.EditMode
                 }
 
@@ -279,7 +280,19 @@ export const useTripStore = create<ITripState>()(((set) => ({
             }))
         },
         setTripDirections(tripDirections) {
+            
+
+
+
             set(produce<ITripState>((state) => {
+                if(state.data.tripDirections)
+                {
+                    state.data.tripDirections.forEach(section => {
+                        section.legs.forEach(leg => {
+                            leg.polyLine?.setMap(null)
+                        })
+                    })
+                }
                 state.data.tripDirections = tripDirections
             }))
         },

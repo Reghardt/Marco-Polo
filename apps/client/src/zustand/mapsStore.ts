@@ -4,9 +4,11 @@ import { immer } from "zustand/middleware/immer"
 
 interface IMapStoreState{
     data: {
+        map: google.maps.Map | undefined
         preserveViewport: boolean;
     },
-    reducers: {
+    actions: {
+        setMap: (map: google.maps.Map) => void;
         setPreserveViewport: (preserve: boolean) => void;
     }
 }
@@ -14,14 +16,23 @@ interface IMapStoreState{
 export const useMapsStore = create<IMapStoreState>()(
     immer((set) => ({
         data: {
+            map: undefined,
             preserveViewport: false
         },
-        reducers: {
+        actions: {
+
+            setMap(map){
+                set(state => {
+                    state.data.map = map
+                })
+            },
+
             setPreserveViewport(preserve) {
                 set(state => {
                     state.data.preserveViewport = preserve
                 })
             },
+
         }
     }))
 )

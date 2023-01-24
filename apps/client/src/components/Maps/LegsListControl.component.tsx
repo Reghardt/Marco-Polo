@@ -9,7 +9,7 @@ interface ILegsListControl{
 
 const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
 
-    console.log("Legs list control rerendered")
+    console.log("Legs list control rerendered", mouldedDirections)
 
     // const Z_rows = useTripStore(store => store.data.rows)
     // const Z_addressColumnIndex = useTripStore(store => store.data.addressColumnIndex)

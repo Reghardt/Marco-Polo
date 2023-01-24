@@ -24,14 +24,14 @@ export type TMouldedDirectionsSection = {
 
 export function createMarker(
     keyId: string, 
-    map: React.MutableRefObject<google.maps.Map | undefined>,
+    map: google.maps.Map | undefined,
     position: google.maps.LatLng,
     content: React.ReactNode,
     )
 {
     return <CustomMarker
         key={`custom-marker-${keyId}`}
-        map={map.current} 
+        map={map} 
         position={position} 
     >
         {content}
@@ -40,7 +40,7 @@ export function createMarker(
 
 export function createCustomMapMarkers(
     rows: IRow[], 
-    map: React.MutableRefObject<google.maps.Map | undefined>, 
+    map: google.maps.Map | undefined, 
     addressColumnIndex: number,
     linkAddressColumnIndex: number,
     departureAddress: google.maps.GeocoderResult | null, 
@@ -294,21 +294,28 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
     }
 }
 
-
-
-export async function handleCalculateFastestDirections(optimize: boolean)
+export async function handleCalculateFastestDirections(optimize: boolean, preserveViewport: boolean)
 {
-    const ZF_setPreserveViewport = useMapsStore.getState().reducers.setPreserveViewport
+    const Z_rows = useTripStore.getState().data.rows
+    const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex
+    const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
+    const ZF_setPreserveViewport = useMapsStore.getState().actions.setPreserveViewport
     const ZF_setTripDirections = useTripStore.getState().actions.setTripDirections
-    
-    const directions = await calculateDirectionsFromWaypoints(optimize)
-    console.log(directions)
-
-    ZF_setPreserveViewport(false);
-    if(directions)
+    const Z_map = useMapsStore.getState().data.map
+   
+    const directions = await calculateDirectionsFromWaypoints(optimize) //calculate new directions
+    if(directions && directions.status === google.maps.DirectionsStatus.OK && Z_map) //if successfull
     {
-        ZF_setTripDirections(directions);
+        const mouldedDirections = mouldDirections(Z_rows, directions, Z_addressColumnIndex, Z_linkAddressColumnIndex, Z_map) //transform directions
+        ZF_setPreserveViewport(preserveViewport);
+        if(mouldedDirections)
+        {
+            ZF_setTripDirections(mouldedDirections);
+        }
     }
+    
+
+
     
 }
 
@@ -328,18 +335,25 @@ function createLatLngPathFromLeg(leg: google.maps.DirectionsLeg)
 
 }
 
-function createPolyLineFromPath(path: google.maps.LatLng[], strokeColor: string, map: React.MutableRefObject<google.maps.Map | undefined>)
+export function createPolyLineFromPath(path: google.maps.LatLng[], strokeColor: string, map: google.maps.Map | undefined)
 {
     return new google.maps.Polyline({
         path: path,
         strokeColor: strokeColor,
         strokeWeight: 5,
-        map: map.current
+        map: map
     })
 }
 
 //TODO error handeling feedback
-export function mouldDirections(rows: IRow[], directions: ITripDirections, addressColumnIndex: number, linkAddressColumnIndex: number, map: React.MutableRefObject<google.maps.Map | undefined>): TMouldedDirectionsSection[] | null
+export function mouldDirections(
+    rows: IRow[], 
+    directions: ITripDirections, 
+    addressColumnIndex: number, 
+    linkAddressColumnIndex: number,
+    map: google.maps.Map
+
+    ): TMouldedDirectionsSection[] | null
 {
     if(addressColumnIndex < 0)
     {
@@ -374,7 +388,7 @@ export function mouldDirections(rows: IRow[], directions: ITripDirections, addre
                                 distance: leg.distance ?? {text: "", value: 0}, 
                                 duration: leg.duration ?? {text: "", value: 0}, 
                                 path: path, 
-                                polyLine: createPolyLineFromPath(path, "hsl(208, 100%, 48%, 0.70)" , map), //blue
+                                polyLine: createPolyLineFromPath(path, "hsl(208, 100%, 48%, 0.70)", map),
                                 startAddress: leg.start_address, 
                                 endAddress: leg.end_address
                             }

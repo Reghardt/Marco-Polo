@@ -15,6 +15,7 @@ const Trip : React.FC = () => {
   console.log("Trip Refresh")
 
   const ZF_setRowsAsNewTrip = useTripStore(store => store.actions.setRowsAsNewTrip)
+  const ZF_setTripDirections = useTripStore(store => store.actions.setTripDirections)
 
     function retrieveUserSelectionFromSpreadsheetAndSet()
     {
@@ -30,6 +31,7 @@ const Trip : React.FC = () => {
             return;
           }
           ZF_setRowsAsNewTrip(selection)
+          ZF_setTripDirections([])
         } 
       })
     }
