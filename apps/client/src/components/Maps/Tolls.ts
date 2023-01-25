@@ -23,8 +23,8 @@ export const tolls: IToll[] = [
         tarrif: {class1: 50.50, class2: 137.00, class3: 189.00, class4: 227.00}
     },
     {
-        name: "KRANSKOP", 
-        coordinates: new google.maps.LatLng({lat: -24.751118394827017, lng: 28.468837726453117}), //-24.751118394827017, 28.468837726453117
+        name: "KRANSKOP", //-24.78178019509647, 28.471487768004984
+        coordinates: new google.maps.LatLng({lat: -24.78178019509647, lng: 28.471487768004984}),
         tarrif: {class1: 50.50, class2: 137.00, class3: 189.00, class4: 227.00}
     },
     {

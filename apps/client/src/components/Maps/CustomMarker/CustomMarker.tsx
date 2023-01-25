@@ -8,11 +8,12 @@ import OverlayView from "./OverlayView.component";
 interface ICustomMarkerProps{
     map?: google.maps.Map;
     position: google.maps.LatLng;
+    center: boolean;
     children: React.ReactNode
-    // markerRowNumber: number;
+
 }
 
-const CustomMarker: React.FC<ICustomMarkerProps> = ({map, position, children}) => {
+const CustomMarker: React.FC<ICustomMarkerProps> = ({map, position, center, children}) => {
 
 
 
@@ -24,9 +25,17 @@ const CustomMarker: React.FC<ICustomMarkerProps> = ({map, position, children}) =
                         map={map}
                         pane={"floatPane"}
                     >
+                        {center === true
+                        ? 
+                        <div style={{transform: 'translate(-50%, -50%)'}}>
+                            {children}
+                        </div>
+                        : 
                         <div style={{transform: 'translate(-50%, -100%)'}}>
                             {children}
                         </div>
+                         }
+                        
                     </OverlayView>
                     
             )}

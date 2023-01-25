@@ -27,12 +27,14 @@ export function createMarker(
     map: google.maps.Map | undefined,
     position: google.maps.LatLng,
     content: React.ReactNode,
+    center: boolean = false
     )
 {
     return <CustomMarker
         key={`custom-marker-${keyId}`}
         map={map} 
         position={position} 
+        center={center}
     >
         {content}
     </CustomMarker>

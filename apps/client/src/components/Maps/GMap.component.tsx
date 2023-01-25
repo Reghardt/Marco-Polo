@@ -49,6 +49,7 @@ const GMap: React.FC = () => {
                         Z_map,
                         toll.coordinates, 
                         <TollMarker tollInfo={toll}/>,
+                        true
                     )
                 })}
 

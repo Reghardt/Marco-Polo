@@ -1,8 +1,9 @@
-import { Box, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { Box,Typography } from "@mui/material";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
-import React, { useState } from "react"
+import React from "react"
 import { useTripStore } from "../../Zustand/tripStore";
-import { tolls } from "../Maps/Tolls";
+import NivoCostGraph from "./NivoCostGraph.component";
+import NivoDistanceGraph from "./NivoDistanceGraph.component";
 // import { useGetMemberDataQuery, useGetVehicleByIdQuery } from "../../trpc-hooks/trpcHooks";
 // import { useTripStore } from "../../Zustand/tripStore";
 
@@ -11,16 +12,16 @@ import { tolls } from "../Maps/Tolls";
 // import DistanceGraph from "./DistanceGraph.component";
 // import TimeGraph from "./TimeGraph.component";
 
-enum EGraphType{
-    Distance,
-    Time,
-    Cost
-}
+// enum EGraphType{
+//     Distance,
+//     Time,
+//     Cost
+// }
 
 const Statistics: React.FC = () => {
 
     const Z_tripDirections = useTripStore(state => state.data.tripDirections)
-    const [graphType, setGraphType] = useState<EGraphType>(EGraphType.Time)
+    // const [graphType, setGraphType] = useState<EGraphType>(EGraphType.Time)
 
     // const [fuelPrice, setFuelPrice] = useState("")
     // const [litersKm, setLitersKm] = useState("")
@@ -30,26 +31,26 @@ const Statistics: React.FC = () => {
 
     ChartJS.register(CategoryScale, LinearScale,PointElement, LineElement, BarElement, Title, Tooltip, Legend)
 
-    if(Z_tripDirections)
-    {
-        Z_tripDirections.forEach(section => {
-            section.legs.forEach(leg => {
-                console.log(leg)
+    // if(Z_tripDirections)
+    // {
+    //     Z_tripDirections.forEach(section => {
+    //         section.legs.forEach(leg => {
+    //             console.log(leg)
 
-                tolls.forEach(toll => {
-                    if(google.maps.geometry.poly.isLocationOnEdge(toll.coordinates, leg.polyLine!, 10e-4))
-                    {
-                        console.log("passes", toll.name)
-                    }
-                    else
-                    {
-                        console.log("does not pass", toll.name)
-                    }
-                })
+    //             tolls.forEach(toll => {
+    //                 if(google.maps.geometry.poly.isLocationOnEdge(toll.coordinates, leg.polyLine!, 10e-4))
+    //                 {
+    //                     console.log("passes", toll.name)
+    //                 }
+    //                 else
+    //                 {
+    //                     console.log("does not pass", toll.name)
+    //                 }
+    //             })
                 
-            })
-        })
-    }
+    //         })
+    //     })
+    // }
     
 
     // function secondsToH_M(value: number)
@@ -130,12 +131,12 @@ const Statistics: React.FC = () => {
     // }, [memberQuery.isFetched])
     
     return(
-        <Box sx={{height: "55em"}}>
+        <Box>
             <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Trip Statistics</Typography>
 
             {/* {calculateSimpleStatistics()} */}
 
-            <ToggleButtonGroup
+            {/* <ToggleButtonGroup
                 sx={{marginBottom: "0.5em"}}
                 size="small"
                 color="primary"
@@ -152,7 +153,7 @@ const Statistics: React.FC = () => {
                 <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Time}>Time</ToggleButton>
                 <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Distance}>Distance</ToggleButton>
                 <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Cost}>Cost</ToggleButton>
-            </ToggleButtonGroup>
+            </ToggleButtonGroup> */}
 
             {/* {graphType === EGraphType.Time && (
                 <TimeGraph tripDirections={Z_tripDirections}/>
@@ -165,6 +166,10 @@ const Statistics: React.FC = () => {
             {graphType === EGraphType.Cost && (
                 <CostGraph tripDirections={Z_tripDirections} fuelPrice={fuelPrice} litersKm={litersKm} setFuelPrice={setFuelPrice} setLitersKm={setLitersKm}/>
             )} */}
+
+            <NivoCostGraph/>
+            {Z_tripDirections && <NivoDistanceGraph tripDirections={Z_tripDirections}/>}
+            
 
         </Box>
     )
