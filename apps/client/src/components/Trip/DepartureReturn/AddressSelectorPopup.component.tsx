@@ -93,9 +93,11 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
       <div className={"shadow-2xl bg-white"}>
         <div className={"bg-[#1976d2] w-full h-1"}></div>
         <div className={"p-4 text-[#1976d2] text-base mb-4"}>
-          <div className={""}>{title}</div>
+          
 
           <div className={"space-y-4"}>
+
+            <div className={""}>{title}</div>
             <div>
               <Button variant="contained" onClick={() => setIsModalOpen(!isModalOpen)}>Address Book</Button>
             </div>
@@ -131,8 +133,8 @@ const AddressSelectorPopup: React.FC<IAddressSelectorPopup> = ({title, address, 
               </div> 
             )}
 
-          <div>
-            <Button variant="text" onClick={() => saveAddress()}>Save</Button>
+          <div className={"space-x-2"}>
+            <Button variant="contained" onClick={() => saveAddress()}>Save</Button>
             <Button variant="text" color="error" onClick={() => {handleCancel()}}>Cancel</Button>
           </div>
 

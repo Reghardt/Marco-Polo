@@ -1,9 +1,9 @@
 import produce from "immer"
 import { useEffect, useState } from "react"
-import { TMouldedDirectionsSection } from "../../Services/GMap.service"
+import { TMouldedDirectionsLegGroup } from "../../Services/GMap.service"
 
 interface ILegsListControl{
-    mouldedDirections: TMouldedDirectionsSection[],
+    mouldedDirections: TMouldedDirectionsLegGroup[],
     // setMouldedDirections: React.Dispatch<React.SetStateAction<TMouldedDirectionsSection[]>>
 }
 
@@ -25,13 +25,13 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
     {
         for(let i = 0; i < mouldedDirections.length; i++)
         {
-            const section = mouldedDirections[i];
+            const group = mouldedDirections[i];
             const vis = visibility[i]
-            if(section)
+            if(group)
             {
-                for(let j = 0; j < section.legs.length; j++)
+                for(let j = 0; j < group.legs.length; j++)
                 {
-                    const leg = section.legs[j]
+                    const leg = group.legs[j]
                     if(leg)
                     {
                         leg.polyLine?.setOptions({
@@ -50,13 +50,12 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
         if(mouldedDirections.length > 0)
         {
             return <div className={" cursor-default text-sm "}>
-                {mouldedDirections.map((section, index) => {
+                {mouldedDirections.map((group, index) => {
 
-  
                     return (
                         <div key={`leg-control-${index}`} className={"flex justify-between items-center p-1 hover:bg-slate-100"}>
                                 
-                            {section.legs[0] && section.legs[1]
+                            {group.legs[0] && group.legs[1]
                                 ?   (() => { 
                                         const legControl = <div>{index + 1} -&gt; {index + 1}</div>
                                         return legControl

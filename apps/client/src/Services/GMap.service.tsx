@@ -7,7 +7,7 @@ import { useMapsStore } from "../Zustand/mapsStore";
 import { useTripStore } from "../Zustand/tripStore";
 import { createLinkedAddressesDirections, createSimplePointToPointDirections } from "./Trip.service";
 
-type TMouldedDirectionsLeg= {
+export type TMouldedDirectionsLeg= {
     distance : google.maps.Distance, 
     duration: google.maps.Duration, 
     path: google.maps.LatLng[],
@@ -16,7 +16,7 @@ type TMouldedDirectionsLeg= {
     endAddress: string
 }
 
-export type TMouldedDirectionsSection = {
+export type TMouldedDirectionsLegGroup = {
     legs: TMouldedDirectionsLeg[]
 }
 
@@ -355,7 +355,7 @@ export function mouldDirections(
     linkAddressColumnIndex: number,
     map: google.maps.Map
 
-    ): TMouldedDirectionsSection[] | null
+    ): TMouldedDirectionsLegGroup[] | null
 {
     if(addressColumnIndex < 0)
     {
@@ -367,7 +367,7 @@ export function mouldDirections(
     if(route)
     {
         let routeLegIndex = 0; //used to crawl down the list of legs of the route. 
-        const mouldedDirections: TMouldedDirectionsSection[] = []
+        const mouldedDirections: TMouldedDirectionsLegGroup[] = []
         for(let i = 0; i < rows.length; i++)
         {
             const row = rows[i]

@@ -1,9 +1,11 @@
 import { Box,Typography } from "@mui/material";
 import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from "chart.js"
-import React from "react"
+import React, { useState } from "react"
 import { useTripStore } from "../../Zustand/tripStore";
 import NivoCostGraph from "./NivoCostGraph.component";
 import NivoDistanceGraph from "./NivoDistanceGraph.component";
+import NivoTimeGraph from "./NivoTimeGraph.component";
+import VehicleSelector from "./VehicleSelector.component";
 // import { useGetMemberDataQuery, useGetVehicleByIdQuery } from "../../trpc-hooks/trpcHooks";
 // import { useTripStore } from "../../Zustand/tripStore";
 
@@ -23,8 +25,8 @@ const Statistics: React.FC = () => {
     const Z_tripDirections = useTripStore(state => state.data.tripDirections)
     // const [graphType, setGraphType] = useState<EGraphType>(EGraphType.Time)
 
-    // const [fuelPrice, setFuelPrice] = useState("")
-    // const [litersKm, setLitersKm] = useState("")
+    const [fuelPrice, setFuelPrice] = useState("")
+    const [litersKm, setLitersKm] = useState("")
 
     // const ZF_setVehicle = useTripStore(state => state.actions.setVehicle)
     // const Z_vehicle = useTripStore(state => state.data.vehicle)
@@ -129,6 +131,8 @@ const Statistics: React.FC = () => {
     //     }
 
     // }, [memberQuery.isFetched])
+
+    
     
     return(
         <Box>
@@ -136,41 +140,19 @@ const Statistics: React.FC = () => {
 
             {/* {calculateSimpleStatistics()} */}
 
-            {/* <ToggleButtonGroup
-                sx={{marginBottom: "0.5em"}}
-                size="small"
-                color="primary"
-                value={graphType}
-                exclusive
-                onChange={(_e, v) => {
-                    if(v !== null)
-                    {
-                        setGraphType(v)
-                    } 
-                }}
-                aria-label="Address Type"
-                >
-                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Time}>Time</ToggleButton>
-                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Distance}>Distance</ToggleButton>
-                <ToggleButton sx={{textTransform: "none", maxHeight:"inherit"}} value={EGraphType.Cost}>Cost</ToggleButton>
-            </ToggleButtonGroup> */}
+            <VehicleSelector setLitersKm={setLitersKm} setFuelPrice={setFuelPrice}/>
 
-            {/* {graphType === EGraphType.Time && (
-                <TimeGraph tripDirections={Z_tripDirections}/>
-            )}
-
-            {graphType === EGraphType.Distance && (
-                <DistanceGraph tripDirections={Z_tripDirections}/>
-            )}
-
-            {graphType === EGraphType.Cost && (
-                <CostGraph tripDirections={Z_tripDirections} fuelPrice={fuelPrice} litersKm={litersKm} setFuelPrice={setFuelPrice} setLitersKm={setLitersKm}/>
-            )} */}
-
-            <NivoCostGraph/>
-            {Z_tripDirections && <NivoDistanceGraph tripDirections={Z_tripDirections}/>}
             
 
+
+
+            {Z_tripDirections && Z_tripDirections.length > 0 &&
+                <div>
+                    <NivoCostGraph fuelPrice={fuelPrice} litersKm={litersKm} tripDirections={Z_tripDirections}/>
+                    <NivoDistanceGraph tripDirections={Z_tripDirections}/>
+                    <NivoTimeGraph tripDirections={Z_tripDirections}/>
+                </div>
+            }
         </Box>
     )
 }

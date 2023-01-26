@@ -58,11 +58,11 @@ import { TMouldedDirectionsLegGroup } from "../../Services/GMap.service"
 //     },   
 //   ]
 
-interface INivoDistanceGraphProps{
+interface INivodurationGraphProps{
     tripDirections: TMouldedDirectionsLegGroup[]
 }
 
-const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) => {
+const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
 
     interface ITripLineGraphData{
         id: string;
@@ -79,26 +79,25 @@ const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) 
         data: []
     }
 
-    let comulativeDistance = 0
+    let comulativeduration = 0
     for(let i = 0; i < tripDirections.length; i++)
     {
         const legs = tripDirections[i]?.legs
         if(legs)
         {
-            if(legs[0]?.distance && legs[1]?.distance)
+            if(legs[0]?.duration && legs[1]?.duration)
             {
-                comulativeDistance += legs[0].distance.value + legs[1].distance.value
-                lineDraphData.data.push({x: `${i + 1}->${i + 1}`, y: comulativeDistance})
+                comulativeduration += legs[0].duration.value + legs[1].duration.value
+                lineDraphData.data.push({x: `${i + 1}->${i + 1}`, y: comulativeduration})
             }
-            else if(legs[0]?.distance)
+            else if(legs[0]?.duration)
             {
-                comulativeDistance += legs[0].distance.value
-                lineDraphData.data.push({x: `${i + 1}`, y: comulativeDistance})
+                comulativeduration += legs[0].duration.value
+                lineDraphData.data.push({x: `${i + 1}`, y: comulativeduration})
             }
             
         }
     }
-
 
     return(
         <div className={"h-80"}>
@@ -131,7 +130,7 @@ const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) 
                 tickSize: 5,
                 tickPadding: 5,
                 tickRotation: 0,
-                legend: 'Distance',
+                legend: 'duration',
                 legendOffset: -40,
                 legendPosition: 'middle'
             }}
@@ -170,7 +169,7 @@ const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) 
         />
         </div>
     )
-
+   
 }
 
-export default NivoDistanceGraph
+export default NivoTimeGraph

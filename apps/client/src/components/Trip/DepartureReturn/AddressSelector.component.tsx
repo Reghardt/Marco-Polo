@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AddressSelectorPopup from "./AddressSelectorPopup.component";
-import { useFloating, shift, offset, useDismiss, useInteractions, autoUpdate } from "@floating-ui/react";
+import { useFloating, shift, offset, useDismiss, useInteractions, } from "@floating-ui/react";
 
 interface IAddressSelectorProps{
     address: google.maps.GeocoderResult | null;
@@ -20,7 +20,7 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
       offset(-4),
 
     ],
-    whileElementsMounted: autoUpdate,
+    // whileElementsMounted: autoUpdate,
     placement: "bottom-start",
     open,
     onOpenChange: setOpen,

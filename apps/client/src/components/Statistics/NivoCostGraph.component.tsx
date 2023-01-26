@@ -1,63 +1,133 @@
 import { ResponsiveBar } from '@nivo/bar'
 
-const demoData = [
-    {
-      "country": "AD",
-      "hot dog": 166,
-      "hot dogColor": "hsl(216, 70%, 50%)",
-      "burger": 118,
-      "burgerColor": "hsl(160, 70%, 50%)",
-      "sandwich": 30,
-      "sandwichColor": "hsl(68, 70%, 50%)",
-      "kebab": 73,
-      "kebabColor": "hsl(280, 70%, 50%)",
-      "fries": 150,
-      "friesColor": "hsl(47, 70%, 50%)",
-      "donut": 67,
-      "donutColor": "hsl(0, 70.19607843137256%, 50%)"
-    },
-    {
-      "country": "AE",
-      "hot dog": 171,
-      "hot dogColor": "hsl(327, 70%, 50%)",
-      "burger": 62,
-      "burgerColor": "hsl(284, 70%, 50%)",
-      "sandwich": 16,
-      "sandwichColor": "hsl(245, 70%, 50%)",
-      "kebab": 47,
-      "kebabColor": "hsl(340, 70%, 50%)",
-      "fries": 29,
-      "friesColor": "hsl(34, 70%, 50%)",
-      "donut": 124,
-      "donutColor": "hsl(106, 70%, 50%)"
-    },
-    
-  ]
+import { TMouldedDirectionsLeg, TMouldedDirectionsLegGroup } from '../../Services/GMap.service'
+import { tolls } from '../Maps/Tolls'
 
-const NivoCostGraph: React.FC = () => {
+
+// const demoData = [
+//     {
+//       leg: "AD",
+//       someVal: 166,
+//     },
+//     {
+//       leg: "AE",
+//       someVal: 100,
+//     },
+    
+//   ]
+
+interface ILegBarKeys extends Record<string, any>{
+    leg: string
+}
+
+interface INivoCostGraphProps{
+    tripDirections: TMouldedDirectionsLegGroup[],
+    fuelPrice: string,
+    litersKm: string
+}
+
+const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice, litersKm}) => {
+
+
+
+    
+
+    function pricePerKm(petrol: string, liters: string)
+    {
+
+            const tempPetrol = parseFloat(petrol)
+            const tempLiters = parseFloat(liters)
+            if(isNaN(tempPetrol) || isNaN(tempLiters))
+            {
+                return 0
+            }
+            else
+            {
+                return tempPetrol * tempLiters / 100;
+            }   
+    }
+
+
+
+    // const vehicle = useTripStore(state => state.data.vehicle)
+
+    function addKeyToKeys(key: string, keys: string[])
+    {
+        for(let i = 0; i < keys.length; i++)
+        {
+            if(keys[i] === key)
+            {
+                return;
+            }
+        }
+        keys.push(key)
+    }
+
+
+    function createGraphBarLeg(legend: string, leg: TMouldedDirectionsLeg, barKeys: string[])
+    {
+        const legData: ILegBarKeys = {leg: legend, "Fuel Cost": (leg.distance.value / 1000 * pricePerKm(fuelPrice, litersKm)).toFixed(2)}
+        tolls.forEach(toll => {
+            if(google.maps.geometry.poly.isLocationOnEdge(toll.coordinates, leg.polyLine!, 10e-4))
+            {
+                console.log("passes", toll.name)
+                addKeyToKeys(toll.name, barKeys)
+                legData[toll.name] = toll.tarrif.class1
+            }
+            else
+            {
+                console.log("does not pass", toll.name)
+            }
+        })
+        return legData
+    }
+
+    const barKeys: string[] = ["Fuel Cost"]
+    const costGraphBars: ILegBarKeys[] = []
+    if(tripDirections)
+    {
+
+        tripDirections.forEach((group, index) => {
+            const leg0 = group.legs[0]
+            const leg1 = group.legs[1]
+
+            let label = (index + 1).toString()
+            if(tripDirections.length - 1 === index)
+            {
+                label = "return"
+            }
+
+            if(leg0 && leg1)
+            {
+                costGraphBars.push(createGraphBarLeg(`${label}->`, leg0, barKeys))
+                costGraphBars.push(createGraphBarLeg(`->${label}`, leg1, barKeys))
+            }
+            else if(leg0)
+            {
+                costGraphBars.push(createGraphBarLeg(`${label}`, leg0, barKeys))
+            }
+        })
+    }
+
+
     console.log("nivo graph fired")
+
+
     return(
         <div className={"h-80"}>
 
         
             <ResponsiveBar
                 
-                data={demoData}
-                keys={[
-                    'hot dog',
-                    'burger',
-                    'sandwich',
-                    'kebab',
-                    'fries',
-                    'donut'
-                ]}
-                indexBy="country"
+                data={costGraphBars}
+                keys={barKeys}
+                indexBy="leg"
             margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
             padding={0.3}
             maxValue={"auto"}
             valueScale={{ type: 'linear' }}
             indexScale={{ type: 'band', round: true }}
-            colors={["#0004fd", "#ff0000"]}
+            colors={{ scheme: 'nivo' }}
             axisTop={null}
             axisRight={null}
             axisBottom={{
@@ -78,12 +148,36 @@ const NivoCostGraph: React.FC = () => {
             }}
             labelSkipWidth={12}
             labelSkipHeight={12}
+            legends={[
+                {
+                    dataFrom: 'keys',
+                    anchor: 'bottom-right',
+                    direction: 'column',
+                    justify: false,
+                    translateX: 120,
+                    translateY: 0,
+                    itemsSpacing: 2,
+                    itemWidth: 100,
+                    itemHeight: 20,
+                    itemDirection: 'left-to-right',
+                    itemOpacity: 0.85,
+                    symbolSize: 20,
+                    effects: [
+                        {
+                            on: 'hover',
+                            style: {
+                                itemOpacity: 1
+                            }
+                        }
+                    ]
+                }
+            ]}
             role="application"
             ariaLabel="Nivo bar chart demo"
             barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in country: "+e.indexValue}}
             />
         </div>
-    )
+        )    
 }
 
 export default NivoCostGraph
