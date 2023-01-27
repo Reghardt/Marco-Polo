@@ -3,10 +3,11 @@ import { useRef, useState } from "react";
 import { IToll } from "../Tolls"
 
 interface ITollMarker{
-    tollInfo: IToll,
+    toll: IToll,
+    gateSectionIndex: number
 }
 
-const TollMarker: React.FC<ITollMarker> = ({tollInfo}) => {
+const TollMarker: React.FC<ITollMarker> = ({toll, gateSectionIndex}) => {
 
     const selfRef = useRef<HTMLDivElement>(null)
 
@@ -80,19 +81,19 @@ const TollMarker: React.FC<ITollMarker> = ({tollInfo}) => {
                     }}
                     {...getFloatingProps()}
                 >
-                    <div className={"text-sm"}>{tollInfo.name}</div> 
+                    <div className={"text-sm"}>{toll.name + toll.gateSection[gateSectionIndex]!.nameExtention}</div> 
                     <div className={"grid"} style={{gridTemplateColumns: "max-content 1fr", columnGap: "8px"}}>
                         <div className={"flex items-center"}>Class 1: R</div>
-                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class1.toPrecision(4)}</div>
+                        <div className={"text-sm flex justify-end"}>{toll.gateSection[gateSectionIndex]!.tarrif.c1.toPrecision(4)}</div>
 
                         <div className={"flex items-center"}>Class 2: R  </div>
-                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class2.toFixed(2)}</div>
+                        <div className={"text-sm flex justify-end"}>{toll.gateSection[gateSectionIndex]!.tarrif.c2.toFixed(2)}</div>
 
                         <div className={"flex items-center"}>Class 3: R  </div>
-                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class3.toFixed(2)}</div>
+                        <div className={"text-sm flex justify-end"}>{toll.gateSection[gateSectionIndex]!.tarrif.c3.toFixed(2)}</div>
 
                         <div className={"flex items-center"}>Class 4: R  </div>
-                        <div className={"text-sm flex justify-end"}>{tollInfo.tarrif.class4.toFixed(2)}</div>
+                        <div className={"text-sm flex justify-end"}>{toll.gateSection[gateSectionIndex]!.tarrif.c4.toFixed(2)}</div>
                     </div>
                     
 

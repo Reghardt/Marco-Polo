@@ -2,7 +2,7 @@ import { Paper } from "@mui/material";
 import React, { useEffect, useRef } from "react";
 import { useTripStore } from "../../Zustand/tripStore";
 import { createCustomMapMarkers, createMarker} from "../../Services/GMap.service";
-import GMapLegends from "./GMapLegends.component";
+// import GMapLegends from "./GMapLegends.component";
 import { tolls } from "./Tolls";
 import TollMarker from "./CustomMarker/TollMarker";
 import { createPortal } from "react-dom";
@@ -41,16 +41,24 @@ const GMap: React.FC = () => {
                 {/* <button onClick={() => {clearPolyLinesFromMap()}}>Clear</button> */}
 
                 <Paper style={{width: "100%", height: "33em", marginBottom: "0.5em"}} id="map"></Paper>
-                <GMapLegends/>
+                {/* <GMapLegends/> */}
 
                 {tolls.map((toll) => {
-                    return createMarker(
-                        toll.name,  
-                        Z_map,
-                        toll.coordinates, 
-                        <TollMarker tollInfo={toll}/>,
-                        true
-                    )
+                    const tollMarkers: JSX.Element[] = []
+                    for(let i = 0; i < toll.gateSection.length; i++)
+                    {
+                        tollMarkers.push(
+                            createMarker(
+                                toll.name + `-${i}`,  
+                                Z_map,
+                                toll.gateSection[i]!.coordinates, 
+                                <TollMarker toll={toll} gateSectionIndex={i}/>,
+                                true
+                            )
+                        )
+                    }
+                    return tollMarkers
+                    
                 })}
 
                 {createCustomMapMarkers(Z_tripRows, Z_map, Z_addresColumIndex, Z_linkAddressColumnIndex, Z_departureAddress, Z_returnAddress)}

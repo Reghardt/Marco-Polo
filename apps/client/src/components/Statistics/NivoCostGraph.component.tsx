@@ -35,16 +35,16 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
     function pricePerKm(petrol: string, liters: string)
     {
 
-            const tempPetrol = parseFloat(petrol)
-            const tempLiters = parseFloat(liters)
-            if(isNaN(tempPetrol) || isNaN(tempLiters))
-            {
-                return 0
-            }
-            else
-            {
-                return tempPetrol * tempLiters / 100;
-            }   
+        const tempPetrol = parseFloat(petrol)
+        const tempLiters = parseFloat(liters)
+        if(isNaN(tempPetrol) || isNaN(tempLiters))
+        {
+            return 0
+        }
+        else
+        {
+            return tempPetrol * tempLiters / 100;
+        }   
     }
 
 
@@ -64,21 +64,26 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
     }
 
 
-    function createGraphBarLeg(legend: string, leg: TMouldedDirectionsLeg, barKeys: string[])
+    function createGraphBarFromLeg(legend: string, leg: TMouldedDirectionsLeg, barKeys: string[])
     {
         const legData: ILegBarKeys = {leg: legend, "Fuel Cost": (leg.distance.value / 1000 * pricePerKm(fuelPrice, litersKm)).toFixed(2)}
         tolls.forEach(toll => {
-            if(google.maps.geometry.poly.isLocationOnEdge(toll.coordinates, leg.polyLine!, 10e-4))
-            {
-                console.log("passes", toll.name)
-                addKeyToKeys(toll.name, barKeys)
-                legData[toll.name] = toll.tarrif.class1
-            }
-            else
-            {
-                console.log("does not pass", toll.name)
-            }
+            toll.gateSection.forEach(gateSection => {
+                if(google.maps.geometry.poly.isLocationOnEdge(gateSection.coordinates, leg.polyLine!, 10 * 10 **(-5)))
+                {
+                    const tollName = toll.name + gateSection.nameExtention
+                    console.log("passes", tollName)
+                    addKeyToKeys(tollName, barKeys)
+                    legData[tollName] = gateSection.tarrif.c1
+                }
+                else
+                {
+                    console.log("does not pass", toll.name + gateSection.nameExtention)
+                }
+            })
+
         })
+        console.log(legData)
         return legData
     }
 
@@ -88,6 +93,7 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
     {
 
         tripDirections.forEach((group, index) => {
+            console.log("leg group")
             const leg0 = group.legs[0]
             const leg1 = group.legs[1]
 
@@ -99,18 +105,18 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
 
             if(leg0 && leg1)
             {
-                costGraphBars.push(createGraphBarLeg(`${label}->`, leg0, barKeys))
-                costGraphBars.push(createGraphBarLeg(`->${label}`, leg1, barKeys))
+                costGraphBars.push(createGraphBarFromLeg(`${label}->`, leg0, barKeys))
+                costGraphBars.push(createGraphBarFromLeg(`->${label}`, leg1, barKeys))
             }
             else if(leg0)
             {
-                costGraphBars.push(createGraphBarLeg(`${label}`, leg0, barKeys))
+                costGraphBars.push(createGraphBarFromLeg(`${label}`, leg0, barKeys))
             }
         })
     }
 
 
-    console.log("nivo graph fired")
+    console.log("nivo graph fired", costGraphBars)
 
 
     return(
