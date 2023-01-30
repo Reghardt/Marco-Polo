@@ -4,7 +4,7 @@ import produce from 'immer';
 import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Services/Trip.service";
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
 import { WritableDraft } from "immer/dist/internal";
-import { TMouldedDirectionsLegGroup } from "../Services/GMap.service";
+import { TMouldedDirections } from "../Services/GMap.service";
 
 export enum EDepartReturn{
     return,
@@ -81,7 +81,7 @@ interface ITrip{
     addressColumnIndex: number; 
     linkAddressColumnIndex: number;
 
-    tripDirections: TMouldedDirectionsLegGroup[] | null;
+    tripDirections: TMouldedDirections | null;
 
     vehicle: IVehicleListEntry | null;
     errorMessage: string;
@@ -106,7 +106,7 @@ interface ITripState {
         reverseRows: () => void;
 
         setRowOrderPerWaypoints: (waypoints: number[]) => void;
-        setTripDirections: (tripDirections: TMouldedDirectionsLegGroup[]) => void;
+        clearAndSetTripDirections: (tripDirections: TMouldedDirections | null) => void;
 
         setVehicle: (vehicle: IVehicleListEntry | null) => void;
 
@@ -279,15 +279,11 @@ export const useTripStore = create<ITripState>()(((set) => ({
                 state.data.rows = inSequenceRows;
             }))
         },
-        setTripDirections(tripDirections) {
-            
-
-
-
+        clearAndSetTripDirections(tripDirections) {
             set(produce<ITripState>((state) => {
                 if(state.data.tripDirections)
                 {
-                    state.data.tripDirections.forEach(group => {
+                    state.data.tripDirections.legGroups.forEach(group => {
                         group.legs.forEach(leg => {
                             leg.polyLine?.setMap(null)
                         })

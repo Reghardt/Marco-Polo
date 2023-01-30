@@ -9,7 +9,7 @@ import TripTableLegends from "./Legends/TripTableLegends.component"
 import GridContainer from "../../DragAndDrop/GridContainer"
 import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
-import { handleCalculateFastestDirections } from "../../../Services/GMap.service"
+import { createTripDirections } from "../../../Services/GMap.service"
 
 
 const TripTable: React.FC = () => {
@@ -64,13 +64,13 @@ const TripTable: React.FC = () => {
     console.log(sequence, rearrangedRows)
 
     ZF_setTripRows(rearrangedRows)
-    handleCalculateFastestDirections(false, true)
+    createTripDirections(false, true)
   }
 
   function handleReverseOrder()
   {
     ZF_reverseRows()
-    handleCalculateFastestDirections(false, true)
+    createTripDirections(false, true)
   }
 
   function appendRows()
@@ -184,13 +184,10 @@ const TripTable: React.FC = () => {
                     <Driver/>
                   </Box>
                 </Stack>
-                
             </Box>
             <Box sx={{width: "100%"}}>
-                <Button sx={{ width: "100%"}} onClick={() => handleCalculateFastestDirections(true, false)} variant="contained">Find Route</Button>
+                <Button sx={{ width: "100%"}} onClick={() => createTripDirections(true, false)} variant="contained">Find Route</Button>
             </Box>
-            
-            
           </Stack>
       </Box>
     )

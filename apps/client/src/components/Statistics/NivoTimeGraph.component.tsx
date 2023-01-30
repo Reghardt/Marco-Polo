@@ -1,5 +1,5 @@
 import { ResponsiveLine } from "@nivo/line"
-import { TMouldedDirectionsLegGroup } from "../../Services/GMap.service"
+import { TMouldedDirections } from "../../Services/GMap.service"
 
 // const data = [
 //     {
@@ -59,7 +59,7 @@ import { TMouldedDirectionsLegGroup } from "../../Services/GMap.service"
 //   ]
 
 interface INivodurationGraphProps{
-    tripDirections: TMouldedDirectionsLegGroup[]
+    tripDirections: TMouldedDirections
 }
 
 const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
@@ -80,9 +80,9 @@ const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
     }
 
     let comulativeduration = 0
-    for(let i = 0; i < tripDirections.length; i++)
+    for(let i = 0; i < tripDirections.legGroups.length; i++)
     {
-        const legs = tripDirections[i]?.legs
+        const legs = tripDirections.legGroups[i]?.legs
         if(legs)
         {
             if(legs[0]?.duration && legs[1]?.duration)

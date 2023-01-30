@@ -1,5 +1,5 @@
 import { ResponsiveLine } from "@nivo/line"
-import { TMouldedDirectionsLegGroup } from "../../Services/GMap.service"
+import { TMouldedDirections } from "../../Services/GMap.service"
 
 // const data = [
 //     {
@@ -59,7 +59,7 @@ import { TMouldedDirectionsLegGroup } from "../../Services/GMap.service"
 //   ]
 
 interface INivoDistanceGraphProps{
-    tripDirections: TMouldedDirectionsLegGroup[]
+    tripDirections: TMouldedDirections
 }
 
 const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) => {
@@ -80,9 +80,9 @@ const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) 
     }
 
     let comulativeDistance = 0
-    for(let i = 0; i < tripDirections.length; i++)
+    for(let i = 0; i < tripDirections.legGroups.length; i++)
     {
-        const legs = tripDirections[i]?.legs
+        const legs = tripDirections.legGroups[i]?.legs
         if(legs)
         {
             if(legs[0]?.distance && legs[1]?.distance)

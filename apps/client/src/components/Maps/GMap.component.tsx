@@ -35,6 +35,7 @@ const GMap: React.FC = () => {
         ZF_setMap(map)
     }, [])
 
+
     return(
         <>
             <div className={"py-2"}>
@@ -62,7 +63,7 @@ const GMap: React.FC = () => {
                 })}
 
                 {createCustomMapMarkers(Z_tripRows, Z_map, Z_addresColumIndex, Z_linkAddressColumnIndex, Z_departureAddress, Z_returnAddress)}
-                {controlContainer.current && Z_tripDirections && Z_tripDirections.length > 0 && createPortal(<><LegsListControl mouldedDirections={Z_tripDirections}/></>, controlContainer.current)}
+                {controlContainer.current && Z_tripDirections && Z_tripDirections.legGroups.length > 0 && createPortal(<><LegsListControl mouldedDirections={Z_tripDirections}/></>, controlContainer.current)}
             </div>
         </>
     )

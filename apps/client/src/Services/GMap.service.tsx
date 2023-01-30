@@ -2,6 +2,7 @@ import React from "react";
 import { IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
 import AddressMarker, { EAddressMarkerType } from "../Components/Maps/CustomMarker/AddressMarker";
 import CustomMarker from "../Components/Maps/CustomMarker/CustomMarker";
+import { IToll, tolls } from "../Components/Maps/Tolls";
 
 import { useMapsStore } from "../Zustand/mapsStore";
 import { useTripStore } from "../Zustand/tripStore";
@@ -13,11 +14,18 @@ export type TMouldedDirectionsLeg= {
     path: google.maps.LatLng[],
     polyLine: google.maps.Polyline | null,
     startAddress: string,
-    endAddress: string
+    endAddress: string,
+    passThroughTolls: {toll: IToll, gateIndex: number}[]
 }
 
-export type TMouldedDirectionsLegGroup = {
+type TMouldedDirectionsLegGroup = {
     legs: TMouldedDirectionsLeg[]
+}
+
+export type TMouldedDirections = {
+    legGroups: TMouldedDirectionsLegGroup[],
+    bounds: google.maps.LatLngBounds
+    //boundedTolls: IToll[]
 }
 
 
@@ -296,29 +304,104 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
     }
 }
 
-export async function handleCalculateFastestDirections(optimize: boolean, preserveViewport: boolean)
+function addTollsWithinBoundsTo(mouldedDirections: TMouldedDirections)
+{
+    const boundedTolls: IToll[] = [];
+    for(let i = 0; i < tolls.length; i++)
+    {
+        const toll = tolls[i]
+        if(toll)
+        {
+            for(let j = 0; j < toll.gateSection.length; j++)
+            {
+                const gateSection = toll.gateSection[j];
+                if(mouldedDirections.bounds.contains(gateSection!.coordinates))
+                {
+                    boundedTolls.push(toll)
+                    break; //break out of this toll's gate sections and move on to next toll
+                }
+            }
+            
+        }
+    }
+
+    console.log(boundedTolls)
+    if(boundedTolls.length)
+    {
+        for(let i = 0; i < mouldedDirections.legGroups.length; i++) //loop through leg groups of directions
+        {
+            const group = mouldedDirections.legGroups[i];
+            if(group)
+            {
+                for(let j = 0; j < group.legs.length; j++) // loop through each leg of a leg group
+                {
+                    const leg = group.legs[j];
+                    if(leg)
+                    {
+                        for(let k = 0; k < boundedTolls.length; k++) //loop through bounded tolls
+                        {
+                            const toll = boundedTolls[k];
+                            if(toll)
+                            {
+                                for(let l = 0; l < toll.gateSection.length; l++) //loop trhough each section of a toll
+                                {
+                                    const gateSection = toll.gateSection[l];
+                                    if(gateSection)
+                                    {
+                                        //if true, polyline intersects toll: then add toll to passThroughTolls of the leg and break the gate section loop to move on to the next toll.
+                                        if(google.maps.geometry.poly.isLocationOnEdge(gateSection.coordinates, leg.polyLine!, 10 * 10 **(-5)))
+                                        {
+                                            leg.passThroughTolls.push({toll: toll, gateIndex: l})
+                                            
+                                        }
+                                    }
+                                }
+                            }
+                        } 
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+export async function createTripDirections(optimize: boolean, preserveViewport: boolean)
 {
     const Z_rows = useTripStore.getState().data.rows
     const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex
     const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
-    const ZF_setPreserveViewport = useMapsStore.getState().actions.setPreserveViewport
-    const ZF_setTripDirections = useTripStore.getState().actions.setTripDirections
+    const ZF_clearAndSetTripDirections = useTripStore.getState().actions.clearAndSetTripDirections
     const Z_map = useMapsStore.getState().data.map
    
     const directions = await calculateDirectionsFromWaypoints(optimize) //calculate new directions
     if(directions && directions.status === google.maps.DirectionsStatus.OK && Z_map) //if successfull
     {
-        const mouldedDirections = mouldDirections(Z_rows, directions, Z_addressColumnIndex, Z_linkAddressColumnIndex, Z_map) //transform directions
-        ZF_setPreserveViewport(preserveViewport);
+        const mouldedDirections = mouldDirectionsAndDisplay(Z_rows, directions, Z_addressColumnIndex, Z_linkAddressColumnIndex, Z_map) //transform directions
         if(mouldedDirections)
         {
-            ZF_setTripDirections(mouldedDirections);
+            if(preserveViewport === false) //zoom in on route by using directions renderer temporarily
+            {
+                const directionsRenderer = new google.maps.DirectionsRenderer({
+                    map: Z_map,
+                    directions: directions.result,
+                    suppressMarkers: true, 
+                    suppressPolylines: true
+                })
+                if(directionsRenderer)
+                {
+                    setTimeout(() => {
+                        directionsRenderer.setMap(null)
+                        console.log("Directions renderer set to null")
+                    }, 5000)
+                    
+                }
+            }
+
+            addTollsWithinBoundsTo(mouldedDirections)
+            ZF_clearAndSetTripDirections(mouldedDirections);
         }
-    }
-    
-
-
-    
+    } 
 }
 
 function createLatLngPathFromLeg(leg: google.maps.DirectionsLeg)
@@ -348,14 +431,14 @@ export function createPolyLineFromPath(path: google.maps.LatLng[], strokeColor: 
 }
 
 //TODO error handeling feedback
-export function mouldDirections(
+export function mouldDirectionsAndDisplay(
     rows: IRow[], 
     directions: ITripDirections, 
     addressColumnIndex: number, 
     linkAddressColumnIndex: number,
     map: google.maps.Map
 
-    ): TMouldedDirectionsLegGroup[] | null
+    ): TMouldedDirections | null
 {
     if(addressColumnIndex < 0)
     {
@@ -367,7 +450,7 @@ export function mouldDirections(
     if(route)
     {
         let routeLegIndex = 0; //used to crawl down the list of legs of the route. 
-        const mouldedDirections: TMouldedDirectionsLegGroup[] = []
+        const mouldedDirectionsLegGroups: TMouldedDirectionsLegGroup[] = []
         for(let i = 0; i < rows.length; i++)
         {
             const row = rows[i]
@@ -376,23 +459,24 @@ export function mouldDirections(
                 const addressCell = row.cells[addressColumnIndex]
                 if(addressCell && addressCell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
                 {
-                    if(!mouldedDirections[i]) //if undefined at index, create new empty array at index
+                    if(!mouldedDirectionsLegGroups[i]) //if undefined at index, create new empty array at index
                     {
-                        mouldedDirections[i] = {legs: []}
+                        mouldedDirectionsLegGroups[i] = {legs: []}
                     }
 
                     const leg = route.legs[routeLegIndex]
                     if(leg)
                     {
                         const path = createLatLngPathFromLeg(leg)
-                        mouldedDirections[i]?.legs.push(
+                        mouldedDirectionsLegGroups[i]?.legs.push(
                             {
                                 distance: leg.distance ?? {text: "", value: 0}, 
                                 duration: leg.duration ?? {text: "", value: 0}, 
                                 path: path, 
-                                polyLine: createPolyLineFromPath(path, "hsl(208, 100%, 48%, 0.70)", map),
+                                polyLine: createPolyLineFromPath(path, "hsl(208, 100%, 48%, 0.70)", map), //blue
                                 startAddress: leg.start_address, 
-                                endAddress: leg.end_address
+                                endAddress: leg.end_address,
+                                passThroughTolls: []
                             }
                         )
                         routeLegIndex++; //increment on success
@@ -416,14 +500,15 @@ export function mouldDirections(
                         if(linkLeg)
                         {
                             const path = createLatLngPathFromLeg(linkLeg)
-                            mouldedDirections[i]?.legs.push(
+                            mouldedDirectionsLegGroups[i]?.legs.push(
                                 {
                                     distance: linkLeg.distance ?? {text: "", value: 0}, 
                                     duration: linkLeg.duration ?? {text: "", value: 0}, 
                                     path: path, 
                                     polyLine: createPolyLineFromPath(path, "hsl(125, 100%, 36%, 0.70)", map), //green
                                     startAddress: linkLeg.start_address, 
-                                    endAddress: linkLeg.end_address
+                                    endAddress: linkLeg.end_address,
+                                    passThroughTolls: []
                                 }
                             )
                             routeLegIndex++
@@ -441,22 +526,24 @@ export function mouldDirections(
             }
         }
 
+        //create poly line for return leg
         const retunLeg = route.legs.at(-1)
         if(retunLeg)
         {
             const path = createLatLngPathFromLeg(retunLeg)
-            mouldedDirections.push({legs: [
+            mouldedDirectionsLegGroups.push({legs: [
                 {
                     distance: retunLeg.distance ?? {text: "", value: 0}, 
                     duration: retunLeg.duration ?? {text: "", value: 0},
                     path: path,
                     polyLine: createPolyLineFromPath(path, "hsl(208, 100%, 48%, 0.70)", map),
                     startAddress: retunLeg.start_address, 
-                    endAddress: retunLeg.end_address
+                    endAddress: retunLeg.end_address,
+                    passThroughTolls: []
                 }
             ]})
         }
-        return mouldedDirections
+        return {legGroups: mouldedDirectionsLegGroups, bounds: route.bounds}
     }
     else
     {

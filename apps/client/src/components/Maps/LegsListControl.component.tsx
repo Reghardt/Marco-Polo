@@ -1,9 +1,9 @@
 import produce from "immer"
 import { useEffect, useState } from "react"
-import { TMouldedDirectionsLegGroup } from "../../Services/GMap.service"
+import { TMouldedDirections } from "../../Services/GMap.service"
 
 interface ILegsListControl{
-    mouldedDirections: TMouldedDirectionsLegGroup[],
+    mouldedDirections: TMouldedDirections,
     // setMouldedDirections: React.Dispatch<React.SetStateAction<TMouldedDirectionsSection[]>>
 }
 
@@ -15,7 +15,7 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
     // const Z_addressColumnIndex = useTripStore(store => store.data.addressColumnIndex)
     // const Z_linkAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
 
-    const [visibility, setVisibility ] = useState(new Array<boolean>(mouldedDirections.length).fill(true))
+    const [visibility, setVisibility ] = useState(new Array<boolean>(mouldedDirections.legGroups.length).fill(true))
 
     useEffect(() => {
         setPolylineOpacity()
@@ -23,9 +23,9 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
 
     function setPolylineOpacity()
     {
-        for(let i = 0; i < mouldedDirections.length; i++)
+        for(let i = 0; i < mouldedDirections.legGroups.length; i++)
         {
-            const group = mouldedDirections[i];
+            const group = mouldedDirections.legGroups[i];
             const vis = visibility[i]
             if(group)
             {
@@ -47,10 +47,10 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
     {
         // let addressCounter = 0
         console.log(visibility)
-        if(mouldedDirections.length > 0)
+        if(mouldedDirections.legGroups.length > 0)
         {
             return <div className={" cursor-default text-sm "}>
-                {mouldedDirections.map((group, index) => {
+                {mouldedDirections.legGroups.map((group, index) => {
 
                     return (
                         <div key={`leg-control-${index}`} className={"flex justify-between items-center p-1 hover:bg-slate-100"}>
@@ -62,7 +62,7 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
                                     })()
                                 :   
                                 
-                                    index !== mouldedDirections.length - 1 
+                                    index !== mouldedDirections.legGroups.length - 1 
                                     ? 
                                     (() => { 
                                         const legControl = <div>{index + 1}</div>
