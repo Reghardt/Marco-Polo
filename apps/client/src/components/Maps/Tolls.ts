@@ -221,23 +221,23 @@ export const tolls: IToll[] = [
             {
                 coordinates: new google.maps.LatLng(-26.4161167412774, 27.879520040830506), 
                 type: ETollType.RAMP, tarrif: {c1: 11.50, c2: 33.00, c3: 39.00, c4: 51.00}, 
-                nameExtention: " - N Ramp"
+                nameExtention: "(Ramp)"
             },
             {
                 coordinates: new google.maps.LatLng(-26.417327417312563, 27.880501536771412), 
                 type: ETollType.RAMP, tarrif: {c1: 11.50, c2: 33.00, c3: 39.00, c4: 51.00}, 
-                nameExtention: " - S Ramp"
+                nameExtention: "(Ramp)"
             },
             { // to Joburg
                 coordinates: new google.maps.LatLng(-26.413839218184094, 27.881256659453232), 
                 type: ETollType.RAMP, tarrif: {c1: 11.50, c2: 33.00, c3: 39.00, c4: 51.00}, 
-                nameExtention: " - N Ramp"
+                nameExtention: "(Ramp)"
             },
 
             { //from joburg
                 coordinates: new google.maps.LatLng(-26.414763664444045, 27.88259055170619), 
                 type: ETollType.RAMP, tarrif: {c1: 11.50, c2: 33.00, c3: 39.00, c4: 51.00}, 
-                nameExtention: " - S Ramp"
+                nameExtention: "(Ramp)"
             },
         ],
     },

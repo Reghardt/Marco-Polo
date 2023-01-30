@@ -1,8 +1,9 @@
 import { ResponsiveBar } from '@nivo/bar'
 
 import { TMouldedDirections, TMouldedDirectionsLeg } from '../../Services/GMap.service'
+import { useTripStore } from '../../Zustand/tripStore'
 
-interface ILegBarKeys extends Record<string, any>{
+interface ILegBar extends Record<string, any>{
     leg: string,
     "Fuel Cost": number
 }
@@ -15,7 +16,7 @@ interface INivoCostGraphProps{
 
 const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice, litersKm}) => {
 
-
+    const vehicle = useTripStore(state => state.data.vehicle)
 
     
 
@@ -53,7 +54,28 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
 
     function createGraphBarFromLeg(legend: string, leg: TMouldedDirectionsLeg, barKeys: string[])
     {
-        const legData: ILegBarKeys = {leg: legend, "Fuel Cost": (leg.distance.value / 1000 * pricePerKm(fuelPrice, litersKm))}
+        const legData: ILegBar = {leg: legend, "Fuel Cost": (leg.distance.value / 1000 * pricePerKm(fuelPrice, litersKm))}
+
+        let vehicleClass: "c1" | "c2" | "c3" | "c4" = "c1"
+        if(vehicle)
+        {
+            if(vehicle.vehicleClass === "Class 1")
+            {
+                
+            }
+            else if(vehicle.vehicleClass === "Class 2")
+            {
+                vehicleClass = "c2"
+            }
+            else if(vehicle.vehicleClass === "Class 3")
+            {
+                vehicleClass = "c3"
+            }
+            else
+            {
+                vehicleClass = "c4"
+            }
+        }
 
         leg.passThroughTolls.forEach(tollAndGateIndex => {
             const gateSection = tollAndGateIndex.toll.gateSection[tollAndGateIndex.gateIndex]
@@ -61,7 +83,8 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
             {
                 const tollName = tollAndGateIndex.toll.name + gateSection.nameExtention
                 addKeyToKeys(tollName, barKeys)
-                legData[tollName] = gateSection.tarrif.c1
+                legData[tollName] = gateSection.tarrif[vehicleClass]
+                
             }
                 
 
@@ -72,7 +95,7 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
     }
 
     const barKeys: string[] = ["Fuel Cost"]
-    const costGraphBars: ILegBarKeys[] = []
+    const costGraphBarGroups: ILegBar[][] = []
     if(tripDirections)
     {
 
@@ -89,18 +112,28 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
 
             if(leg0 && leg1)
             {
-                costGraphBars.push(createGraphBarFromLeg(`${label}->`, leg0, barKeys))
-                costGraphBars.push(createGraphBarFromLeg(`->${label}`, leg1, barKeys))
+                costGraphBarGroups.push([createGraphBarFromLeg(`${label}->`, leg0, barKeys), createGraphBarFromLeg(`->${label}`, leg1, barKeys)])
+                
             }
             else if(leg0)
             {
-                costGraphBars.push(createGraphBarFromLeg(`${label}`, leg0, barKeys))
+                costGraphBarGroups.push([createGraphBarFromLeg(`${label}`, leg0, barKeys)])
             }
         })
     }
 
+    function unravelBarGroups(barGroups: ILegBar[][])
+    {
+        const unraveledBars: ILegBar[] = []
+        for(let i = 0; i < barGroups.length; i++)
+        {
+            unraveledBars.push(...barGroups[i]!)
+        }
+        return unraveledBars
+    }
 
-    console.log("nivo graph fired", costGraphBars)
+
+    console.log("nivo graph fired", costGraphBarGroups)
 
 
     return(
@@ -108,7 +141,7 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
             <div className={" text-base"}>Trip Cost:</div>
             <div className={"h-80"}>
                 <ResponsiveBar
-                    data={costGraphBars}
+                    data={unravelBarGroups(costGraphBarGroups)}
                     keys={barKeys}
                     indexBy="leg"
                     margin={{bottom: 50, left: 60, top: 20 }}
@@ -165,39 +198,75 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
                     // ]}
                     role="application"
                     ariaLabel="Trip cost by leg"
-                    barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in country: "+e.indexValue}}
+                    //barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in country: "+e.indexValue}}
                     />
                 </div>
 
                 <div className={"flex flex-wrap gap-1"}>
-                    {costGraphBars.map((bar, index) => {
-                        let totalCost = 0;
-                        barKeys.forEach(key => {
-                            const value: number = bar[key]
-                            if(value !== undefined)
+                    {costGraphBarGroups.map((barGroup, index) => {
+                        
+                        const bar_from = barGroup[0]
+                        const bar_to = barGroup[1]
+
+                        if(bar_from)
+                        {
+                            let fuelCost = 0
+                            let totalCost = 0;
+                            let label = `${index + 1}`
+
+                            fuelCost += bar_from['Fuel Cost']
+                            barKeys.forEach(key => {
+                                const value: number = bar_from[key]
+                                if(value !== undefined)
+                                {
+                                    totalCost += value
+                                }
+                            })
+
+                            if(bar_to)
                             {
-                                totalCost += value
+                                label += `->${index + 1}`
+                                fuelCost += bar_to['Fuel Cost']
+                                barKeys.forEach(key => {
+                                    const value: number = bar_to[key]
+                                    if(value !== undefined)
+                                    {
+                                        totalCost += value
+                                    }
+                                })
                             }
-                        })
-                        return( 
-                            <div key={`leg-bar-${index}`} className={"p-2 bg-slate-100 rounded-xl cursor-default"}>
-                                <div className={"text-xs font-bold"}>Leg: {bar.leg}</div>
-                                <div className={"grid gap-x-1 gap-y-1 "} style={{gridTemplateColumns: "auto auto auto"}}>
 
-                                    <div className={"text-xs"}>Toll Tarrifs:</div> 
-                                    <div className={"text-xs"}>R</div>
-                                    <div className={" text-xs flex justify-end"}>{(totalCost - bar['Fuel Cost']).toFixed(2)}</div>
+                            if(index === costGraphBarGroups.length - 1)
+                            {
+                                label = "return"
+                            }
 
-                                    <div className={"text-xs"}>Fuel Cost:</div> 
-                                    <div className={"text-xs"}>R</div>
-                                    <div className={" text-xs flex justify-end"}>{bar['Fuel Cost'].toFixed(2)}</div>
-
-                                    <div className={"text-xs"}>Total:</div> 
-                                    <div className={"text-xs"}>R</div>
-                                    <div className={" text-xs flex justify-end"}>{totalCost.toFixed(2)}</div>
+                            
+                            return( 
+                                <div key={`leg-bar-${index}`} className={"p-2 bg-slate-100 rounded-xl cursor-default"}>
+                                    <div className={"text-xs font-bold"}>Leg: {label}</div>
+                                    <div className={"grid gap-x-1 gap-y-1 "} style={{gridTemplateColumns: "auto auto auto"}}>
+    
+                                        <div className={"text-xs"}>Toll Tarrifs:</div> 
+                                        <div className={"text-xs"}>R</div>
+                                        <div className={" text-xs flex justify-end"}>{(totalCost - fuelCost).toFixed(2)}</div>
+    
+                                        <div className={"text-xs"}>Fuel Cost:</div> 
+                                        <div className={"text-xs"}>R</div>
+                                        <div className={" text-xs flex justify-end"}>{fuelCost.toFixed(2)}</div>
+    
+                                        <div className={"text-xs"}>Total:</div> 
+                                        <div className={"text-xs"}>R</div>
+                                        <div className={" text-xs flex justify-end"}>{totalCost.toFixed(2)}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        )
+                            )
+                        }
+                        else
+                        {
+                            return(<></>)
+                        }
+
                     })}
                 </div>
 

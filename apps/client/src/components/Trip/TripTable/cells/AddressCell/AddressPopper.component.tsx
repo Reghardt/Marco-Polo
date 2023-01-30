@@ -33,7 +33,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     const ZR_deleteRow = useTripStore((state) => state.actions.deleteRow)
 
     useEffect( () => {
-        if(cellRef.geocodedDataAndStatus === null)
+        if(cellRef.geocodedDataAndStatus === null && cellRef.displayData)
         {
             generateGeocodeResults(cellRef.displayData)
         }

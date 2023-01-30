@@ -154,7 +154,7 @@ const Statistics: React.FC = () => {
                 </div>
             }
 
-        <VehicleSelector setLitersKm={setLitersKm} setFuelPrice={setFuelPrice}/>
+        <VehicleSelector setLitersKm={setLitersKm} setFuelPrice={setFuelPrice} fuelPrice={fuelPrice} litersKm={litersKm}/>
         </Box>
     )
 }
