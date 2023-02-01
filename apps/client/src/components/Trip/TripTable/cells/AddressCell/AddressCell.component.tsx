@@ -1,9 +1,15 @@
 import { useFloating, offset, useDismiss, useInteractions, autoUpdate, flip } from "@floating-ui/react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { VerifiedUser, WarningOutlined } from "@mui/icons-material";
 import React, { useState } from "react";
 
 import { ICell } from "../../../../common/CommonInterfacesAndEnums";
 import AddressPopper from "./AddressPopper.component";
+
+enum EAddressState{
+  OK = 1,
+  SOLVE = 2,
+  ERROR = 3
+}
 
 type AddressCellProps = {
     cellRef: ICell;
@@ -13,9 +19,15 @@ type AddressCellProps = {
 const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 {
   const [open, setOpen] = useState(false);
-  // const geocodeStarted = useRef(false)
+  const [addressState, setAddressState] = useState<EAddressState>(EAddressState.SOLVE)
 
-  // const ZF_updateBodyCell = useTripStore(store => store.reducers.updateBodyCell)
+  function handleSetAddressState(newState: EAddressState)
+  {
+    if(addressState !== newState)
+    {
+      setAddressState(newState)
+    }
+  }
 
   const {x, y, reference, floating, strategy, context} = useFloating({
     middleware: [
@@ -34,7 +46,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
     dismiss,
   ]);
 
-  function getAddressStatus(): {status: string, color: string, hoverColor: string}
+  function getAddressStatus()
   {
     if(cellRef?.geocodedDataAndStatus)
     {
@@ -44,42 +56,44 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
         {
           if(cellRef.isAddressAccepted)
           {
-            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]!.formatted_address, color: "green", hoverColor: "#006e09"}
+            handleSetAddressState(EAddressState.OK)
           }
           else{
-            return {status: cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]!.formatted_address, color: "#f57c00", hoverColor: "#df6400"}
+            handleSetAddressState(EAddressState.SOLVE)
           }
           
         }
         else{
-          return {status: "error", color: "#ff5100", hoverColor: "#ca2800"}
+          handleSetAddressState(EAddressState.ERROR)
         }
       }
       else if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
       {
-        return {status: "server under load, please wait...", color: "#f57c00", hoverColor: "#df6400"}
+        handleSetAddressState(EAddressState.SOLVE)
       }
       else if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.ZERO_RESULTS)
       {
-        return {status:  google.maps.GeocoderStatus.ZERO_RESULTS.toString() , color: "#ff5100", hoverColor: "#ca2800"}
+        handleSetAddressState(EAddressState.ERROR)
       }
       else
       {
-        return {status: cellRef.geocodedDataAndStatus.status.toString(), color: "#ff5100", hoverColor: "#ca2800"}
+        handleSetAddressState(EAddressState.ERROR)
       }
     }
     else{
       if(cellRef.displayData === "")
       {
-        return {status: "No Link Address", color: "primary", hoverColor: "primary.hover"}
+        handleSetAddressState(EAddressState.OK)
       }
       else
       {
-        return {status: "loading...", color: "#f57c00", hoverColor: "#df6400"}
+        handleSetAddressState(EAddressState.SOLVE)
       }
       
     }
   }
+
+  getAddressStatus()
 
   function closePopper()
   {
@@ -87,27 +101,65 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
   }
 
 
+
   return(
     <React.Fragment>
-      <Button 
-        sx={{textAlign:"left", background: getAddressStatus().color, ":hover": {backgroundColor: getAddressStatus().hoverColor}, width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "left"}} 
-        
-        variant={"contained"} 
+      <button 
+        draggable="true"
+        //sx={{textAlign:"left", background: getAddressStatus().color, ":hover": {backgroundColor: getAddressStatus().hoverColor}, width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "left"}} 
+        className={"text-base text-left p-1 bg-slate-200 hover:bg-slate-300"}
+        style={{textTransform: "none", minHeight: "30px"}}
+
         {...getReferenceProps()} ref={reference} onClick={()=> closePopper()}>
           
-          {glanceMode ? 
-            <Stack>
-              <Box>
-                Given: {cellRef.displayData}
-              </Box>
-              <Box>
-                <Typography sx={{fontSize: "1em", fontStyle: "italic"}}>Found: {getAddressStatus().status}</Typography>
-              </Box>
-            </Stack>
+          {glanceMode ?   
+           <div className={"flex justify-between items-center"}>
+
+              <div>
+                <div>
+                  <div className={"text-sm"}>
+                    Given: {cellRef.displayData}
+                  </div>
+                  <div>
+                    <div className={"text-base"}> <>Found: {cellRef.geocodedDataAndStatus?.results && (cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]?.formatted_address ?? "")}</></div>
+                    
+                    
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                {addressState === EAddressState.OK 
+                  ? 
+                  <div className="ml-2">
+                    <VerifiedUser color="primary"/>
+                  </div>
+                  
+                  : 
+                  <div className="ml-2">
+                    <WarningOutlined color="warning"/>
+                  </div>
+                    
+                }
+              </div>
+           </div>
+
           :
-            cellRef.displayData
+          <div className={"flex justify-between items-center"}>
+            <div>
+              {cellRef.displayData}
+            </div>
+            {cellRef.displayData && (
+                <div className="ml-1">
+                <VerifiedUser color="primary" fontSize="small"/>
+              </div>
+            )}
+
+            
+          </div>
+            
           }
-      </Button>
+      </button>
       
 
       {open && (

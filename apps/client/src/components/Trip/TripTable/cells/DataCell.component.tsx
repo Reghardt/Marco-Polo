@@ -1,6 +1,3 @@
-
-import { Button } from "@mui/material"
-import React from "react"
 import { ICell } from "../../../common/CommonInterfacesAndEnums";
 
 type DataCellProps = {
@@ -12,8 +9,14 @@ const DataCell: React.FC<DataCellProps> = ({cellRef}) =>
 
     return(
             <div draggable="true">
-                <Button disableRipple variant={"contained"} 
-                  sx={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start", minHeight: "2.4em", pointerEvents: "none"}}>{cellRef.displayData}</Button>
+                <button 
+                className={"w-full h-full pointer-events-none bg-slate-200 text-base p-1 text-left"}
+                style={{minHeight: "25px"}}
+                  //sx={{width: "100%", height: "100%", textTransform: "none", borderRadius: 0, justifyContent: "flex-start", minHeight: "2.4em", pointerEvents: "none"}}
+                  >
+                    {cellRef.displayData}
+                </button>
+                
             </div>
         )
 }

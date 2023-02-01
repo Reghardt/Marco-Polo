@@ -1,5 +1,3 @@
-import { Button } from "@mui/material";
-import React from "react";
 import { numberToAlphabetical } from "../../../../Services/Trip.service";
 
 
@@ -14,9 +12,10 @@ const HeadingCell: React.FC<HeadingCellProps> = ({colNumber}) =>
 
     
     return(
-        <React.Fragment>
-            <Button variant="contained" style={{height: "100%", width: "100%"}}>{col}</Button>
-        </React.Fragment>
+      <div className="mb-1">
+        <button className={" w-full h-full  hover:bg-slate-100 text-base py-1"}>{col}</button>
+      </div>
+      
     )
 }
 

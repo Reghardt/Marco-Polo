@@ -4,7 +4,7 @@ export interface ICell
     y: number;
     displayData: string;
 
-    geocodedDataAndStatus: IGeoStatusAndRes | null;
+    geocodedDataAndStatus: IGeoStatusAndRes | null; // TODO remove null option
     selectedGeocodedAddressIndex: number;
     formula: string; // default ""
     isAddressAccepted: boolean;

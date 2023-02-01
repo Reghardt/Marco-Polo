@@ -5,7 +5,6 @@ import { ETableMode, useTripStore } from "../../../Zustand/tripStore"
 import { createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, isAllAddressesInColumnValidAndAccepted, writeBackToSpreadsheet } from "../../../Services/Trip.service"
 import { loadSelection } from "../Worksheet/worksheet.service"
 import { Driver } from "./Driver/Driver.component"
-import TripTableLegends from "./Legends/TripTableLegends.component"
 import GridContainer from "../../DragAndDrop/GridContainer"
 import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
@@ -122,73 +121,75 @@ const TripTable: React.FC = () => {
   {
     return(
       <Box>
-          <Box sx={{marginBottom: "0.8em"}}>
-            <TripTableLegends/>
-          </Box>
-
           <Box sx={{marginBottom: "0.5em"}}>
             <Typography variant="body2">Show/Hide Columns:</Typography>
             {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
           </Box>
 
-          <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
+          <div>
+            <div className="w-auto pb-1 ">
+              <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
 
-            {createColumnDesignationSelectors(Z_columnVisibility)}
+                {CreateTableHeadingElements(Z_tripRows[0]!, Z_columnVisibility)}
+                {createColumnDesignationSelectors(Z_columnVisibility)}
 
-            {CreateTableHeadingElements(Z_tripRows[0]!, Z_columnVisibility)}
+                
 
-            {Z_tripRows.map((row, idx) => {
-              return(
-                <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
-                  {
-                    createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
-                  }
-                </GridRow>
-                  
-              )})
-            }                   
-          </GridContainer>
-
-          <Stack sx={{marginTop: "1em"}} spacing={1}>
-            <ConfirmAllAddresses/>
-
-            {Z_errorMessage && (
-              <Box>
-                <Typography variant="body1" sx={{color: "red"}}>{Z_errorMessage}</Typography>
-              </Box>
-            )}
-    
-
-
-            <div className={"flex space-x-2"}>
-              <div>
-                <div className={"text-sm"}>Note: drag and drop rows to change the route sequence </div>
-              </div>
-              <div>
-                <PanToolOutlined fontSize="small"/>
-              </div>
-            </div>
-              
-            <div className={"flex flex-wrap gap-2"}>
-                  <div>
-                      <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
-                  </div>
-                  <div>
-                      <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
-                  </div>
-
-                  <div>
-                      <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
-                  </div>
-                  <div>
-                    <Driver/>
-                  </div>
+                {Z_tripRows.map((row, idx) => {
+                  return(
+                    <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
+                      {
+                        createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
+                      }
+                    </GridRow>
+                      
+                  )})
+                }                   
+              </GridContainer>
             </div>
 
 
+            <Stack sx={{marginTop: "1em"}} spacing={1}>
+              <ConfirmAllAddresses/>
+
+              {Z_errorMessage && (
+                <Box>
+                  <Typography variant="body1" sx={{color: "red"}}>{Z_errorMessage}</Typography>
+                </Box>
+              )}
+      
 
 
-          </Stack>
+              <div className={"flex space-x-2"}>
+                <div>
+                  <div className={"text-sm"}>Note: drag and drop rows to change the route sequence </div>
+                </div>
+                <div>
+                  <PanToolOutlined fontSize="small"/>
+                </div>
+              </div>
+                
+              <div className={"flex flex-wrap gap-2"}>
+                <div>
+                    <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
+                </div>
+
+                <div>
+                    <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
+                </div>
+
+                <div>
+                    <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
+                </div>
+
+                <div>
+                  <Driver/>
+                </div>
+              </div>
+            </Stack>
+          </div>
+
+
       </Box>
     )
   }
