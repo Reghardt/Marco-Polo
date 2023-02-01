@@ -169,25 +169,25 @@ const TripTable: React.FC = () => {
               </div>
             </div>
               
-            <Box>
-                <Stack direction={"row"} spacing={1} >
-                  <Box >
+            <div className={"flex flex-wrap gap-2"}>
+                  <div>
                       <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
-                  </Box>
-                  <Box>
+                  </div>
+                  <div>
                       <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
-                  </Box>
-                  <Box>
+                  </div>
+
+                  <div>
                       <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
-                  </Box>
-                  <Box>
+                  </div>
+                  <div>
                     <Driver/>
-                  </Box>
-                </Stack>
-            </Box>
-            <Box sx={{width: "100%"}}>
-                <Button sx={{ width: "100%"}} onClick={() => createTripDirections(true, false)} variant="contained">Find Route</Button>
-            </Box>
+                  </div>
+            </div>
+
+
+
+
           </Stack>
       </Box>
     )

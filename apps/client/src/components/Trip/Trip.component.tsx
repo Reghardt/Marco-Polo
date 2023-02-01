@@ -44,10 +44,11 @@ const Trip : React.FC = () => {
 
           <StandardHeader title="Trip Builder" backNavStr="/workspaces"/> {/*Trip? Job? Route?*/}
 
-          <div className={"p-2"}>
+          <div className={"p-2 space-y-2"}>
             <TripNetwork/>
 
             <DepartureReturn/>
+
             <div className={"mb-2"}>
               <Button variant="contained"  onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Use Current Selection</Button>
             </div>

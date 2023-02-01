@@ -1,62 +1,6 @@
+import { TextField } from "@mui/material";
 import { ResponsiveLine } from "@nivo/line"
 import { TMouldedDirections } from "../../Services/GMap.service"
-
-// const data = [
-//     {
-//       "id": "legs",
-//       "color": "hsl(254, 70%, 50%)",
-//       "data": [
-//         {
-//           "x": "plane2",
-//           "y": 100
-//         },
-//         {
-//           "x": "helicopter",
-//           "y": 101
-//         },
-//         {
-//           "x": "boat",
-//           "y": 196
-//         },
-//         {
-//           "x": "train",
-//           "y": 274
-//         },
-//         {
-//           "x": "subway",
-//           "y": 191
-//         },
-//         {
-//           "x": "bus",
-//           "y": 144
-//         },
-//         {
-//           "x": "car",
-//           "y": 230
-//         },
-//         {
-//           "x": "moto",
-//           "y": 175
-//         },
-//         {
-//           "x": "bicycle",
-//           "y": 91
-//         },
-//         {
-//           "x": "horse",
-//           "y": 172
-//         },
-//         {
-//           "x": "skateboard",
-//           "y": 242
-//         },
-//         {
-//           "x": "others",
-//           "y": 117
-//         }
-//       ]
-//     },   
-//   ]
 
 interface INivodurationGraphProps{
     tripDirections: TMouldedDirections
@@ -73,6 +17,15 @@ const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
         }[];
     }
 
+    function secondsToH_M(value: number)
+    {
+        const minutes = value / 60
+        
+        const hours = Math.floor(minutes / 60)
+        const remainingMinutes = Math.floor(minutes % 60)
+        return hours + "h:" + remainingMinutes + "m"
+    }
+
     const lineDraphData: ITripLineGraphData = {
         id: "legs",
         color: "red",
@@ -85,15 +38,26 @@ const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
         const legs = tripDirections.legGroups[i]?.legs
         if(legs)
         {
-            if(legs[0]?.duration && legs[1]?.duration)
+            if(legs[0] && legs[1])
             {
-                comulativeduration += legs[0].duration.value + legs[1].duration.value
-                lineDraphData.data.push({x: `${i + 1}->${i + 1}`, y: comulativeduration})
+                comulativeduration += legs[0].duration.value 
+                lineDraphData.data.push({x: `${i + 1}->`, y: comulativeduration})
+                comulativeduration +=legs[1].duration.value
+                lineDraphData.data.push({x: `->${i + 1}`, y: comulativeduration})
             }
             else if(legs[0]?.duration)
             {
-                comulativeduration += legs[0].duration.value
-                lineDraphData.data.push({x: `${i + 1}`, y: comulativeduration})
+                if(i === tripDirections.legGroups.length - 1)
+                {
+                    comulativeduration += legs[0].duration.value
+                    lineDraphData.data.push({x: `return`, y: comulativeduration})
+                }
+                else
+                {
+                    comulativeduration += legs[0].duration.value
+                    lineDraphData.data.push({x: `${i + 1}`, y: comulativeduration})
+                }
+
             }
             
         }
@@ -104,7 +68,7 @@ const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
             
         <ResponsiveLine
             data={[lineDraphData]}
-            margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+            margin={{ bottom: 50, left: 65, right: 10, top: 10 }}
             xScale={{ type: 'point' }}
             yScale={{
                 type: 'linear',
@@ -130,9 +94,11 @@ const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
                 tickSize: 5,
                 tickPadding: 5,
                 tickRotation: 0,
-                legend: 'duration',
-                legendOffset: -40,
-                legendPosition: 'middle'
+                legend: 'Duration',
+                legendOffset: -60,
+                legendPosition: 'middle',
+                format: v => secondsToH_M(v)
+                
             }}
             pointSize={10}
             pointColor={{ theme: 'background' }}
@@ -140,33 +106,48 @@ const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
             pointBorderColor={{ from: 'serieColor' }}
             pointLabelYOffset={-12}
             useMesh={true}
-            legends={[
-                {
-                    anchor: 'bottom-right',
-                    direction: 'column',
-                    justify: false,
-                    translateX: 100,
-                    translateY: 0,
-                    itemsSpacing: 0,
-                    itemDirection: 'left-to-right',
-                    itemWidth: 80,
-                    itemHeight: 20,
-                    itemOpacity: 0.75,
-                    symbolSize: 12,
-                    symbolShape: 'circle',
-                    symbolBorderColor: 'rgba(0, 0, 0, .5)',
-                    effects: [
-                        {
-                            on: 'hover',
-                            style: {
-                                itemBackground: 'rgba(0, 0, 0, .03)',
-                                itemOpacity: 1
-                            }
-                        }
-                    ]
-                }
-            ]}
+            tooltip={({point}) => {
+                return <div>
+                    <div>{secondsToH_M(parseInt(point.data.y.toString()))}</div>
+                    <div>{}</div>
+                </div>
+            }}
+            // legends={[
+            //     {
+            //         anchor: 'bottom-right',
+            //         direction: 'column',
+            //         justify: false,
+            //         translateX: 100,
+            //         translateY: 0,
+            //         itemsSpacing: 0,
+            //         itemDirection: 'left-to-right',
+            //         itemWidth: 80,
+            //         itemHeight: 20,
+            //         itemOpacity: 0.75,
+            //         symbolSize: 12,
+            //         symbolShape: 'circle',
+            //         symbolBorderColor: 'rgba(0, 0, 0, .5)',
+            //         effects: [
+            //             {
+            //                 on: 'hover',
+            //                 style: {
+            //                     itemBackground: 'rgba(0, 0, 0, .03)',
+            //                     itemOpacity: 1
+            //                 }
+            //             }
+            //         ]
+            //     }
+            // ]}
         />
+
+            <TextField
+            label="Average Address Busy Time"
+            id="outlined-size-small"
+            //defaultValue=""
+            size="small"
+            sx={{width: '25ch'}}
+
+            />
         </div>
     )
    

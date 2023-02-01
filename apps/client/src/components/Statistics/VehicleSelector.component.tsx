@@ -1,4 +1,4 @@
-import { Button, InputAdornment, TextField, Typography } from "@mui/material"
+import { Button, InputAdornment, TextField } from "@mui/material"
 import { useEffect } from "react"
 import { isFloat } from "../../Services/Statistics.service"
 import { useGetMemberDataQuery, useGetVehicleByIdQuery, useSetFuelPriceMutation } from "../../trpc-hooks/trpcHooks"
@@ -67,64 +67,65 @@ const VehicleSelector: React.FC<IVehicleSelectorProps> = ({setLitersKm, setFuelP
     
     
     return (
-        <>
-            Vehicle Selector
+        <div>
             <VehicleList/>
 
-            
-
-            {vehicle && (
-                <div>
-                    <Typography variant="body1">Current Vehicle:</Typography>
-                    <Typography variant="body1">{vehicle.vehicleDescription} - {vehicle.vehicleLicencePlate} - {vehicle.vehicleClass}</Typography>
-
+            <div className={"space-y-4"}>
+                <div className={"flex flex-wrap gap-2 items-baseline"}>
+                    <div className={"text-sm "}>Current Vehicle:</div>
+                    {
+                        vehicle 
+                        ? 
+                            <div className={" text-base"}>{vehicle.vehicleDescription} - {vehicle.vehicleLicencePlate} - {vehicle.vehicleClass}</div>
+                        :
+                            <div className={"text-base"}>custom</div>
+                    }
                 </div>
-            )}
 
-            {vehicle === null && (
-                <div>
-                    <Typography variant="body1">Current Vehicle:</Typography>
-                    <Typography variant="body1" sx={{fontStyle: "italic"}}>custom</Typography>
 
-                </div>
-            )}
 
-            <div>
-                <TextField
-                label="Liters per 100 km"
-                id="outlined-size-small"
-                //defaultValue=""
-                size="small"
-                sx={{width: '25ch'}}
-                onChange={(e) => handleSetLitersKm(e.target.value)}
-                value={litersKm}
-                error={!isFloat(litersKm)}
-                InputProps={{startAdornment: <InputAdornment position="start">l/100km:</InputAdornment>}}
-                />
-            </div>
-
-            <div>
-                <div>
-                    <div>
+                <div className={"flex flex-wrap gap-y-2"}>
+                    <div className={"mr-2"}>
                         <TextField
-                        label="Fuel Price"
+                        label="Liters per 100 km"
                         id="outlined-size-small"
                         //defaultValue=""
                         size="small"
                         sx={{width: '25ch'}}
-                        onChange={(e) => setFuelPrice(e.target.value)}
-                        value={fuelPrice}
-                        error={!isFloat(fuelPrice)}
-                        InputProps={{startAdornment: <InputAdornment position="start">R</InputAdornment>}}
+                        onChange={(e) => handleSetLitersKm(e.target.value)}
+                        value={litersKm}
+                        error={!isFloat(litersKm)}
+                        InputProps={{startAdornment: <InputAdornment position="start">l/100km:</InputAdornment>}}
                         />
                     </div>
+
                     <div>
-                        <Button onClick={() => handleUseSetFuelPriceMutation(fuelPrice)} sx={{height: "100%"}} variant="outlined">Save Price</Button>
+                        <div className={"flex space-x-2"}>
+                            <div>
+                                <TextField
+                                label="Fuel Price"
+                                id="outlined-size-small"
+                                //defaultValue=""
+                                size="small"
+                                sx={{width: '25ch'}}
+                                onChange={(e) => setFuelPrice(e.target.value)}
+                                value={fuelPrice}
+                                error={!isFloat(fuelPrice)}
+                                InputProps={{startAdornment: <InputAdornment position="start">R</InputAdornment>}}
+                                />
+                            </div>
+                            <div>
+                                <Button onClick={() => handleUseSetFuelPriceMutation(fuelPrice)} sx={{height: "100%"}} variant="outlined">Save Price</Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
+
             </div>
-        </>
+
+            
+
+        </div>
     )
 }
 

@@ -449,6 +449,7 @@ export function mouldDirectionsAndDisplay(
 
     if(route)
     {
+        console.log(route)
         let routeLegIndex = 0; //used to crawl down the list of legs of the route. 
         const mouldedDirectionsLegGroups: TMouldedDirectionsLegGroup[] = []
         for(let i = 0; i < rows.length; i++)

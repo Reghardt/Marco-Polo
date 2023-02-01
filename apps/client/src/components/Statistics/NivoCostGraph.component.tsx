@@ -243,7 +243,7 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
 
                             
                             return( 
-                                <div key={`leg-bar-${index}`} className={"p-2 bg-slate-100 rounded-xl cursor-default"}>
+                                <div key={`leg-bar-${index}`} className={"p-2 bg-slate-100 rounded-xl cursor-default w-32"}>
                                     <div className={"text-xs font-bold"}>Leg: {label}</div>
                                     <div className={"grid gap-x-1 gap-y-1 "} style={{gridTemplateColumns: "auto auto auto"}}>
     
