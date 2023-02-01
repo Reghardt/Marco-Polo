@@ -113,7 +113,7 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
       return(
         <>
           <SequenceIndicatorComponent sequenceNumber={nr}/>
-          {row.cells.map((cell, index) => {
+          {row.cells.map((cell, index) => { // loop through cells
             if(columnVisibility[index])
             {
               if(columnDesignations[index] === EColumnDesignations.Address){
@@ -136,6 +136,9 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
             {
               return <></> //return nothing if column is not visible
             }
+          })}
+          {row.children.map((childRow, childRowIndex) => {
+            return createChildRow(childRowIndex, childRow, columnVisibility)
           })}
         </>
       )
@@ -185,36 +188,28 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
   }
 }
 
-// function createChildRow(row: Readonly<IRow>, columnVisibility: boolean[])
-// {
-//     const elementSize = (12 - labelSize) / numberOfVisibleColumns(columnVisibility);
+function createChildRow(childRowIndex: number, row: Readonly<IRow>, columnVisibility: boolean[])
+{
+  return(
+    <>
+      <BlankColumnComponent/>
+      {row.cells.map((cell, index) => { // loop through cells
+          if(columnVisibility[index])
+          {
+            return(
+              <DataCell key={`childCell-${childRowIndex}-${index}`} cellRef={cell}/>
+            )
+          }
+          else
+          {
+            return <></> //return nothing if column is not visible
+          }
+        })
+      }
+    </>
+  )
 
-//     const childRow =
-//     <React.Fragment>
-//         <Grid item xs={labelSize}>
-//             <Box sx={{height: "100%", width: "100%"}}></Box>
-//         </Grid>
-
-//         {row.cells.map((cell, index) => {
-//             if(columnVisibility[index] === true)
-//             {
-//                 return(
-//                     <Grid key={`cell-${cell.x}-${cell.y}`} item xs={elementSize}>
-//                         <DataCell
-//                             cellRef={cell}
-//                         />
-//                     </Grid>
-//                 )
-//             }
-//             else
-//             {
-//                 return <></>
-//             }
-//         })}
-//     </React.Fragment>
-
-//     return childRow
-// }
+}
 
 export function geocodeAddress(address: string) : Promise<IGeoStatusAndRes>
 {
