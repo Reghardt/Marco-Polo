@@ -31,7 +31,7 @@
   },
   "scripts": {
     "dev": "set HTTPS=true&&set SSL_CRT_FILE=./ssl/server.crt&&set SSL_KEY_FILE=./ssl/server.key&& react-scripts start",
-    "build": "react-scripts build",
+    "build": "(react-scripts build) && ((robocopy .\\build ..\\server\\build\\MP /E /move) ^& IF %ERRORLEVEL% LEQ 1 exit 0)",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

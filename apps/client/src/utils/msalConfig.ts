@@ -14,7 +14,7 @@ export const msalConfig: Configuration = {
     auth: {
         clientId: "1f2c4a95-1637-4582-bbab-c933d6161117", //Enter_the_Application_Id_Here
         authority: "https://login.microsoftonline.com/common", //instance of azure cloud
-        redirectUri: "https://localhost:3000", // what are redirect URIs, how do they work?
+        redirectUri: process.env.REACT_APP_MSAL_REDIRECT_URI, // what are redirect URIs, how do they work?
         navigateToLoginRequestUrl: false
     },
     cache: {

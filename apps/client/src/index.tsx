@@ -13,30 +13,45 @@ const root = ReactDOM.createRoot(
 
 Office.onReady((res) => {
   console.log(res)
-  if(res.host === Office.HostType.Excel && ( res.platform !== Office.PlatformType.OfficeOnline || res.platform !== Office.PlatformType.PC))
-  {
+  console.log(process.env.REACT_APP_MSAL_REDIRECT_URI)
 
-    const msalInstance = new PublicClientApplication(msalConfig);
-
-    
-    root.render(
-      // <React.StrictMode>
-        <MsalProvider instance={msalInstance}>
-          <TrpcWrapper>
-            <App />
-          </TrpcWrapper>
-        </MsalProvider>
-      //</React.StrictMode>
-    );
-  }
-  else
+  if(!process.env.REACT_APP_MSAL_REDIRECT_URI)
   {
     root.render(
       <div>
-        Error: Loaded outside Excel Environment
+        Error: MSAL redirect URI not found
       </div>
     )
   }
+  else
+  {
+    if(res.host === Office.HostType.Excel && ( res.platform !== Office.PlatformType.OfficeOnline || res.platform !== Office.PlatformType.PC))
+    {
+  
+      const msalInstance = new PublicClientApplication(msalConfig);
+  
+      
+      root.render(
+        // <React.StrictMode>
+          <MsalProvider instance={msalInstance}>
+            <TrpcWrapper>
+              <App />
+            </TrpcWrapper>
+          </MsalProvider>
+        //</React.StrictMode>
+      );
+    }
+    else
+    {
+      root.render(
+        <div>
+          Error: Loaded outside Excel Environment
+        </div>
+      )
+    }
+  }
+
+
 })
 
 // If you want to start measuring performance in your app, pass a function
