@@ -13,8 +13,8 @@ const root = ReactDOM.createRoot(
 
 Office.onReady((res) => {
   console.log(res)
-  console.log(process.env.REACT_APP_MSAL_REDIRECT_URI)
-
+  console.log(process.env)
+  
   if(!process.env.REACT_APP_MSAL_REDIRECT_URI)
   {
     root.render(

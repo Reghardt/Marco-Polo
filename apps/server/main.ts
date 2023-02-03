@@ -4,7 +4,7 @@ import * as trpcExpress from '@trpc/server/adapters/express';
 import { createContext } from "./trpc/createContext";
 import { appRouter } from "./trpc/routers/appRouter";
 import mongoose from "mongoose";
-// import compression from "compression";
+import compression from "compression";
 import * as dotenv from 'dotenv'
 // import helmet from "helmet";
 
@@ -15,7 +15,7 @@ export = Express
 app.use(cors());
 
 app.get("/", (req, res) => {
-    res.send("Hello from api-server");
+    res.send("...");
   });
 
 app.use(
@@ -26,15 +26,27 @@ app.use(
     })
 )
 
-// app.use(compression())
+app.use(compression())
 // app.use(helmet())
 
-app.use(express.static('MP'))
+
+app.use(express.static('MP'));
 
 app.set("view engine", "ejs");
 
 app.get("/test", (req, res) => {
     res.render("test.ejs", {testValue: "some test value"})
+})
+
+if(!process.env.REACT_APP_MSAL_REDIRECT_URI)
+{
+    console.log("*** ERROR: REACT_APP_MSAL_REDIRECT_URI on server not set! - Exiting ***")
+    process.exit()
+}
+
+
+app.get("/api/auth/msLoginPopup", (req, res) => {
+    res.render("login.ejs",{redirectUri: process.env.REACT_APP_MSAL_REDIRECT_URI})
 })
 
 

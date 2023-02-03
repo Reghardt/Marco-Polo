@@ -9,5 +9,15 @@ module.exports = function(app)
             changeOrigin: true,
             secure: false
         })
-    )
+    );
+
+    app.use(
+        '/api',
+        createProxyMiddleware({
+            target: 'http://localhost:4000',
+            changeOrigin: true,
+            secure: false
+        })
+    );
+    
 }

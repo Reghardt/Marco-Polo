@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.28.3/js/msal-browser.min.js"></script>
+    <script type="text/javascript">
+        async function run(sourceUri)
+        {
+        Office.initialize = () => {
+            const config = {
+            auth: {
+                clientId: '1f2c4a95-1637-4582-bbab-c933d6161117',
+                authority: 'https://login.microsoftonline.com/common',
+                redirectUri: sourceUri + '/api/auth/msLoginPopup'   // Must be registered as "spa" type
+                },
+                cache: {
+                cacheLocation: 'localStorage', // needed to avoid "login required" error
+                storeAuthStateInCookie: true   // recommended to avoid certain IE/Edge issues
+                }
+            }
+
+            var msalInstance = new msal.PublicClientApplication(config)
+
+            msalInstance.handleRedirectPromise()
+                .then((response) => {
+                    // If response is non-null, it means page is returning from AAD with a successful response
+                    if (response) {
+                        Office.context.ui.messageParent( JSON.stringify({ status: 'success', result : response }) );
+                        console.log(response)
+                    } else {
+                        // Otherwise, invoke login
+                        msalInstance.loginRedirect({
+                            scopes: ['user.read', "email"]
+                        });
+                    }
+                })
+                .catch((error) => {
+                    const errorData = `errorMessage: ${error.errorCode}
+                                        message: ${error.errorMessage}
+                                        errorCode: ${error.stack}`;
+                    Office.context.ui.messageParent( JSON.stringify({ status: 'failure', result: errorData }));
+                    console.log(errorData)
+                });
+        }      
+    }
+    </script>
+</head>
+<body>
+    <p>Please wait...</p>
+    <div id="redirectUri" style="display: none;"><%= redirectUri %></div>
+
+    <!-- <button onclick="run()">Press me</button> -->
+    <script type="text/javascript">
+        run(document.getElementById("redirectUri").innerHTML)
+    </script>
+    
+</body>
+</html>

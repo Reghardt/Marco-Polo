@@ -1,5 +1,5 @@
 import { PanToolOutlined } from "@mui/icons-material"
-import { Box, Button, Stack, Typography } from "@mui/material"
+import { Button } from "@mui/material"
 import React, { useEffect } from "react"
 import { ETableMode, useTripStore } from "../../../Zustand/tripStore"
 import { createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, isAllAddressesInColumnValidAndAccepted, writeBackToSpreadsheet } from "../../../Services/Trip.service"
@@ -120,11 +120,11 @@ const TripTable: React.FC = () => {
   if(Z_tripRows.length > 0)
   {
     return(
-      <Box>
-          <Box sx={{marginBottom: "0.5em"}}>
-            <Typography variant="body2">Show/Hide Columns:</Typography>
+      <div>
+          <div>
+            <div>Show/Hide Columns:</div>
             {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
-          </Box>
+          </div>
 
           <div>
             <div className="w-auto pb-1 ">
@@ -149,13 +149,13 @@ const TripTable: React.FC = () => {
             </div>
 
 
-            <Stack sx={{marginTop: "1em"}} spacing={1}>
+            <div>
               <ConfirmAllAddresses/>
 
               {Z_errorMessage && (
-                <Box>
-                  <Typography variant="body1" sx={{color: "red"}}>{Z_errorMessage}</Typography>
-                </Box>
+                <div>
+                  <div style={{color: "red"}}>{Z_errorMessage}</div>
+                </div>
               )}
       
 
@@ -186,19 +186,23 @@ const TripTable: React.FC = () => {
                   <Driver/>
                 </div>
               </div>
-            </Stack>
+            </div>
           </div>
 
 
-      </Box>
+      </div>
     )
   }
   else
   {
       return(
-        <Box sx={{backgroundColor: "lightGrey", height: "10em", justifyContent:"center", alignItems: "center", display: "flex", marginBottom: "1em"}}>
-            <Typography align="center" variant="body1" gutterBottom sx={{paddingLeft: "0.5em", paddingRight: "0.5em"}}>No data selected. <br/>Select the desired addresses and their corresponding data in Excel then press "Use Current Selection" to begin</Typography>
-        </Box>
+        <div className={"flex flex-col bg-slate-300 h-40 items-center justify-center p-4 text-center "}>
+
+            <div>No trip sheet selected.</div>
+            <div>Box select rows in Excel to import then click "Use Current Selection" to begin</div>
+
+            
+        </div>
       )
   }
 }
