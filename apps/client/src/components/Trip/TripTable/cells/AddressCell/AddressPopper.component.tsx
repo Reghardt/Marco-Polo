@@ -86,7 +86,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     return(
         <div className={"shadow-2xl bg-white"}>
             <div className={"bg-[#1976d2] w-full h-1"}></div>
-            <div className={"p-4 space-y-2"}>
+            <div className={"p-4 space-y-4"}>
 
 
                 <div className={"flex space-x-2 "}>
@@ -136,7 +136,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
                     </Box>
                 )}
 
-                <div>
+                <div className="flex gap-2">
                     <Button variant="contained" onClick={() => handleSaveAndClose()}>Save</Button>
                     <Button variant="text" onClick={() => closePopper()}>Cancel</Button>
                     <Button variant="text" color="error" onClick={() => handleDeleteRow(cellRef.y)}>Delete Row</Button>

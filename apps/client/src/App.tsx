@@ -13,7 +13,7 @@ function App() {
   
 
   return (
-    <div>
+    <>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login/>}/>
@@ -28,7 +28,7 @@ function App() {
 
       {/* <Counter1/>
       <Counter2/> */}
-    </div>
+    </>
   )
 }
 

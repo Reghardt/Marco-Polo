@@ -120,75 +120,74 @@ const TripTable: React.FC = () => {
   if(Z_tripRows.length > 0)
   {
     return(
-      <div>
+      <div className="flex flex-col space-y-4 ">
+        <div>
+          <div>Show/Hide Columns:</div>
+          {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
+        </div>
+
+        <div>
+          <div className="w-auto pb-1 ">
+            <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
+
+              {CreateTableHeadingElements(Z_tripRows[0]!, Z_columnVisibility)}
+              {createColumnDesignationSelectors(Z_columnVisibility)}
+
+              
+
+              {Z_tripRows.map((row, idx) => {
+                return(
+                  <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
+                    {
+                      createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
+                    }
+                  </GridRow>
+                    
+                )})
+              }                   
+            </GridContainer>
+          </div>
+
+        </div>
+
+
+
+        <ConfirmAllAddresses/>
+
+        {Z_errorMessage && (
           <div>
-            <div>Show/Hide Columns:</div>
-            {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
+            <div style={{color: "red"}}>{Z_errorMessage}</div>
+          </div>
+        )}
+    
+
+
+        <div className={"flex space-x-2"}>
+          <div>
+            <div className={"text-sm"}>Note: drag and drop rows to change the route sequence </div>
+          </div>
+          <div>
+            <PanToolOutlined fontSize="small"/>
+          </div>
+        </div>
+            
+        <div className={"flex flex-wrap gap-2"}>
+          <div>
+              <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
           </div>
 
           <div>
-            <div className="w-auto pb-1 ">
-              <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
-
-                {CreateTableHeadingElements(Z_tripRows[0]!, Z_columnVisibility)}
-                {createColumnDesignationSelectors(Z_columnVisibility)}
-
-                
-
-                {Z_tripRows.map((row, idx) => {
-                  return(
-                    <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
-                      {
-                        createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
-                      }
-                    </GridRow>
-                      
-                  )})
-                }                   
-              </GridContainer>
-            </div>
-
-
-            <div>
-              <ConfirmAllAddresses/>
-
-              {Z_errorMessage && (
-                <div>
-                  <div style={{color: "red"}}>{Z_errorMessage}</div>
-                </div>
-              )}
-      
-
-
-              <div className={"flex space-x-2"}>
-                <div>
-                  <div className={"text-sm"}>Note: drag and drop rows to change the route sequence </div>
-                </div>
-                <div>
-                  <PanToolOutlined fontSize="small"/>
-                </div>
-              </div>
-                
-              <div className={"flex flex-wrap gap-2"}>
-                <div>
-                    <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
-                </div>
-
-                <div>
-                    <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
-                </div>
-
-                <div>
-                    <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
-                </div>
-
-                <div>
-                  <Driver/>
-                </div>
-              </div>
-            </div>
+              <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
           </div>
 
+          <div>
+              <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
+          </div>
+
+          <div>
+            <Driver/>
+          </div>
+        </div>
 
       </div>
     )
@@ -196,7 +195,7 @@ const TripTable: React.FC = () => {
   else
   {
       return(
-        <div className={"flex flex-col bg-slate-300 h-40 items-center justify-center p-4 text-center "}>
+        <div className={"flex flex-col bg-slate-200 h-40 items-center justify-center p-4 text-center "}>
 
             <div>No trip sheet selected.</div>
             <div>Box select rows in Excel to import then click "Use Current Selection" to begin</div>
