@@ -164,22 +164,23 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 
       {open && (
           <div 
+            className={"bg-white shadow-xl p-2"}
             ref={floating}
             style={{
-              position: strategy,
-              top: y ?? 0,
-              left: x ?? 0,
-              width: 'max-content',
-              zIndex: 1
+            position: strategy,
+            top: y ?? 0,
+            left: x ?? 0,
+            width: 'auto',
+            // gridTemplateColumns: "max-content 1fr",
             }}
             {...getFloatingProps()}
-          >
-              {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
-              <AddressPopper 
-                closePopper={closePopper} 
-                cellRef={cellRef}
-                />
-          </div>
+        >
+            {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
+            <AddressPopper 
+              closePopper={closePopper} 
+              cell={cellRef}
+              />
+        </div>
       )}
   </React.Fragment>
   )

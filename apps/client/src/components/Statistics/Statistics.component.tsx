@@ -28,7 +28,7 @@ const Statistics: React.FC = () => {
 
 
             {Z_tripDirections && Z_tripDirections.legGroups.length > 0 &&
-                <div className={"space-y-4"}>
+                <div className={"space-y-6"}>
                     <NivoCostGraph fuelPrice={fuelPrice} litersKm={litersKm} tripDirections={Z_tripDirections}/>
                     <VehicleSelector setLitersKm={setLitersKm} setFuelPrice={setFuelPrice} fuelPrice={fuelPrice} litersKm={litersKm}/>
                     <NivoDistanceGraph tripDirections={Z_tripDirections}/>

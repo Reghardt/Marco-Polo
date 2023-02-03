@@ -114,13 +114,6 @@ const GMap: React.FC = () => {
             <div className={"py-2"}>
                 <div style={{height: "33em"}} className={" w-full mb-2 rounded"} id="map"></div>
 
-
-
-
-
-
-
-
                 {createTollMarkers(tollVisibility)}
 
                 {createCustomMapMarkers(Z_tripRows, Z_map, Z_addresColumIndex, Z_linkAddressColumnIndex, Z_departureAddress, Z_returnAddress)}

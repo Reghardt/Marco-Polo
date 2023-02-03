@@ -84,7 +84,7 @@ const TollMarker: React.FC<ITollMarker> = ({toll, gateSectionIndex}) => {
                     <div className={"text-sm"}>{toll.name + toll.gateSection[gateSectionIndex]!.nameExtention}</div> 
                     <div className={"grid"} style={{gridTemplateColumns: "max-content 1fr", columnGap: "8px"}}>
                         <div className={"flex items-center"}>Class 1: R</div>
-                        <div className={"text-sm flex justify-end"}>{toll.gateSection[gateSectionIndex]!.tarrif.c1.toPrecision(4)}</div>
+                        <div className={"text-sm flex justify-end"}>{toll.gateSection[gateSectionIndex]!.tarrif.c1.toFixed(2)}</div>
 
                         <div className={"flex items-center"}>Class 2: R  </div>
                         <div className={"text-sm flex justify-end"}>{toll.gateSection[gateSectionIndex]!.tarrif.c2.toFixed(2)}</div>

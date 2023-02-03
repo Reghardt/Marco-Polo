@@ -91,7 +91,7 @@ export function createCustomMapMarkers(
                                 label, 
                                 map, 
                                 selectedAddressRes.geometry.location, 
-                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS}/>
+                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS} popperData={{cell: addressCell, rowIndex: i}}/>
                             ))
                     }
                 }
@@ -107,7 +107,7 @@ export function createCustomMapMarkers(
                                 label, 
                                 map, 
                                 selectedAddressRes.geometry.location, 
-                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS}/>
+                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS} popperData={{cell: linkAddressCell, rowIndex: i}}/>
                             ))
                     }
                 }
@@ -126,7 +126,7 @@ export function createCustomMapMarkers(
                     label, 
                     map, 
                     departureAddress.geometry.location, 
-                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET}/>
+                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET} popperData={null}/>
                 ))
         }
     }
@@ -140,7 +140,7 @@ export function createCustomMapMarkers(
                     label, 
                     map, 
                     departureAddress.geometry.location, 
-                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET}/>
+                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET} popperData={null}/>
                 ))
         }
         if(returnAddress)
@@ -151,7 +151,7 @@ export function createCustomMapMarkers(
                     label, 
                     map, 
                     returnAddress.geometry.location, 
-                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET}/>
+                    <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET} popperData={null}/>
                 ))
         }
     }
@@ -164,7 +164,7 @@ export function isValidAddress(row: IRow, columnIndex: number): boolean
     const cell = row.cells[columnIndex]
     if(cell)
     {
-        if(cell.displayData && cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK && cell.geocodedDataAndStatus?.results)
+        if(cell.displayData && cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK && cell.geocodedDataAndStatus?.results && cell.isAddressAccepted)
         {
 
             const location = cell.geocodedDataAndStatus?.results[cell.selectedGeocodedAddressIndex]?.formatted_address
@@ -200,6 +200,8 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
     const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex
     const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
 
+    const ZF_setErrorMessage = useTripStore.getState().actions.setErrorMessage
+
     if(Z_addressColumnIndex >= 0)
     {
         const waypoints: google.maps.DirectionsWaypoint[]  = [];
@@ -223,7 +225,8 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
                         {
                             if(row.cells[Z_linkAddressColumnIndex]?.displayData !== "")
                             {
-                                console.error("Non empty Link Address not valid")
+                                console.error("ERROR: Check if all link addresses are confirmed")
+                                ZF_setErrorMessage("ERROR: Check if all link addresses are confirmed")
                                 return null
                             }
                         }
@@ -231,7 +234,8 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
                 }
                 else
                 {
-                    console.error("Address not valid")
+                    console.error("Error: Check if all addresses are confirmed")
+                    ZF_setErrorMessage("ERROR: Check if all addresses are confirmed")
                     return null
                 }
             }
@@ -240,7 +244,9 @@ function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
     }
     else
     {
+        ZF_setErrorMessage("ERROR: No address column selected")
         console.error("No address column selected")
+        
         return null
     }
     
@@ -440,8 +446,10 @@ export function mouldDirectionsAndDisplay(
 
     ): TMouldedDirections | null
 {
+    const ZF_setErrorMessage = useTripStore.getState().actions.setErrorMessage
     if(addressColumnIndex < 0)
     {
+        ZF_setErrorMessage("No Address Column Set");
         return null //no address column
     }
 
@@ -484,11 +492,13 @@ export function mouldDirectionsAndDisplay(
                     }
                     else
                     {
+                        ZF_setErrorMessage("INTERNAL ERROR: Trip leg does not exist (address)");
                         return null //leg does not exist
                     }
                 }
                 else
                 {
+                    ZF_setErrorMessage("INTERNAL ERROR: Address cell not valid");
                     return null //address cell not valid
                 }
 
@@ -516,6 +526,7 @@ export function mouldDirectionsAndDisplay(
                         }
                         else
                         {
+                            ZF_setErrorMessage("INTERNAL ERROR: Trip leg does not exist (linkAddress)");
                             return null //leg does not exist
                         }
                     }
@@ -523,6 +534,7 @@ export function mouldDirectionsAndDisplay(
             }
             else
             {
+                ZF_setErrorMessage("INTERNAL ERROR: Row does not exist");
                 return null //row does not exist
             }
         }
@@ -544,10 +556,12 @@ export function mouldDirectionsAndDisplay(
                 }
             ]})
         }
+        ZF_setErrorMessage("");
         return {legGroups: mouldedDirectionsLegGroups, bounds: route.bounds}
     }
     else
     {
+        ZF_setErrorMessage("INTERNAL ERROR: No Route Calculated");
         return null //no route has been calculated
     }
 }

@@ -11,20 +11,20 @@ import { geocodeAddress } from "../../../../../Services/Trip.service";
 
 interface IAddressCellPopperProps{
     closePopper : () => void;
-    cellRef: ICell;
+    cell: ICell;
     //recalculateRoute(departureAddress: string, returnAddress: string, rows: IRow[], addressColumnIndex: number): Promise<void>
 }
 
 const AddressPopper: React.FC<IAddressCellPopperProps> = (
     {
         closePopper, 
-        cellRef,
+        cell,
     }) => {
 
-    const [geoStatusAndRes, setGeoStatusAndRes] = useState(cellRef.geocodedDataAndStatus);
+    const [geoStatusAndRes, setGeoStatusAndRes] = useState(cell.geocodedDataAndStatus);
 
-    const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(cellRef.selectedGeocodedAddressIndex)
-    const [textboxContent, setTextboxContent] = useState(cellRef.displayData)
+    const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(cell.selectedGeocodedAddressIndex)
+    const [textboxContent, setTextboxContent] = useState(cell.displayData)
     const [errorMessage, setErrorMessage] = useState("")
 
 
@@ -33,9 +33,9 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     const ZR_deleteRow = useTripStore((state) => state.actions.deleteRow)
 
     useEffect( () => {
-        if(cellRef.geocodedDataAndStatus === null && cellRef.displayData)
+        if(cell.geocodedDataAndStatus === null && cell.displayData)
         {
-            generateGeocodeResults(cellRef.displayData)
+            generateGeocodeResults(cell.displayData)
         }
     }, [])
 
@@ -66,7 +66,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     {
         if(geoStatusAndRes?.results)
         {
-            ZR_updateBodyCell({...cellRef, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isAddressAccepted: true})
+            ZR_updateBodyCell({...cell, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isAddressAccepted: true})
             closePopper()
         }
         else
@@ -139,7 +139,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
                 <div className="flex gap-2">
                     <Button variant="contained" onClick={() => handleSaveAndClose()}>Save</Button>
                     <Button variant="text" onClick={() => closePopper()}>Cancel</Button>
-                    <Button variant="text" color="error" onClick={() => handleDeleteRow(cellRef.y)}>Delete Row</Button>
+                    <Button variant="text" color="error" onClick={() => handleDeleteRow(cell.y)}>Delete Row</Button>
                 </div>
             </div>
            
