@@ -164,13 +164,14 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 
       {open && (
           <div 
-            className={"bg-white shadow-xl p-2"}
+            className={""}
             ref={floating}
             style={{
             position: strategy,
             top: y ?? 0,
             left: x ?? 0,
             width: 'auto',
+            zIndex: 10
             // gridTemplateColumns: "max-content 1fr",
             }}
             {...getFloatingProps()}
