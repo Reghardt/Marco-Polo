@@ -83,7 +83,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
     else{
       if(cellRef.displayData === "")
       {
-        handleSetAddressState(EAddressState.OK)
+        handleSetAddressState(EAddressState.ERROR)
       }
       else
       {
@@ -118,12 +118,43 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
               <div>
                 <div>
                   <div className={"text-sm"}>
-                    Given: {cellRef.displayData}
+                    Given: {cellRef.displayData ? cellRef.displayData : <span className="text-red-500 ">Empty</span>}
                   </div>
                   <div>
-                    <div className={"text-base"}> <>Found: {cellRef.geocodedDataAndStatus?.results && (cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]?.formatted_address ?? "")}</></div>
-                    
-                    
+                    <div className={"text-base"}> 
+                      <>
+                        Found:
+                        {(() => {
+                          
+                          if(cellRef.geocodedDataAndStatus?.results)
+                          {
+                            return cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]?.formatted_address
+                          }
+                          else
+                          {
+                            if(cellRef.geocodedDataAndStatus?.status === undefined)
+                            {
+                              return "Loading..."
+                            }
+                            else
+                            {
+                              return cellRef.geocodedDataAndStatus?.status
+                            }
+                             
+                            // if(!cellRef.displayData)
+                            // {
+                            //   return " Error"
+                            // }
+                            // else
+                            // {
+                            //   return cellRef.geocodedDataAndStatus?.status
+                            // }
+                            // return "Loading..."
+                          }
+
+                        })()}
+                      </>
+                    </div>
                   </div>
                 </div>
               </div>
