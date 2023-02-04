@@ -90,10 +90,10 @@ export default function Login()
               </div>
 
               <div>
-                <TextField size='small' id="email" label="Email" variant="outlined" value={email} onChange={(e) => setEmail(e.target.value)} sx={{width:'100%'}}/>
+                <TextField size='small' id="email" label="Email" variant="outlined" value={email} onChange={(e) => setEmail(e.target.value)} sx={{width:'100%', backgroundColor: "white"}}/>
               </div>  
               <div>
-                <TextField size='small' type="password" id="pass" label="Password" variant="outlined"  value={password} onChange={(e) => setPassword(e.target.value)} sx={{width:'100%'}}/>
+                <TextField size='small' type="password" id="pass" label="Password" variant="outlined"  value={password} onChange={(e) => setPassword(e.target.value)} sx={{width:'100%', backgroundColor: "white"}}/>
               </div>  
 
               {loginError && (
@@ -121,7 +121,7 @@ export default function Login()
               </div>
 
               <div className={"flex justify-center text-sm"}>
-                <div>Version - 0.20.1</div>
+                <div>Version - 0.20.3</div>
               </div>
             </div>
 

@@ -33,6 +33,7 @@ const NivoTimeGraph: React.FC<INivodurationGraphProps> = ({tripDirections}) => {
     }
 
     let comulativeduration = 0
+    lineDraphData.data.push({x: `Start`, y: 0})
     for(let i = 0; i < tripDirections.legGroups.length; i++)
     {
         const legs = tripDirections.legGroups[i]?.legs

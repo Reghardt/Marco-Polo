@@ -23,6 +23,9 @@ const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) 
     }
 
     let comulativeDistance = 0
+
+    lineDraphData.data.push({x: `Start`, y: 0})
+
     for(let i = 0; i < tripDirections.legGroups.length; i++)
     {
         const legs = tripDirections.legGroups[i]?.legs
@@ -86,6 +89,7 @@ const NivoDistanceGraph: React.FC<INivoDistanceGraphProps> = ({tripDirections}) 
             pointBorderColor={{ from: 'serieColor' }}
             pointLabelYOffset={-12}
             useMesh={true}
+            
             // legends={[
             //     {
             //         anchor: 'bottom-right',

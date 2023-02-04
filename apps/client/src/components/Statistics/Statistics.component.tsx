@@ -21,11 +21,6 @@ const Statistics: React.FC = () => {
 
             {/* {calculateSimpleStatistics()} */}
 
-            
-
-            
-
-
 
             {Z_tripDirections && Z_tripDirections.legGroups.length > 0 &&
                 <div className={"space-y-6"}>

@@ -34,10 +34,6 @@ app.use(express.static('MP'));
 
 app.set("view engine", "ejs");
 
-app.get("/test", (req, res) => {
-    res.render("test.ejs", {testValue: "some test value"})
-})
-
 if(!process.env.REACT_APP_MSAL_REDIRECT_URI)
 {
     console.log("*** ERROR: REACT_APP_MSAL_REDIRECT_URI on server not set! - Exiting ***")
