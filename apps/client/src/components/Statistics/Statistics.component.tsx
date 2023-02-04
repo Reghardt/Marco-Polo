@@ -1,9 +1,7 @@
-import { Box } from "@mui/material";
 import React, { useState } from "react"
 import { useTripStore } from "../../Zustand/tripStore";
-import NivoCostGraph from "./NivoCostGraph.component";
-import NivoDistanceGraph from "./NivoDistanceGraph.component";
-import NivoTimeGraph from "./NivoTimeGraph.component";
+import CostGraph from "./CostGraph.component";
+import TimeDistanceGraph from "./TimeDistanceGraph.component";
 import VehicleSelector from "./VehicleSelector.component";
 
 
@@ -16,7 +14,7 @@ const Statistics: React.FC = () => {
     const [litersKm, setLitersKm] = useState("")
    
     return(
-        <Box>
+        <div>
             {/* <Typography variant="h6" gutterBottom sx={{color:"#1976d2"}}>Trip Statistics</Typography> */}
 
             {/* {calculateSimpleStatistics()} */}
@@ -24,15 +22,14 @@ const Statistics: React.FC = () => {
 
             {Z_tripDirections && Z_tripDirections.legGroups.length > 0 &&
                 <div className={"space-y-6"}>
-                    <NivoCostGraph fuelPrice={fuelPrice} litersKm={litersKm} tripDirections={Z_tripDirections}/>
+                    <CostGraph fuelPrice={fuelPrice} litersKm={litersKm} tripDirections={Z_tripDirections}/>
                     <VehicleSelector setLitersKm={setLitersKm} setFuelPrice={setFuelPrice} fuelPrice={fuelPrice} litersKm={litersKm}/>
-                    <NivoDistanceGraph tripDirections={Z_tripDirections}/>
-                    <NivoTimeGraph tripDirections={Z_tripDirections}/>
+                    <TimeDistanceGraph tripDirections={Z_tripDirections}/>
                 </div>
             }
 
         
-        </Box>
+        </div>
     )
 }
 

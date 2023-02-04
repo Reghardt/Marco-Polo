@@ -14,7 +14,7 @@ interface INivoCostGraphProps{
     litersKm: string
 }
 
-const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice, litersKm}) => {
+const CostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice, litersKm}) => {
 
     const vehicle = useTripStore(state => state.data.vehicle)
 
@@ -138,7 +138,7 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
 
     return(
         <div>
-            <div className={" text-base"}>Trip Cost:</div>
+            <div className="flex justify-center w-full text-base text-[#1976d2] font-bold">Cost</div>
             <div className={"h-80"}>
                 <ResponsiveBar
                     data={unravelBarGroups(costGraphBarGroups)}
@@ -172,32 +172,9 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
                     labelSkipWidth={12}
                     labelSkipHeight={12}
                     valueFormat={value => `R${value.toFixed(2)}`}
-                    // legends={[
-                    //     {
-                    //         dataFrom: 'keys',
-                    //         anchor: 'bottom-right',
-                    //         direction: 'column',
-                    //         justify: false,
-                    //         translateX: 120,
-                    //         translateY: 0,
-                    //         itemsSpacing: 2,
-                    //         itemWidth: 100,
-                    //         itemHeight: 20,
-                    //         itemDirection: 'left-to-right',
-                    //         itemOpacity: 0.85,
-                    //         symbolSize: 20,
-                    //         effects: [
-                    //             {
-                    //                 on: 'hover',
-                    //                 style: {
-                    //                     itemOpacity: 1
-                    //                 }
-                    //             }
-                    //         ]
-                    //     }
-                    // ]}
                     role="application"
                     ariaLabel="Trip cost by leg"
+                    
                     //barAriaLabel={function(e){return e.id+": "+e.formattedValue+" in country: "+e.indexValue}}
                     />
                 </div>
@@ -275,4 +252,4 @@ const NivoCostGraph: React.FC<INivoCostGraphProps> = ({tripDirections, fuelPrice
         )    
 }
 
-export default NivoCostGraph
+export default CostGraph
