@@ -152,7 +152,7 @@ const AddressMarker: React.FC<IAddressMarker> = ({label, markerType, popperData}
                     <div className="flex flex-col gap-2">
                         <div>{popperData.cell.displayData}</div>
                         <div className="flex items-center space-x-2 text-base">
-                            <div>Make:</div>
+                            <div>Visit:</div>
                             <div>
                                 <Select 
                                     size="small"
