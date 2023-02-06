@@ -51,6 +51,14 @@ export const workspaceRouter = router({
   //checks if the workspace with the giver id exists
   doesWorkspaceExist: protectedProcedure
   .mutation(async ({ctx}) => {
+
+    console.log("FIRED: doesWorkspaceExist")
+
+    if(ctx.workspaceId === '' || ctx.userId === '') //check if strings are valid, a user may have not yet have joined a workspace if they just created an account
+    {
+      return {doesExist: false}
+    }
+
     const workspace = await WorkspaceModel.findOne(
     {
         _id: new mongoose.Types.ObjectId(ctx.workspaceId),

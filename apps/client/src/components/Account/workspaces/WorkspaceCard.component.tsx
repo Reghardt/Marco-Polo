@@ -17,13 +17,14 @@ export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descrip
     const setLastUsedWorkspace = useSetLastUsedWorkspace({
         doOnSuccess: (res) => {
             ZF_setToken(res)
+            navigate("/trip", {replace: true})
         }
     })
 
     async function setSelectionAndNavigate()
     {
         setLastUsedWorkspace.mutate({workspaceId: _id})
-        navigate("/trip", {replace: true})
+        
     }
     
     return(

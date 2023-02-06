@@ -34,15 +34,15 @@ app.use(express.static('MP'));
 
 app.set("view engine", "ejs");
 
-if(!process.env.REACT_APP_MSAL_REDIRECT_URI)
-{
-    console.log("*** ERROR: REACT_APP_MSAL_REDIRECT_URI on server not set! - Exiting ***")
-    process.exit()
-}
+// if(process.env.NODE_ENV === "production")
+// {
+//     console.log("*** ERROR: REACT_APP_MSAL_REDIRECT_URI on server not set! - Exiting ***")
+//     process.exit()
+// }
 
 
 app.get("/api/auth/msLoginPopup", (req, res) => {
-    res.render("login.ejs",{redirectUri: process.env.REACT_APP_MSAL_REDIRECT_URI})
+    res.render("login.ejs",{redirectUri: process.env.NODE_ENV === "development" ? process.env.REACT_APP_MSAL_REDIRECT_URI_DEV : process.env.REACT_APP_MSAL_REDIRECT_URI_PROD })
 })
 
 
@@ -64,6 +64,6 @@ app.listen(process.env.SERVER_PORT, () => {
     .then(()=> {console.log("Mongo connected")})
     .catch(err => console.log(err))
     
-    console.log(`api-server listening at http://localhost:${process.env.SERVER_PORT}`);
+    console.log(`api-server listening at port ${process.env.SERVER_PORT} in ${process.env.NODE_ENV} mode`);
 
 });

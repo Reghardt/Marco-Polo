@@ -258,6 +258,7 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
     const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
 
     const ZF_setRowOrderPerWaypoints = useTripStore.getState().actions.setRowOrderPerWaypoints
+    const ZF_setErrorMessage = useTripStore.getState().actions.setErrorMessage
 
     const waypoints = createWaypointsListFromRows()
     console.log(waypoints)
@@ -279,9 +280,7 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
                     else
                     {
                         return null
-                    }
-                    
-                    
+                    }  
                 }
                 else //there are link addresses
                 {
@@ -293,6 +292,7 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
             {
                 //no return address
                 console.error("No return address set")
+                ZF_setErrorMessage("Error: No return address set")
                 return null
             }
         }
@@ -300,12 +300,14 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
         {
             //No departure address
             console.error("No departure address set")
+            ZF_setErrorMessage("Error: No departure address set")
             return null
         }
     }
     else
     {
         console.error("No waypoints")
+        ZF_setErrorMessage("Error: No waypoints")
         return null
     }
 }

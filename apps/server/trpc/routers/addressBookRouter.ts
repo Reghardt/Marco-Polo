@@ -11,17 +11,11 @@ export const addressBookRouter = router({
     getAddressBook: protectedProcedure
     .query(async ({ctx}) => {
 
-        console.log("FIRED: getAddressBook")
+        console.log("FIRED: getAddressBook", ctx.workspaceId, ctx.userId)
 
         const workspace = await WorkspaceModel.findOne({_id: new mongoose.Types.ObjectId(ctx.workspaceId)}, {addressBook: 1})
-
-        //TODO fix this:
-        type TReturnType = {
-            addressBookEntries: IAddressBookEntry[]
-        }
-
-        const ret: TReturnType = {addressBookEntries: workspace?.addressBook ?? [] }
-        return ret
+        return {addressBookEntries: workspace?.addressBook ?? [] }
+        
     }),
 
     createAddressBookEntry: protectedProcedure
