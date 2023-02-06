@@ -1,6 +1,6 @@
-import { Box, Tab, Tabs, Typography } from '@mui/material';
+import { Button, Tab, Tabs } from '@mui/material';
 import React, { useState } from 'react';
-import { useGetWorkspacesQuery } from '../../../trpc-hooks/trpcHooks';
+import { useGetUsernameAndTag, useGetWorkspacesQuery } from '../../../trpc-hooks/trpcHooks';
 
 import StandardHeader, { EStandardHeaderConfig } from '../../common/StandardHeader.component';
 import TabPanel, { a11yProps } from '../../Tabs/TabPanel.component';
@@ -15,6 +15,8 @@ export default function WorkSpaces()
 {
     const workspaces = useGetWorkspacesQuery()
     const [tabValue, setTabValue] = useState(0)
+
+    const getUsernameAndTag = useGetUsernameAndTag()
 
     return(
         <div>
@@ -31,24 +33,40 @@ export default function WorkSpaces()
             </Tabs>
 
             <TabPanel value={tabValue} index={0}>
-                <Box sx={{p: "0.5em"}}>
+                <div className='p-3 space-y-4'>
+
+                    {getUsernameAndTag.data && (
+                        <div className='flex items-baseline space-x-1'>
+                            <div className='text-sm '>
+                                My Username:
+                            </div>
+                            <div>
+                                {getUsernameAndTag.data}
+                            </div>
+                        </div>
+                    )}
+
 
                     <div>
-                        <Typography style={{paddingLeft:"3px", fontWeight: "bold"}} variant="body1">Select a workspace:</Typography>
+                        <div className='text-lg '>Select a workspace:</div>
                     </div>
                     {workspaces.data && workspaces.data.length > 0 && (
-                        <Box>
+                        <div className='space-y-2 '>
                             {workspaces.data.map((elem, idx) => {
                                 return <WorkSpaceCard _id={elem._id.toString()} workspaceName={elem.workspaceName} descriptionPurpose={elem.descriptionPurpose} tokens={elem.tokens}  key={idx}/>
                             })}
-                        </Box>
+                        </div>
                     )}
                     {workspaces.isFetched === true && workspaces.data && workspaces.data.length === 0 &&(
-                        <Box>
-                            <Typography variant="body1">You currently don't belong to a workspace, click on "Create Workspace" to create one or ask an admin to invite you to an existing workspace.</Typography>
-                        </Box>
+                        <div>
+                            <div>You currently don't belong to a workspace, click on "Create Workspace" to create one or ask an admin to invite you to an existing workspace.</div>
+                        </div>
                     )}
-                </Box>
+
+                    <div>
+                        <Button variant='contained' onClick={() => workspaces.refetch()}>Refresh</Button>
+                    </div>
+                </div>
                 
             </TabPanel>
 

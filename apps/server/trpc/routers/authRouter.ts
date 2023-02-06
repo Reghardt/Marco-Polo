@@ -3,11 +3,12 @@
 
 import { z } from "zod";
 import mongoose from "mongoose";
-import UserModel, { IUser } from "../models/User";
+
 
 import { publicProcedure, router } from "../trpc";
 import { decode, JwtPayload, sign } from "jsonwebtoken";
 import { TRPCError } from "@trpc/server";
+import UserModel from "../models/User.model";
 
 // TODO create better JWT
 export function createAndSignAccessToken(workspaceId: string, userId: string)
@@ -37,11 +38,21 @@ export const authRouter = router({
       
       for(let i = 0; i < 10; i++)
       {
-        const usernameWithTag = (decodedIdToken.name as string).replace(/\s/g,'') + "#" + randomIntFromInterval(1000, 9999);
-        const existingUserWithNameAndTag = await UserModel.findOne({userName: usernameWithTag})
+        const userNameWithTag = (decodedIdToken.name as string).replace(/\s/g,'') + "#" + randomIntFromInterval(1000, 9999);
+        const existingUserWithNameAndTag = await UserModel.findOne({userName: userNameWithTag})
         if(existingUserWithNameAndTag === null) //username with that tag does not exist, go ahead and create a user
         {
-          user = new UserModel({_id: new mongoose.Types.ObjectId(), accType: "MS", provider_id: decodedIdToken.oid, userName: usernameWithTag, email: decodedIdToken.email, password: null, lastUsedWorkspaceId: ''});
+          user = new UserModel(
+            {
+              _id: new mongoose.Types.ObjectId(), 
+              accType: "MS", 
+              provider_id: decodedIdToken.oid, 
+              userName: decodedIdToken.name, 
+              userNameWithTag: userNameWithTag,
+              email: decodedIdToken.email, 
+              password: null, 
+              lastUsedWorkspaceId: ''
+            });
           await user.save()
           break
         }

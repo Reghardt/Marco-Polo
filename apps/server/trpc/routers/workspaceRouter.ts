@@ -5,8 +5,10 @@ import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../trpc";
 
 import WorkspaceModel from "../models/Workspace"
-import UserModel from "../models/User.model";
+
 import { createAndSignAccessToken } from "./authRouter";
+import UserModel from "../models/User.model";
+
 
 
 export const workspaceRouter = router({
@@ -37,6 +39,7 @@ export const workspaceRouter = router({
   //gets all the workspaces the user belongs to
   getWorkspaces: protectedProcedure
   .query(async ({ctx}) => {
+    console.log("FIRED: getWorkspaces")
 
     const userWorkspaces = await WorkspaceModel.find<{_id: mongoose.Types.ObjectId, workspaceName: string, descriptionPurpose: string, tokens: number}>({
         "members.userId": new mongoose.Types.ObjectId(ctx.userId)
@@ -82,7 +85,7 @@ export const workspaceRouter = router({
   getMemberData: protectedProcedure
   .query(async ({ctx}) => {
 
-    const members = await WorkspaceModel.aggregate<{memberId: string, memberRole: string, lastUsedVehicleId: string, lastUsedFuelPrice: number}>([
+    const members = await WorkspaceModel.aggregate<{memberId: string,  memberRole: string, lastUsedVehicleId: string, lastUsedFuelPrice: number}>([
       {
           '$match': {'_id': new mongoose.Types.ObjectId(ctx.workspaceId), 'members.userId': new mongoose.Types.ObjectId(ctx.userId)}
       },
@@ -131,9 +134,64 @@ export const workspaceRouter = router({
     {
       throw new TRPCError({message: "not a member of workspace", code: "UNAUTHORIZED"})
     }
+  }),
 
+  inviteUserToWorkspace: protectedProcedure
+  .input(z.object({
+    userNameAndTag: z.string()
+  }))
+  .mutation(async ({input, ctx}) => {
+    const userToAdd = await UserModel.findOne({userNameWithTag: input.userNameAndTag})
+    console.log(userToAdd)
 
+    if(userToAdd)
+    {
+      const existingMember = await WorkspaceModel.findOne(
+        {
+          _id: new mongoose.Types.ObjectId(ctx.workspaceId),
+          "members.userId": userToAdd._id
+        },
+        {
+          _id: 1
+        })
 
+      if(existingMember !== null)
+      {
+        console.log("Already exists", existingMember)
+        return {invited: true, message: "That user already belongs to the workspace"}
+      }
 
+      await WorkspaceModel.updateOne(
+        {
+          _id: new mongoose.Types.ObjectId(ctx.workspaceId)
+        }, 
+        {
+          $push: {members: {
+            _id: new mongoose.Types.ObjectId(), 
+            userId: userToAdd._id,
+            role: "member",
+            lastUsedVehicleId: "", //TODO make objectId
+            lastUsedFuelPrice: 0
+          }}
+        })
+        return {invited: true, message: "User invited to workspace"}
+    }
+    else
+    {
+      return {invited: false, message: "No use with that username and tag exists"}
+    }
+  }),
+
+  getUserNameAndTag: protectedProcedure
+  .query(async ({ctx}) => {
+    const user = await UserModel.findById(new mongoose.Types.ObjectId(ctx.userId))
+    if(user)
+    {
+      return user.userNameWithTag
+    }
+    else
+    {
+      throw new TRPCError({message: "User not found", code: "NOT_FOUND"})
+    }
   })
 });

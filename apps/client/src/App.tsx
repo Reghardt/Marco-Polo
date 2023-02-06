@@ -5,6 +5,7 @@ import WorkSpaces from './Components/Account/workspaces/Workspaces.component'
 
 import Trip from './Components/Trip/Trip.component'
 import './App.css'
+import AdminPanel from './Components/AdminPanel/AdminPanel.component'
 
 function App() {
 
@@ -23,6 +24,8 @@ function App() {
           <Route path="/workspaces" element={<WorkSpaces/>}/>
 
           <Route path="/trip" element={<Trip/>}/>
+
+          <Route path="/admin" element={<AdminPanel/>}/>
         </Routes>
       </BrowserRouter>
 

@@ -1,5 +1,5 @@
 import { DeleteOutline } from "@mui/icons-material";
-import { Box, Button, IconButton, Paper, Stack, Tooltip, Typography } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetLastUsedWorkspace } from "../../../trpc-hooks/trpcHooks";
@@ -30,28 +30,24 @@ export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descrip
     return(
         <>
             <div style={{width: "300px", boxShadow: "",}}> 
-                <Stack direction={"row"} alignItems="center">
-                    
-                    <Box sx={{width: "90%"}}>
-                        <Button onClick={() => {setSelectionAndNavigate()}} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", p: "0.2em", ":hover": {backgroundColor: "#8d8d8d11"}}}>
-                            <Paper sx={{background: "transparent", width: "100%", height: "100%"}} elevation={0}>
-                                <Stack>
-                                    <Typography variant="subtitle1" sx={{color:"#1976d2"}}>{workspaceName}</Typography>
-                                    {/* <hr style={{borderTop: "1px solid #a5a5a5", width: "110px", padding: "0", margin: "0"}}/> */}
-                                    <Typography variant="body2">{descriptionPurpose}</Typography>
-                                    <Typography variant="body2">{tokens}</Typography>
-                                </Stack>
-                            </Paper>
-                        </Button>
-                    </Box>
-                    <Box sx={{justifyContent:"center", alignItems: "center", display: "flex", width: "10%", marginX: "5px"}}>
+                <div className="grid items-center p-2 rounded-lg bg-slate-50 hover:bg-slate-100" style={{gridTemplateColumns: "1fr min-content"}}>
+                    <div>
+                        <button onClick={() => {setSelectionAndNavigate()}} className="text-left " style={{textTransform: "none"}}>
+                            <div>
+                                <div className=" text-[#1976d2]" >{workspaceName}</div>
+                                <div>{descriptionPurpose}</div>
+                                <div>{tokens}</div>
+                            </div>
+                        </button>
+                    </div>
+                    <div>
                         <Tooltip title={"Delete Workspace"}>
                             <IconButton>
                                 <DeleteOutline color="error"/>
                             </IconButton>
                         </Tooltip>
-                    </Box>
-                </Stack>
+                    </div>
+                </div>
             </div>
         </>
     )

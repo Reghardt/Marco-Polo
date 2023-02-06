@@ -22,7 +22,7 @@ const MenuDrawer: React.FC<IMenuDrawerProps> = ({drawerState, handleDrawerState,
             </Box>
             <List>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={() => {console.log("pressed")}}>
+                    <ListItemButton onClick={() => {navigate("/workspaces", {replace: true})}}>
                     <ListItemIcon>
                         <Work sx={{color:"#1976d2"}}/>
                     </ListItemIcon>

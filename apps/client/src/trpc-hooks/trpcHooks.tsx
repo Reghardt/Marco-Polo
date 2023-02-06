@@ -31,6 +31,20 @@ import { trpc } from "../utils/trpc"
     }
   })
 
+  export const useInviteUserToWorkspace = (callbacks: {doOnSuccess: (res: {invited: boolean, message: string}) => void}) => trpc.workspaces.inviteUserToWorkspace.useMutation({
+    onSuccess: (res) => {
+      callbacks.doOnSuccess(res)
+    }
+  })
+
+  export const useGetUsernameAndTag = () => trpc.workspaces.getUserNameAndTag.useQuery(
+    undefined,
+    {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false
+    }
+  )
+
 //workspace - end \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 //auth - start /////////////////////////////////////////////////////////////////////////////////////////
