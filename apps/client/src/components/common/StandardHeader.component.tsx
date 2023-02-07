@@ -2,6 +2,8 @@ import { Menu, NavigateBefore } from "@mui/icons-material"
 import { IconButton,  Typography } from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom";
+import { useGetAvailableTokens } from "../../trpc-hooks/trpcHooks";
+
 import MenuDrawer from "../Menu/MenuDrawer.component";
 
 interface StandardHeaderProps{
@@ -27,6 +29,8 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
             tokenStoreConfig = EStandardHeaderConfig.Visible,
             adminPanelConfig = EStandardHeaderConfig.Visible,
         }) => {
+
+    const availableTokens = useGetAvailableTokens(tokenCountConfig === EStandardHeaderConfig.Visible)
 
     if(tokenStoreConfig && adminPanelConfig)
     {
@@ -62,13 +66,13 @@ const StandardHeader: React.FC<StandardHeaderProps> = (
                 </div>
                 
                 <div style={{display: "flex", alignItems: "center",  gap: "5px"}}>
-                    {tokenCountConfig === 2 && (
+                    {tokenCountConfig === 2 && availableTokens.data && (
                         <div>
                             {/* <Button sx={{padding: 0, paddingLeft: 0.5, paddingRight: 0.5, borderColor: 'white' }} variant="outlined">
                                 <Typography sx={{color: "white"}} variant="h6" >Tokens: {R_tokens}</Typography>
                             </Button> */}
                             
-                            <Typography variant="body1" sx={{color: "#1976d2"}}>Tokens</Typography>
+                            <Typography variant="body1" sx={{color: "#1976d2"}}>Tokens: {availableTokens.data}</Typography>
                         </div>
                     )}
                     

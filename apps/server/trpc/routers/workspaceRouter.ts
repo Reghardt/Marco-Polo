@@ -193,5 +193,76 @@ export const workspaceRouter = router({
     {
       throw new TRPCError({message: "User not found", code: "NOT_FOUND"})
     }
+  }),
+
+  getAvailableTokens: protectedProcedure
+  .query(async ({ctx}) => {
+
+    if(ctx.workspaceId)
+    {
+      const workspace = await WorkspaceModel.findOne({
+        _id: new mongoose.Types.ObjectId(ctx.workspaceId)
+      },
+      {
+        _id: 1, tokens: 1
+      })
+  
+      if(workspace)
+      {
+        return workspace.tokens
+      }
+      else
+      {
+        throw new TRPCError({message: "Workspace not found", code: "NOT_FOUND"})
+      }
+    }
+    else
+    {
+      throw new TRPCError({message: "Not in workspace", code: "NOT_FOUND"})
+    }
+  }),
+
+  subtractTokens: protectedProcedure
+  .input(
+    z.object({
+      amount: z.number()
+    })
+  )
+  .mutation(async ({input, ctx}) => {
+
+    const workspaceToSubtractFrom = await WorkspaceModel.findById(new mongoose.Types.ObjectId(ctx.workspaceId),
+    {
+      id: 1, tokens: 1
+    })
+
+    if(workspaceToSubtractFrom)
+    {
+      if(workspaceToSubtractFrom.tokens >= input.amount)
+      {
+        const subtractedWorkspaceTokens = await WorkspaceModel.updateOne(
+          {
+            _id: new mongoose.Types.ObjectId(ctx.workspaceId)
+          },
+          {
+            $subtract: ["$tokens", 1]
+          }
+        )
+
+        return
+      }
+      else
+      {
+        throw new TRPCError({message: "Not enough tokens", code: "BAD_REQUEST"})
+      }
+
+    }
+    else
+    {
+      throw new TRPCError({message: "No workspace found", code: "BAD_REQUEST"})
+    }
+
+
   })
+
+
 });

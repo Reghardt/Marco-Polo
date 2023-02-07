@@ -45,6 +45,22 @@ import { trpc } from "../utils/trpc"
     }
   )
 
+  export const useGetAvailableTokens = (enabled: boolean) => trpc.workspaces.getAvailableTokens.useQuery(
+    undefined,
+    {
+      enabled: enabled
+    }
+  )
+
+  export const useSubtractTokens = (callbacks: {doOnSuccess: () => void, doOnError: (message: string) => void}) => trpc.workspaces.subtractTokens.useMutation({
+    onSuccess: () => {
+      callbacks.doOnSuccess()
+    },
+    onError: (err) => {
+      callbacks.doOnError(err.message)
+    }
+  })
+
 //workspace - end \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 //auth - start /////////////////////////////////////////////////////////////////////////////////////////
