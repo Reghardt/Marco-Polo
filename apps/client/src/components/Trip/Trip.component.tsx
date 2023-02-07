@@ -10,6 +10,9 @@ import TripTable from "./TripTable/TripTable.component"
 import { loadSelection } from "./Worksheet/worksheet.service"
 import GMap from "../Maps/GMap.component"
 import Statistics from "../Statistics/Statistics.component"
+import { createTripDirections } from "../../Services/GMap.service"
+import GAutoComplete from "../Experiments/GAutoComplete.component"
+import GProgrammaticAutoComplete from "../Experiments/GProgrammaticAutocomplete.component"
 
 const Trip : React.FC = () => {
   console.log("Trip Refresh")
@@ -41,10 +44,12 @@ const Trip : React.FC = () => {
 
     return(
         <div >
-
           <StandardHeader title="Trip Builder" backNavStr="/workspaces"/> {/*Trip? Job? Route?*/}
 
           <div className={"p-2 space-y-2"}>
+
+            <GAutoComplete/>
+            <GProgrammaticAutoComplete/>
             <TripNetwork/>
 
             <DepartureReturn/>
@@ -55,9 +60,16 @@ const Trip : React.FC = () => {
             
             <TripTable/>
 
+            <div className={"w-full"}>
+              <Button className={"w-full"}  variant="contained" onClick={() => createTripDirections(true, false)}>Find Route</Button>
+            </div>
+
             <GMap/>
 
             <Statistics/>
+
+
+
 
             
           </div>

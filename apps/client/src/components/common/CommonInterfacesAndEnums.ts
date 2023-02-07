@@ -3,11 +3,9 @@ export interface ICell
     x: number;
     y: number;
     displayData: string;
-
-    geocodedDataAndStatus: IGeoStatusAndRes | null; // TODO remove null option
-    selectedGeocodedAddressIndex: number;
+    formatted_address: string,
+    latLng: google.maps.LatLng | null,
     formula: string; // default ""
-    isAddressAccepted: boolean;
 }
 
 export interface IRow //each row contains a bumch of cell objects
