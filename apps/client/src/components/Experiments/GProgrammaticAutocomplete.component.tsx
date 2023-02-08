@@ -20,7 +20,7 @@ const GProgrammaticAutoComplete: React.FC = () => {
     {
 
         const autoReq: google.maps.places.AutocompletionRequest = {
-            input: "44 Silver Pine Ave moret",
+            input: "",
             sessionToken: new google.maps.places.AutocompleteSessionToken(),
             bounds: {north: -21.7, south: -35.3, east: 33.05, west: 15.91},
             componentRestrictions: {country: "ZA"},
@@ -30,8 +30,10 @@ const GProgrammaticAutoComplete: React.FC = () => {
         console.log(response.predictions)
 
         const placeService = new google.maps.places.PlacesService(useMapsStore.getState().data.map!);
-        placeService.getDetails({placeId: response.predictions[0]!.place_id, fields: ["formatted_address", "geometry"]}, (res) => {
-            console.log(res)
+        placeService.getDetails({placeId: response.predictions[0]!.place_id, fields: ["formatted_address", "geometry"]}, (res, status) => {
+            console.log(res, status)
+            
+            // google.maps.places.PlacesServiceStatus.
             // if(res)
             // {
             //     res.formatted_address

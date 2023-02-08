@@ -1,11 +1,32 @@
+
+export enum EAddressSolveStatus{
+    INVALID_REQUEST = "INVALID_REQUEST",
+    NOT_FOUND = "NOT_FOUND",
+    OK = "OK",
+    OVER_QUERY_LIMIT = "OVER_QUERY_LIMIT",
+    REQUEST_DENIED = "REQUEST_DENIED",
+    UNKNOWN_ERROR = "UNKNOWN_ERROR",
+    ZERO_RESULTS = "ZERO_RESULTS",
+    AWAITING_SOLVE = "AWAITING_SOLVE"
+}
+
+export interface IAddress{
+    formatted_address: string,
+    latLng: google.maps.LatLng | null,
+    solveStatus: EAddressSolveStatus,
+    isAddressAccepted: boolean,
+    placeId: string
+}
+
 export interface ICell
 {
     x: number;
     y: number;
     displayData: string;
-    formatted_address: string,
-    latLng: google.maps.LatLng | null,
-    formula: string; // default ""
+    
+    formula: string; // default "",
+    address: IAddress
+    
 }
 
 export interface IRow //each row contains a bumch of cell objects
@@ -27,11 +48,11 @@ export enum EColumnDesignations{
     LinkAddress = 3
 }
 
-export interface IGeoStatusAndRes
-{
-    status: google.maps.GeocoderStatus;
-    results: google.maps.GeocoderResult[] | null;
-}
+// export interface IGeoStatusAndRes
+// {
+//     status: google.maps.GeocoderStatus;
+//     results: google.maps.GeocoderResult[] | null;
+// }
 
 
 

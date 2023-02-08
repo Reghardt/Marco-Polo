@@ -1,11 +1,12 @@
-import { Box, Button, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from "@mui/material"
+import { Button} from "@mui/material"
 
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useTripStore } from "../../../../../Zustand/tripStore";
 
 import HelpTooltip from "../../../../common/HelpTooltip.component";
-import { ICell } from "../../../../common/CommonInterfacesAndEnums";
-import { geocodeAddress } from "../../../../../Services/Trip.service";
+import { IAddress, ICell } from "../../../../common/CommonInterfacesAndEnums";
+import GAutoComplete from "../../../../Experiments/GAutoComplete.component";
+
 
 
 
@@ -21,66 +22,32 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
         cell,
     }) => {
 
-    const [geoStatusAndRes, setGeoStatusAndRes] = useState(cell.geocodedDataAndStatus);
+    const ZF_updateBodyCell = useTripStore(store => store.actions.updateBodyCell)
+    const ZF_deleteRow = useTripStore((state) => state.actions.deleteRow)
 
-    const [selectedGeocodedAddressIndex, setSelectedGeocodedAddressIndex] = useState(cell.selectedGeocodedAddressIndex)
-    const [textboxContent, setTextboxContent] = useState(cell.displayData)
-    const [errorMessage, setErrorMessage] = useState("")
-
-
-
-    const ZR_updateBodyCell = useTripStore(store => store.actions.updateBodyCell)
-    const ZR_deleteRow = useTripStore((state) => state.actions.deleteRow)
-
-    useEffect( () => {
-        if(cell.geocodedDataAndStatus === null && cell.displayData)
-        {
-            generateGeocodeResults(cell.displayData)
-        }
-    }, [])
-
-    function captureInput(input: string)
+    function handleUpdateBodyCell(address: IAddress)
     {
-      console.log(input)
-      setTextboxContent(input)
-    }
-
-    async function generateGeocodeResults(address: string)
-    {
-        const geoRes = await geocodeAddress(address)
-        setGeoStatusAndRes(geoRes) 
-        if(geoRes.status !== google.maps.GeocoderStatus.OK)
-        {
-            setErrorMessage(geoRes.status.toString())
-        }
-      
-    }
-
-    function handleAddressSelection(index: string)
-    {
-      setSelectedGeocodedAddressIndex(parseInt(index))
-      setErrorMessage("")
-    }
-
-    function handleSaveAndClose()
-    {
-        if(geoStatusAndRes?.results)
-        {
-            ZR_updateBodyCell({...cell, displayData: textboxContent, geocodedDataAndStatus: geoStatusAndRes, selectedGeocodedAddressIndex: selectedGeocodedAddressIndex, isAddressAccepted: true})
-            closePopper()
-        }
-        else
-        {
-            setErrorMessage("Click Search to find address")
-        }
-        
+        //
+        ZF_updateBodyCell({...cell, displayData: address.formatted_address ? address.formatted_address : cell.displayData, address: address})
+        closePopper()
     }
 
     async function handleDeleteRow(rowYCoord: number)
     {
         closePopper()
-        ZR_deleteRow(rowYCoord)
+        ZF_deleteRow(rowYCoord)
     }
+
+    function acceptAddress()
+    {
+        if(cell.address.latLng)
+        {
+          ZF_updateBodyCell({...cell, address: {...cell.address, isAddressAccepted: true}})
+        }
+
+    }
+
+
 
     //TODO delete button to remove address. View on map option to preview location
     return(
@@ -91,7 +58,7 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
 
                 <div className={"flex space-x-2 "}>
                     <div>
-                        <div className={"text-[#1976d2] text-base"}>Address Checker</div> 
+                        <div className={"text-[#1976d2] text-base"}>Address Finder</div> 
                     </div>
                     <div>
                         <HelpTooltip title={"Check the given address against Google Maps to confirm its validity and existence"}/>
@@ -99,45 +66,30 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
                 </div>
 
                 <div>
-                    <TextField 
-                        onChange={(e)=> captureInput(e.target.value)}  
-                        defaultValue={textboxContent} 
-                        size="medium" 
-                        label="Address"
-                        fullWidth
-                    />
-                </div>
-                <div>
-                    <Button variant="contained" onClick={()=> generateGeocodeResults(textboxContent)}>Search</Button>
-                </div>
-
-                {geoStatusAndRes?.results  && (
+                    <div className="text-sm ">
+                        Click in textbox to see results:
+                    </div>
                     <div>
-                        <FormControl>
-                            <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
-                            <RadioGroup
-                                aria-labelledby="demo-radio-buttons-group-label"
-                                name="radio-buttons-group"
-                                onChange={(e) => handleAddressSelection(e.target.value)}
-                                value={selectedGeocodedAddressIndex}
-                            >
-                                {geoStatusAndRes.results?.map((elem, idx) => {
-                                    return <FormControlLabel key={idx} value={idx} control={<Radio />} label={elem.formatted_address} />
-                                    })}
-                            </RadioGroup>
-                        </FormControl>
+                        <GAutoComplete setAddress={handleUpdateBodyCell} currentAddress={cell.displayData}/>
                     </div>
                     
+                </div>
+
+
+                {!cell.address.latLng && (
+                    <div>
+                        <p style={{color: "red"}}>Address not valid</p>
+                    </div>
                 )}
 
-                {errorMessage && (
-                    <Box>
-                        <p style={{color: "red"}}>{errorMessage}</p>
-                    </Box>
+                {cell.address.latLng && cell.address.isAddressAccepted === false && (
+                    <div>
+                        <p style={{color: "red"}}>Address not confirmed, click "CONFIRM" to do so.</p>
+                    </div>
                 )}
 
                 <div className="flex gap-2">
-                    <Button variant="contained" onClick={() => handleSaveAndClose()}>Save</Button>
+                    <Button variant="contained" onClick={() => acceptAddress()}>Confirm</Button>
                     <Button variant="text" onClick={() => closePopper()}>Cancel</Button>
                     <Button variant="text" color="error" onClick={() => handleDeleteRow(cell.y)}>Delete Row</Button>
                 </div>

@@ -11,7 +11,6 @@ import { loadSelection } from "./Worksheet/worksheet.service"
 import GMap from "../Maps/GMap.component"
 import Statistics from "../Statistics/Statistics.component"
 import { createTripDirections } from "../../Services/GMap.service"
-import GAutoComplete from "../Experiments/GAutoComplete.component"
 import GProgrammaticAutoComplete from "../Experiments/GProgrammaticAutocomplete.component"
 
 const Trip : React.FC = () => {
@@ -48,7 +47,7 @@ const Trip : React.FC = () => {
 
           <div className={"p-2 space-y-2"}>
 
-            <GAutoComplete/>
+            
             <GProgrammaticAutoComplete/>
             <TripNetwork/>
 

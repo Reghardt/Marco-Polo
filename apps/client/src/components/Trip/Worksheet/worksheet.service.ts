@@ -1,4 +1,4 @@
-import { IRow } from "../../common/CommonInterfacesAndEnums";
+import { EAddressSolveStatus, IRow } from "../../common/CommonInterfacesAndEnums";
 import { SelectedCells } from "./selectedCells.class";
 
 
@@ -42,7 +42,7 @@ function generateCellsFromCoordinates(userSelection: string)
             {
                 for(let k = range.start.y; k <= range.stop.y; k++)
                 {
-                    selectionData.insertCell({x: j, y: k, displayData: "", geocodedDataAndStatus: null, selectedGeocodedAddressIndex: 0,  formula: "", isAddressAccepted: false});
+                    selectionData.insertCell({x: j, y: k, displayData: "",   formula: "", address: {formatted_address: "", latLng: null, solveStatus: EAddressSolveStatus.AWAITING_SOLVE, isAddressAccepted: false, placeId: ""}});
                 }
             }
         }

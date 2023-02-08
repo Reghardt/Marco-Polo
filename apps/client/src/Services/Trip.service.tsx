@@ -1,11 +1,12 @@
 import { Grid, Typography, FormControlLabel, Checkbox, Button } from "@mui/material";
 import React from "react";
 import { TLeg } from "trpc-server/trpc/models/Workspace";
-import { IRow, EColumnDesignations,  IGeoStatusAndRes, ITripDirections, ICell } from "../Components/common/CommonInterfacesAndEnums";
+import { IRow, EColumnDesignations, ITripDirections, ICell, IAddress, EAddressSolveStatus } from "../Components/common/CommonInterfacesAndEnums";
 import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressCell.component";
 import ColumnDesignationSelector from "../Components/Trip/TripTable/cells/ColumnDesignationSelector.component";
 import DataCell from "../Components/Trip/TripTable/cells/DataCell.component";
 import HeadingCell from "../Components/Trip/TripTable/cells/HeadingCell.component";
+import { useMapsStore } from "../Zustand/mapsStore";
 import { ETableMode, useTripStore } from "../Zustand/tripStore";
 
 const BlankColumnComponent: React.FC = () => <div style={{height: "100%", width: "100%"}}></div> //used for layout alignment
@@ -56,25 +57,23 @@ export function reorder(list: IRow[], startIndex: number, endIndex: number )
 
 }
 
-export function isAllAddressesInColumnValidAndAccepted(column: number, tableMode: ETableMode)
+export function areAllAddressesInColumnValidAndAccepted(column: number, tripRows: IRow[], tableMode: ETableMode)
 {
-  const Z_tripRows = useTripStore.getState().data.rows
-
   if(column < 0)
   {
     return false
   }
 
-  for(let i = 0; i < Z_tripRows.length; i++)
+  for(let i = 0; i < tripRows.length; i++)
   {
-    const cell = Z_tripRows[i]?.cells[column]
+    const cell = tripRows[i]?.cells[column]
 
     if(tableMode === ETableMode.LinkAddressSolveMode && cell?.displayData === "") //if in linkAddressSolveMode and cell data is empty, skip it.
     {
       continue;
     }
 
-    if(cell?.geocodedDataAndStatus?.status !== google.maps.GeocoderStatus.OK || cell.isAddressAccepted === false)
+    if(cell?.address.latLng === null || cell?.address.isAddressAccepted === false)
     {
       return false
     }
@@ -91,11 +90,11 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
   const ZF_setErrorMessage = useTripStore.getState().actions.setErrorMessage
 
 
-  function setVerified(cell: ICell)
+  function setAccepted(cell: ICell)
   {
-    if(cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
+    if(cell.address.latLng)
     {
-      ZF_updateBodyCell({...cell, isAddressAccepted: true})
+      ZF_updateBodyCell({...cell, address: {...cell.address, isAddressAccepted: true}})
       ZF_setErrorMessage("")
     }
     else
@@ -152,7 +151,7 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
           <>
             <SequenceIndicatorComponent sequenceNumber={nr}/>
             <AddressCell cellRef={cell} glanceMode={true}/>
-            <Button onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+            <Button onClick={() => {setAccepted(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
           </>
         )
       }
@@ -171,7 +170,7 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
           <>
             <SequenceIndicatorComponent sequenceNumber={nr}/>
             <AddressCell cellRef={cell} glanceMode={cell.displayData === "" ? false : true}/>
-            <Button disabled={cell.displayData === "" ? true : false} onClick={() => {setVerified(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
+            <Button disabled={cell.displayData === "" ? true : false} onClick={() => {setAccepted(cell)}} variant={"outlined"} sx={{height: "100%", p: 0.1}}>Confirm</Button>
           </>  
         )
       }
@@ -211,17 +210,17 @@ function createChildRow(childRowIndex: number, row: Readonly<IRow>, columnVisibi
 
 }
 
-export function geocodeAddress(address: string) : Promise<IGeoStatusAndRes>
-{
-  const geoResPromise = new Promise<IGeoStatusAndRes>((resolve) => {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({address: address, region: "ZA"},(res, status) => {
-      resolve({status, results: res})
-    })
-  })
+// export function geocodeAddress(address: string) : Promise<IGeoStatusAndRes>
+// {
+//   const geoResPromise = new Promise<IGeoStatusAndRes>((resolve) => {
+//     const geocoder = new google.maps.Geocoder();
+//     geocoder.geocode({address: address, region: "ZA"},(res, status) => {
+//       resolve({status, results: res})
+//     })
+//   })
 
-  return geoResPromise;
-}
+//   return geoResPromise;
+// }
 
 
 export function createColumnVisibilityCheckboxes(columnNames: IRow, columnVisibility: boolean[])
@@ -618,11 +617,12 @@ export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: n
   
 }
 
-export function createSimplePointToPointDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
+export function createSimplePointToPointDirections(departureAddress: IAddress, returnAddress: IAddress, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
+
 
   var request: google.maps.DirectionsRequest = {
-    origin: departureAddress,
-    destination: returnAddress,
+    origin: departureAddress.latLng!,
+    destination: returnAddress.latLng!,
     waypoints: waypoints,
     travelMode: google.maps.TravelMode.DRIVING,
     optimizeWaypoints: shouldOptimize,
@@ -692,15 +692,17 @@ export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
       }
   
       const addressCell = row.cells[Z_addressColumIndex]
-      if(addressCell?.isAddressAccepted === false)
+      if(addressCell?.address.isAddressAccepted === false)
       {
         return {errorMsg: "Trip not valid, one or more addresses were not confirmed", legs: []}
       }
 
-      const fullAddress = addressCell?.geocodedDataAndStatus!.results![addressCell.selectedGeocodedAddressIndex]?.formatted_address
 
-      if(addressCell && fullAddress)
-      tripLegs.push({givenAddress: addressCell.displayData, fullAddressStr: fullAddress, legDetails: legDetails, avoidTolls: false, legStatus: 0})
+
+      if(addressCell?.address.formatted_address)
+      {
+        tripLegs.push({givenAddress: addressCell.displayData, fullAddressStr: addressCell.address.formatted_address, legDetails: legDetails, avoidTolls: false, legStatus: 0})
+      } 
     }
 
 
@@ -722,9 +724,62 @@ export function createDriverTrip() : {errorMsg: string, legs: TLeg[]}
 
 }
 
+export async function getFirstPlacePrediction(addressToPredict: string)
+{
+
+  return new Promise<IAddress>(async (acceptPredictionWithDetails) => {
+    const autoCompleteService = new google.maps.places.AutocompleteService()
+
+    if(!addressToPredict)
+    {
+      acceptPredictionWithDetails({formatted_address: "", latLng: null, solveStatus: EAddressSolveStatus.INVALID_REQUEST, isAddressAccepted: false, placeId: ""})
+      return
+    }
+
+    const autoCompleteRequest: google.maps.places.AutocompletionRequest = {
+        input: addressToPredict,
+        sessionToken: new google.maps.places.AutocompleteSessionToken(),
+        bounds: {north: -21.7, south: -35.3, east: 33.05, west: 15.91},
+        componentRestrictions: {country: "ZA"},
+    }
+
+
+    //Predict list of places
+    const placePredictions = await new Promise<{response: google.maps.places.AutocompletePrediction[] | null, status: google.maps.places.PlacesServiceStatus} >((acceptAutocompletePredictions) => {
+      autoCompleteService.getPlacePredictions(autoCompleteRequest, (response, status) => {
+        acceptAutocompletePredictions({response, status})
+      })
+    })
+    ///////////////////////
+
+    // Take first prediction and get details
+    if(placePredictions.status === google.maps.places.PlacesServiceStatus.OK && placePredictions.response && placePredictions.response[0]?.place_id)
+    {
+      const placeDetails = await new Promise<{response: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus}>((acceptPlaceDetails) => {
+        const placeService = new google.maps.places.PlacesService(useMapsStore.getState().data.map!);
+        placeService.getDetails({placeId: placePredictions!.response![0]!.place_id, fields: ["formatted_address", "geometry", "place_id"]}, (response, status) => {
+          acceptPlaceDetails({response, status})
+        })
+      })
+
+      if(placeDetails.status === google.maps.places.PlacesServiceStatus.OK && placeDetails.response?.formatted_address && placeDetails.response.geometry?.location && placeDetails.response.place_id)
+      {
+        acceptPredictionWithDetails({formatted_address: placeDetails.response.formatted_address, latLng: placeDetails.response.geometry.location, solveStatus: google.maps.places.PlacesServiceStatus[placeDetails.status].toString() as EAddressSolveStatus, isAddressAccepted: false, placeId: placeDetails.response.place_id})
+        return
+      }
+    }
+
+    acceptPredictionWithDetails({formatted_address: "", latLng: null, solveStatus: EAddressSolveStatus.UNKNOWN_ERROR, isAddressAccepted: false, placeId: ""})
+    /////////////////////////////////////////
+  })
+
+}
+
 //this function is used in the ColumnDesignationSelector component. It is called when the designation changes
 export async function solveAddresses(columnIndex: number)
 {
+  console.log("solve address fired")
+
   const Z_tripRows = useTripStore.getState().data.rows
   const ZF_updateBodyCell = useTripStore.getState().actions.updateBodyCell
 
@@ -733,18 +788,20 @@ export async function solveAddresses(columnIndex: number)
     for(let i = 0; i < Z_tripRows.length; i++)
     {
       const row = Z_tripRows[i];
-      const addressCell = row?.cells[columnIndex]
-
-      if(addressCell?.geocodedDataAndStatus === null) //if the cell has no geocoded address, find one
+      if(row)
       {
-        const geoRes = await geocodeAddress(addressCell.displayData)
-        if(addressCell.displayData)
+        const addressCell = row.cells[columnIndex]
+        console.log(addressCell)
+
+        if(addressCell?.address.solveStatus === EAddressSolveStatus.AWAITING_SOLVE) //if the cell has no geocoded address, find one
         {
-          ZF_updateBodyCell({...addressCell, geocodedDataAndStatus: geoRes});
+          const addressPrediction = await getFirstPlacePrediction(addressCell.displayData)
+          console.log(addressPrediction)
+          ZF_updateBodyCell({...addressCell, address: addressPrediction});
+          
         }
-        
-        // return;
       }
+
       // else if(addressCell?.geocodedDataAndStatus && addressCell.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
       // {
       //   await setTimeout(() => {
@@ -757,10 +814,10 @@ export async function solveAddresses(columnIndex: number)
 }
 
 //sets column designation. And if the designation is not data, solve the addresses in the columns
-export function handleColumnDesignationAndSolveColumnAddresses(columnIndex: number, columnDesignation: EColumnDesignations)
+export function handleColumnDesignationAndSolveAddresses(columnIndex: number, columnDesignation: EColumnDesignations)
 {
   useTripStore.getState().actions.updateColumnDesignation({columnIndex: columnIndex, designation: columnDesignation})
-  //solve addresses in column if not edit mode
+  // solve addresses in column if not edit mode
   if(useTripStore.getState().data.tabelMode !== ETableMode.EditMode)
   {
     solveAddresses(columnIndex)

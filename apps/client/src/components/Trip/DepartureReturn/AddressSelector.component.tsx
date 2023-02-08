@@ -1,64 +1,61 @@
 import React, { useState } from "react";
-import AddressSelectorPopup from "./AddressSelectorPopup.component";
-import { useFloating, shift, offset, useDismiss, useInteractions, } from "@floating-ui/react";
+import { IAddress } from "../../common/CommonInterfacesAndEnums";
+import GAutoComplete from "../../Experiments/GAutoComplete.component";
+import { Button, Dialog } from "@mui/material";
+import AddressBookDialog from "./AddressBookDialog.component";
+import { getFirstPlacePrediction } from "../../../Services/Trip.service";
 
 interface IAddressSelectorProps{
-    address: google.maps.GeocoderResult | null;
+    address: IAddress | null;
     //addressSetter: React.Dispatch<React.SetStateAction<google.maps.GeocoderResult>>;
-    addressSetter: (address: google.maps.GeocoderResult) => void
+    addressSetter: (departureAddress: IAddress) => void
     title: string;
 
 }
 
 const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSetter, title}) =>
 {
-  const [open, setOpen] = useState(false);
 
-  const {x, y, reference, floating, strategy, context} = useFloating({
-    middleware: [
-      shift(), 
-      offset(-4),
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-    ],
-    // whileElementsMounted: autoUpdate,
-    placement: "bottom-start",
-    open,
-    onOpenChange: setOpen,
-
-  });
-
-  const dismiss = useDismiss(context);
-  const {getReferenceProps, getFloatingProps} = useInteractions([
-    dismiss,
-  ]);
-
-
-  function toggleShow()
+  async function applyAddressBookSelection(address: string)
   {
-    setOpen(current => {
-      return !current;
-    })
+    console.log("address book selection fired", address)
+    
+    addressSetter(await getFirstPlacePrediction(address))
+    setIsModalOpen(!isModalOpen);
   }
 
   return(
-    <React.Fragment>
+    <div>
+      <div className={"pt-2 mb-4 bg-slate-50 rounded-md"}>
+        <div className={"space-y-4"}>
+          <div className={" text-base text-[#1976d2]"}>{title}:</div>
 
-      <div>
-        <button {...getReferenceProps()} ref={reference} onClick={()=> setOpen(!open)} className={"p-3 mb-2 text-left bg-slate-50 rounded-md hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"}>
-          <div className={"space-y-2"}>
-            <div className={" text-sm"}>{title}:</div>
-            {
-              address?.formatted_address 
-              ? <div className={"text-[#1976d2]"}>{address?.formatted_address}</div>
-              : <div className={" drop-shadow text-red-600"}>{"click to select address"}</div>
-            }
-            
+          <div>
+            <GAutoComplete setAddress={addressSetter} currentAddress={address?.formatted_address ?? ""}/>
           </div>
-        </button>
+
+          <div className="">
+            <Button variant="contained" onClick={() => setIsModalOpen(!isModalOpen)}>Address Book</Button>
+          </div>
+
+        </div>
       </div>
 
+      <Dialog
+          PaperProps={{sx: {width: "80%", minHeight: "90%"}}}
+          open={isModalOpen}
+          scroll={"body"}
+          //onClose={}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <AddressBookDialog setIsModalOpen={setIsModalOpen} applyAddressBookSelection={applyAddressBookSelection}/>
+      </Dialog>
 
-      {open && (
+
+      {/* {open && (
               <div 
                 ref={floating}
                 style={{
@@ -70,11 +67,10 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
                 }}
                 {...getFloatingProps()}
               >
-                {/* <div ref={setArrowRef} style={styles.arrow} className="arrow"/> */}
-                <AddressSelectorPopup title={title} address={address} addressSetter={addressSetter} toggleShow={toggleShow}/>
+                <DepartureReturnPopup title={title} address={address} addressSetter={addressSetter} toggleShow={toggleShow}/>
               </div>
-        )}
-    </React.Fragment>
+        )} */}
+    </div>
   )
 }
 
