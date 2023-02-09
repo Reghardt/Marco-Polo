@@ -1,5 +1,5 @@
-import { Button, ToggleButton, ToggleButtonGroup } from "@mui/material"
-import React, { useState } from "react"
+import { Button } from "@mui/material"
+import React from "react"
 import { useTripStore } from "../../Zustand/tripStore"
 import StandardHeader from "../common/StandardHeader.component"
 
@@ -16,7 +16,7 @@ import { createTripDirections } from "../../Services/GMap.service"
 const Trip : React.FC = () => {
   console.log("Trip Refresh")
 
-  const [mode, setMode] = useState< "planner" | "explore">("planner")
+  // const [mode, setMode] = useState< "planner" | "explore">("planner")
 
   const ZF_setRowsAsNewTrip = useTripStore(store => store.actions.setRowsAsNewTrip)
   const ZF_clearAndSetTripDirections = useTripStore(store => store.actions.clearAndSetTripDirections)
@@ -55,7 +55,7 @@ const Trip : React.FC = () => {
 
             <DepartureReturn/>
 
-            <ToggleButtonGroup
+            {/* <ToggleButtonGroup
               value={mode}
               exclusive
               onChange={(_, value) => setMode(value)}
@@ -67,7 +67,7 @@ const Trip : React.FC = () => {
               <ToggleButton value="explore" aria-label="centered">
                 Explore
               </ToggleButton>
-            </ToggleButtonGroup>
+            </ToggleButtonGroup> */}
 
             <div className={"mb-2"}>
               <Button variant="contained"  onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Use Current Selection</Button>
