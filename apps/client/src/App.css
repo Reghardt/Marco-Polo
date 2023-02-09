@@ -21,3 +21,8 @@
   padding: 10px; */
   cursor: default;
 }
+
+/* For the google autocomplete modal */
+.pac-container {
+  z-index: 10000 !important;
+}

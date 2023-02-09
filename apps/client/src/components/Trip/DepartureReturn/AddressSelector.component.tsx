@@ -44,32 +44,16 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
       </div>
 
       <Dialog
-          PaperProps={{sx: {width: "80%", minHeight: "90%"}}}
+          PaperProps={{sx: {width: "80%", minHeight: "90%",}}}
           open={isModalOpen}
           scroll={"body"}
           //onClose={}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
+          
         >
           <AddressBookDialog setIsModalOpen={setIsModalOpen} applyAddressBookSelection={applyAddressBookSelection}/>
       </Dialog>
-
-
-      {/* {open && (
-              <div 
-                ref={floating}
-                style={{
-                  position: strategy,
-                  top: y ?? 0,
-                  left: x ?? 0,
-                  width: 'max-content',
-                  zIndex: 1
-                }}
-                {...getFloatingProps()}
-              >
-                <DepartureReturnPopup title={title} address={address} addressSetter={addressSetter} toggleShow={toggleShow}/>
-              </div>
-        )} */}
     </div>
   )
 }

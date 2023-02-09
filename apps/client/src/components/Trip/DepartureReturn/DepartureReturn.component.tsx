@@ -38,8 +38,6 @@ const DepartureReturn: React.FC = () => {
                             }}
                             />} 
                         label="Circuit" />
-                    
-
                 </div>
                 <div>
                     <HelpTooltip title="If circuit is enabled, the Depart address is used as the return address"/>

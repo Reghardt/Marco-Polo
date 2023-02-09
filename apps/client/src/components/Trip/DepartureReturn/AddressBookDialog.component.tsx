@@ -1,11 +1,13 @@
 import { DeleteOutline } from "@mui/icons-material"
-import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, IconButton, Paper, Radio, RadioGroup, Stack, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material"
+import { Box, Button, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Stack, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material"
 import React, { useState } from "react"
 
 import TabPanel, { a11yProps } from "../../Tabs/TabPanel.component"
 
 import { useCreateAddressBookEntry, useDeleteAddressBookEntryMutation, useGetAddressBookQuery } from "../../../trpc-hooks/trpcHooks"
 import { trpc } from "../../../utils/trpc"
+import GAutoComplete from "../../Experiments/GAutoComplete.component"
+import { IAddress } from "../../common/CommonInterfacesAndEnums"
 
 interface IAddressBookDialogProps{
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,14 +29,12 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
     //TODO read up on top, left and translate, and their interactions with each other
     const [tabValue, setTabValue] = useState(0)
 
-    const [physicalAddress, setPhysicalAddress] = useState("")
+    const [physicalAddress, setPhysicalAddress] = useState<IAddress | null>(null)
 
     const [addressDescription, setAddressDescription] = useState("")
-    const [geocodedResults, setGeocodedResults] = useState<google.maps.GeocoderResult[]>([]);
+
 
     const [errorMessage, setErrorMessage] = useState("")
-
-    const [selectedAddressIdx, setSelectedAddressIdx] = useState(-1)
 
     const utils = trpc.useContext()
 
@@ -42,10 +42,8 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
     const createAddressBookEntry = useCreateAddressBookEntry({
         doOnSuccess: () => {
-        setPhysicalAddress("")
+        setPhysicalAddress(null)
         setErrorMessage("")
-        setGeocodedResults([])
-        setSelectedAddressIdx(-1)
         setAddressDescription("")
         setTabValue(0)
 
@@ -53,16 +51,16 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
     }})
 
+    function handleSetPhysicalAddress(address: IAddress)
+    {
+        setPhysicalAddress(address)
+    }
+
     const deleteAddressBookEntry = useDeleteAddressBookEntryMutation({
         doOnSuccess: () => {
             utils.addressBook.getAddressBook.invalidate()
         },
     });
-
-    function capturePhysicalAddress(input: string)
-    {
-        setPhysicalAddress(input)
-    }
 
     function captureAddressDescription(input: string)
     {
@@ -70,20 +68,13 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
     }
 
 
-    function handleAddressSelection(index: string)
-    {
-      console.log(geocodedResults[parseInt(index)])
-        setSelectedAddressIdx(parseInt(index))
-    }
-
     function saveAddressToAddressBook()
     {
-        const geoResult = geocodedResults[selectedAddressIdx]
-        if(addressDescription && geoResult)
+        if(addressDescription && physicalAddress)
         {
             
             createAddressBookEntry.mutate({
-                physicalAddress: geoResult.formatted_address, 
+                physicalAddress: physicalAddress.formatted_address, 
                 addressDescription: addressDescription})
         }
         else
@@ -168,30 +159,12 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
                             <Typography variant="h6">Create New Address Book Entry:</Typography>
                         </Box>
 
-                        <Box>
-                            <TextField value={physicalAddress} onChange={(e)=> capturePhysicalAddress(e.target.value)} size="medium" label="Physical Address" fullWidth></TextField>
-                        </Box>
+                        <div className="z-50 ">
+                            <GAutoComplete setAddress={handleSetPhysicalAddress} currentAddress={physicalAddress ? physicalAddress.formatted_address : ""}/>
+                        </div>
 
-                        {geocodedResults.length > 0 && (
-                            <Box>
-                                <FormControl>
-                                    <FormLabel id="demo-radio-buttons-group-label">Results:</FormLabel>
-                                    <RadioGroup
-                                        aria-labelledby="demo-radio-buttons-group-label"
-                                        //defaultValue="0"
-                                        name="radio-buttons-group"
-                                        onChange={(e) => handleAddressSelection(e.target.value)}
-                                        value={selectedAddressIdx}
-                                    >
-                                        {geocodedResults.map((elem, idx) => {
-                                            return <FormControlLabel key={`dep-ret-${idx}`} value={idx} control={<Radio />} label={elem.formatted_address} />
-                                            })}
-                                    </RadioGroup>
-                                </FormControl>
-                            </Box>
-                        )}
 
-                        {selectedAddressIdx > -1 && (
+                        {physicalAddress && (
                             <React.Fragment>
                                 <Box>
                                     <TextField value={addressDescription} onChange={(e)=> captureAddressDescription(e.target.value)} size="medium" label="Descriptive Address Name" fullWidth></TextField>
