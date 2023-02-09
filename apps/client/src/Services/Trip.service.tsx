@@ -621,8 +621,8 @@ export function createSimplePointToPointDirections(departureAddress: IAddress, r
 
 
   var request: google.maps.DirectionsRequest = {
-    origin: departureAddress.latLng!,
-    destination: returnAddress.latLng!,
+    origin: {placeId: departureAddress.placeId},
+    destination: {placeId: returnAddress.placeId},
     waypoints: waypoints,
     travelMode: google.maps.TravelMode.DRIVING,
     optimizeWaypoints: shouldOptimize,
@@ -637,11 +637,11 @@ export function createSimplePointToPointDirections(departureAddress: IAddress, r
 }
 
 //TODO modify function to use dijikstras algorithm to calulate shortest path for when link addresses are present
-export function createLinkedAddressesDirections(departureAddress: string, returnAddress: string, waypoints: google.maps.DirectionsWaypoint[]) {
+export function createLinkedAddressesDirections(departureAddress: IAddress, returnAddress: IAddress, waypoints: google.maps.DirectionsWaypoint[]) {
 
   var request: google.maps.DirectionsRequest = {
-    origin: departureAddress,
-    destination: returnAddress,
+    origin: {placeId: departureAddress.placeId},
+    destination: {placeId: returnAddress.placeId},
     waypoints: waypoints,
     travelMode: google.maps.TravelMode.DRIVING,
     optimizeWaypoints: false,

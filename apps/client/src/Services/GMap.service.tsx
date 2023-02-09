@@ -170,7 +170,7 @@ export function isValidAddress(row: IRow, columnIndex: number): boolean
 
 function createWaypoint(row: IRow, columnIndex: number) : google.maps.DirectionsWaypoint
 {
-    return {location: row.cells[columnIndex]!.address.latLng!, stopover: true,}
+    return {location: {placeId: row.cells[columnIndex]!.address.placeId}, stopover: true,}
 }
 
 function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
@@ -266,7 +266,7 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
                 else //there are link addresses
                 {
                     //TODO modify function to use dijikstras algorithm to calulate shortest path for when link addresses are present
-                    return await createLinkedAddressesDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints )
+                    return await createLinkedAddressesDirections(Z_departureAddress, Z_returnAddress, waypoints )
                 }
             }
             else
