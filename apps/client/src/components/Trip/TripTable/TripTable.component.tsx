@@ -1,8 +1,8 @@
 import { PanToolOutlined } from "@mui/icons-material"
 import { Button } from "@mui/material"
-import React, { useEffect } from "react"
+import React from "react"
 import { ETableMode, useTripStore } from "../../../Zustand/tripStore"
-import { createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, isAllAddressesInColumnValidAndAccepted, writeBackToSpreadsheet } from "../../../Services/Trip.service"
+import { createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, solveAddresses, writeBackToSpreadsheet } from "../../../Services/Trip.service"
 import { loadSelection } from "../Worksheet/worksheet.service"
 import { Driver } from "./Driver/Driver.component"
 import GridContainer from "../../DragAndDrop/GridContainer"
@@ -17,34 +17,50 @@ const TripTable: React.FC = () => {
   const Z_columnVisibility = useTripStore(store => store.data.columnVisibility)
   const Z_columnDesignations = useTripStore(store => store.data.columnDesignations)
   const Z_addressColumnIndex = useTripStore(store => store.data.addressColumnIndex)
-  const Z_LinkAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
+  const Z_linkAddressColumnIndex = useTripStore(store => store.data.linkAddressColumnIndex)
   const Z_tabelMode = useTripStore(store => store.data.tabelMode)
   const Z_errorMessage = useTripStore(store => store.data.errorMessage)
 
   const ZF_setTripRows = useTripStore(store => store.actions.setTripRows)
   const ZF_appendRows = useTripStore(store => store.actions.appendRows)
   const ZF_reverseRows = useTripStore(store => store.actions.reverseRows)
-  const ZF_setTableMode = useTripStore(store => store.actions.setTableMode)
+
 
 
   //TODO make solveAddresses event based, only needs to fire on solve modes
-  useEffect(() => {
-    if(Z_tabelMode === ETableMode.AddressSolveMode)
-    {
-      if(isAllAddressesInColumnValidAndAccepted(Z_addressColumnIndex, Z_tabelMode))
-      {
-        ZF_setTableMode(ETableMode.EditMode)
-      }
-    }
-    else if(Z_tabelMode === ETableMode.LinkAddressSolveMode)
-    {
-      if(isAllAddressesInColumnValidAndAccepted(Z_LinkAddressColumnIndex, Z_tabelMode))
-      {
-        ZF_setTableMode(ETableMode.EditMode)
-      }
-    }
+  // useEffect(() => {
+  //   if(Z_tabelMode === ETableMode.AddressSolveMode)
+  //   {
+  //     if(isAllAddressesInColumnValidAndAccepted(Z_addressColumnIndex, Z_tabelMode))
+  //     {
+  //       if(Z_LinkAddressColumnIndex > -1 && isAllAddressesInColumnValidAndAccepted(Z_LinkAddressColumnIndex, ETableMode.LinkAddressSolveMode) === false) // if data gets appended
+  //       {
+          
+  //         ZF_setTableMode(ETableMode.LinkAddressSolveMode)
+  //       }
+  //       else
+  //       {
+  //         ZF_setTableMode(ETableMode.EditMode)
+  //       }
+  //     }
+  //     else
+  //     {
+  //       solveAddresses(Z_addressColumnIndex)
+  //     }
+  //   }
+  //   else if(Z_tabelMode === ETableMode.LinkAddressSolveMode)
+  //   {
+  //     if(isAllAddressesInColumnValidAndAccepted(Z_LinkAddressColumnIndex, Z_tabelMode))
+  //     {
+  //       ZF_setTableMode(ETableMode.EditMode)
+  //     }
+  //     else
+  //     {
+  //       solveAddresses(Z_LinkAddressColumnIndex)
+  //     }
+  //   }
 
-  }, [Z_tripRows])
+  // }, [Z_columnDesignations])
 
   function onDragEnd(sequence: number[])
   {
@@ -83,6 +99,9 @@ const TripTable: React.FC = () => {
       else
       {
         ZF_appendRows(selection)
+        //solve address column then solve link address column
+        solveAddresses(Z_addressColumnIndex)
+        solveAddresses(Z_linkAddressColumnIndex)
       }
     })
   }

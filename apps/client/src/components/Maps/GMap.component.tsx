@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTripStore } from "../../Zustand/tripStore";
-import { createCustomMapMarkers, createMarker, createTripDirections} from "../../Services/GMap.service";
+import { createCustomMapMarkers, createMarker} from "../../Services/GMap.service";
 // import GMapLegends from "./GMapLegends.component";
 import { tolls } from "./Tolls";
 import TollMarker from "./CustomMarker/TollMarker";
@@ -8,7 +8,6 @@ import { createPortal } from "react-dom";
 import LegsListControl from "./LegsListControl.component";
 import { useMapsStore } from "../../Zustand/mapsStore";
 import TollVisibilityControl from "./TollVisibilityControl.component";
-import { Button } from "@mui/material";
 
 export enum ETollVisibility{
     ALL = 1,
@@ -108,9 +107,7 @@ const GMap: React.FC = () => {
 
     return(
         <>
-            <div className={"w-full"}>
-              <Button className={"w-full"}  variant="contained" onClick={() => createTripDirections(true, false)}>Find Route</Button>
-            </div>
+            
             <div className={"py-2"}>
                 <div style={{height: "33em"}} className={" w-full mb-2 rounded"} id="map"></div>
 

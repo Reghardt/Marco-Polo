@@ -2,14 +2,14 @@ import { useFloating, offset, useDismiss, useInteractions, autoUpdate, flip } fr
 import { VerifiedUser, WarningOutlined } from "@mui/icons-material";
 import React, { useState } from "react";
 
-import { ICell } from "../../../../common/CommonInterfacesAndEnums";
+import { EAddressSolveStatus, ICell } from "../../../../common/CommonInterfacesAndEnums";
 import AddressPopper from "./AddressPopper.component";
 
-enum EAddressState{
-  OK = 1,
-  SOLVE = 2,
-  ERROR = 3
-}
+// enum EAddressState{
+//   OK = 1,
+//   SOLVE = 2,
+//   ERROR = 3
+// }
 
 type AddressCellProps = {
     cellRef: ICell;
@@ -19,15 +19,15 @@ type AddressCellProps = {
 const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 {
   const [open, setOpen] = useState(false);
-  const [addressState, setAddressState] = useState<EAddressState>(EAddressState.SOLVE)
+  // const [addressState, setAddressState] = useState<EAddressState>(EAddressState.SOLVE)
 
-  function handleSetAddressState(newState: EAddressState)
-  {
-    if(addressState !== newState)
-    {
-      setAddressState(newState)
-    }
-  }
+  // function handleSetAddressState(newState: EAddressState)
+  // {
+  //   if(addressState !== newState)
+  //   {
+  //     setAddressState(newState)
+  //   }
+  // }
 
   const {x, y, reference, floating, strategy, context} = useFloating({
     middleware: [
@@ -48,52 +48,21 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
 
   function getAddressStatus()
   {
-    if(cellRef?.geocodedDataAndStatus)
+    if(cellRef.address.solveStatus === EAddressSolveStatus.AWAITING_SOLVE)
     {
-      if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OK)
-      {
-        if(cellRef.geocodedDataAndStatus.results && cellRef.geocodedDataAndStatus.results.length > 0)
-        {
-          if(cellRef.isAddressAccepted)
-          {
-            handleSetAddressState(EAddressState.OK)
-          }
-          else{
-            handleSetAddressState(EAddressState.SOLVE)
-          }
-          
-        }
-        else{
-          handleSetAddressState(EAddressState.ERROR)
-        }
-      }
-      else if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT)
-      {
-        handleSetAddressState(EAddressState.SOLVE)
-      }
-      else if(cellRef.geocodedDataAndStatus.status === google.maps.GeocoderStatus.ZERO_RESULTS)
-      {
-        handleSetAddressState(EAddressState.ERROR)
-      }
-      else
-      {
-        handleSetAddressState(EAddressState.ERROR)
-      }
+      return "Loading..."
     }
-    else{
-      if(cellRef.displayData === "")
-      {
-        handleSetAddressState(EAddressState.ERROR)
-      }
-      else
-      {
-        handleSetAddressState(EAddressState.SOLVE)
-      }
-      
+    else if(cellRef.address.solveStatus === EAddressSolveStatus.OK)
+    {
+      return cellRef.address.formatted_address
+    }
+    else
+    {
+      return cellRef.address.solveStatus
     }
   }
 
-  getAddressStatus()
+  
 
   function closePopper()
   {
@@ -123,36 +92,8 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
                   <div>
                     <div className={"text-base"}> 
                       <>
-                        Found:
-                        {(() => {
-                          
-                          if(cellRef.geocodedDataAndStatus?.results)
-                          {
-                            return cellRef.geocodedDataAndStatus.results[cellRef.selectedGeocodedAddressIndex]?.formatted_address
-                          }
-                          else
-                          {
-                            if(cellRef.geocodedDataAndStatus?.status === undefined)
-                            {
-                              return "Loading..."
-                            }
-                            else
-                            {
-                              return cellRef.geocodedDataAndStatus?.status
-                            }
-                             
-                            // if(!cellRef.displayData)
-                            // {
-                            //   return " Error"
-                            // }
-                            // else
-                            // {
-                            //   return cellRef.geocodedDataAndStatus?.status
-                            // }
-                            // return "Loading..."
-                          }
-
-                        })()}
+                        Found: {getAddressStatus()}
+                        
                       </>
                     </div>
                   </div>
@@ -160,7 +101,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
               </div>
 
               <div>
-                {addressState === EAddressState.OK 
+                {cellRef.address.isAddressAccepted === true
                   ? 
                   <div className="ml-2">
                     <VerifiedUser color="primary"/>
@@ -201,7 +142,7 @@ const AddressCell: React.FC<AddressCellProps> = ({cellRef, glanceMode}) =>
             position: strategy,
             top: y ?? 0,
             left: x ?? 0,
-            width: 'auto',
+            width: '90%',
             zIndex: 10
             // gridTemplateColumns: "max-content 1fr",
             }}

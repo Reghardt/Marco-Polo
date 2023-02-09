@@ -1,7 +1,7 @@
 import { MenuItem, Select } from "@mui/material"
 
 import React from "react"
-import { handleColumnDesignationAndSolveColumnAddresses } from "../../../../Services/Trip.service";
+import { handleColumnDesignationAndSolveAddresses } from "../../../../Services/Trip.service";
 import { useTripStore } from "../../../../Zustand/tripStore";
 import { EColumnDesignations } from "../../../common/CommonInterfacesAndEnums";
 
@@ -21,7 +21,7 @@ const ColumnDesignationSelector : React.FC<ColumnDecoratorProps> = ({columnIndex
         labelId="demo-select-small"
         id="demo-select-small"
         value={Z_columnDesignations[columnIndex]}
-        onChange={e => handleColumnDesignationAndSolveColumnAddresses(columnIndex, e.target.value as EColumnDesignations)}
+        onChange={e => handleColumnDesignationAndSolveAddresses(columnIndex, e.target.value as EColumnDesignations)}
         sx={{width:"100%", borderRadius: 0}}
       >
         <MenuItem value={EColumnDesignations.Data}>Data</MenuItem>

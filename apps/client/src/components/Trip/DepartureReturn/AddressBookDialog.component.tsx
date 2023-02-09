@@ -3,7 +3,6 @@ import { Box, Button, DialogActions, DialogContent, DialogTitle, FormControl, Fo
 import React, { useState } from "react"
 
 import TabPanel, { a11yProps } from "../../Tabs/TabPanel.component"
-import { geocodeAddress } from "../../../Services/Trip.service"
 
 import { useCreateAddressBookEntry, useDeleteAddressBookEntryMutation, useGetAddressBookQuery } from "../../../trpc-hooks/trpcHooks"
 import { trpc } from "../../../utils/trpc"
@@ -70,31 +69,6 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
         setAddressDescription(input)
     }
 
-    function generateGeocodeResults()
-    {
-        if(physicalAddress)
-        {
-            geocodeAddress(physicalAddress).then(geocoded => {
-                console.log(geocoded)
-                if(geocoded.status === "OK")
-                {
-                    console.log("OK")
-                    setGeocodedResults(geocoded.results ?? [])
-                    setErrorMessage("")
-                }
-                else
-                {
-                    setErrorMessage("No results, try a more specific name or address")
-                }
-                setSelectedAddressIdx(-1)
-            })
-        }   
-        else
-        {
-            setErrorMessage("Please enter an address")
-        }
-        
-    }
 
     function handleAddressSelection(index: string)
     {
@@ -196,10 +170,6 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
                         <Box>
                             <TextField value={physicalAddress} onChange={(e)=> capturePhysicalAddress(e.target.value)} size="medium" label="Physical Address" fullWidth></TextField>
-                        </Box>
-
-                        <Box>
-                            <Button onClick={()=> generateGeocodeResults()}>Search</Button>
                         </Box>
 
                         {geocodedResults.length > 0 && (

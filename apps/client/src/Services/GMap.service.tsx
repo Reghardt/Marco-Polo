@@ -1,5 +1,5 @@
 import React from "react";
-import { IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
+import { EAddressSolveStatus, IAddress, IRow, ITripDirections } from "../Components/common/CommonInterfacesAndEnums";
 import AddressMarker, { EAddressMarkerType } from "../Components/Maps/CustomMarker/AddressMarker";
 import CustomMarker from "../Components/Maps/CustomMarker/CustomMarker";
 import { IToll, tolls } from "../Components/Maps/Tolls";
@@ -53,8 +53,8 @@ export function createCustomMapMarkers(
     map: google.maps.Map | undefined, 
     addressColumnIndex: number,
     linkAddressColumnIndex: number,
-    departureAddress: google.maps.GeocoderResult | null, 
-    returnAddress: google.maps.GeocoderResult | null
+    departureAddress: IAddress | null, 
+    returnAddress: IAddress | null
     )
 {
     if(departureAddress && returnAddress)
@@ -76,40 +76,36 @@ export function createCustomMapMarkers(
                 const addressCell = addressColumnIndex > -1 ? row.cells[addressColumnIndex] : undefined
                 const linkAddressCell = linkAddressColumnIndex > -1 ? row.cells[linkAddressColumnIndex] : undefined
                 
-                if(addressCell?.geocodedDataAndStatus?.results && addressCell.geocodedDataAndStatus.results.length > 0)
+                if(addressCell?.address.latLng)
                 {
-                    const selectedAddressRes = addressCell.geocodedDataAndStatus.results[addressCell.selectedGeocodedAddressIndex]
-                    if(selectedAddressRes)
+
+                    let label = (i + 1).toString()
+                    if(linkAddressCell?.address.latLng) //add -> to label if row has a valid link address
                     {
-                        let label = (i + 1).toString()
-                        if(linkAddressCell?.geocodedDataAndStatus?.results && linkAddressCell.geocodedDataAndStatus.results.length > 0) //add -> to label if row has a valid link address
-                        {
-                            label+= "->"
-                        }
-                        addressMarkers.push(
-                            createMarker(
-                                label, 
-                                map, 
-                                selectedAddressRes.geometry.location, 
-                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS} popperData={{cell: addressCell, rowIndex: i}}/>
-                            ))
+                        label+= "->"
                     }
+                    addressMarkers.push(
+                        createMarker(
+                            label, 
+                            map, 
+                            addressCell.address.latLng, 
+                            <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS} popperData={{cell: addressCell, rowIndex: i}}/>
+                        ))
+                    
                 }
                 
-                if(linkAddressCell?.geocodedDataAndStatus?.results && linkAddressCell.geocodedDataAndStatus.results.length > 0)
+                if(linkAddressCell?.address.latLng)
                 {
-                    const selectedAddressRes = linkAddressCell.geocodedDataAndStatus.results[linkAddressCell.selectedGeocodedAddressIndex]
-                    if(selectedAddressRes)
-                    {
-                        const label = `->${(i + 1).toString()}`
-                        addressMarkers.push(
-                            createMarker(
-                                label, 
-                                map, 
-                                selectedAddressRes.geometry.location, 
-                                <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS} popperData={{cell: linkAddressCell, rowIndex: i}}/>
-                            ))
-                    }
+
+                    const label = `->${(i + 1).toString()}`
+                    addressMarkers.push(
+                        createMarker(
+                            label, 
+                            map, 
+                            linkAddressCell.address.latLng, 
+                            <AddressMarker label={label} markerType={EAddressMarkerType.ADDRESS} popperData={{cell: linkAddressCell, rowIndex: i}}/>
+                        ))
+                    
                 }
             }
 
@@ -118,39 +114,39 @@ export function createCustomMapMarkers(
 
     if(departureAddress && returnAddress && departureAddress.formatted_address === returnAddress.formatted_address)
     {
-        if(departureAddress)
+        if(departureAddress.latLng)
         {
             const label = "D+R"
             addressMarkers.unshift(
                 createMarker(
                     label, 
                     map, 
-                    departureAddress.geometry.location, 
+                    departureAddress.latLng, 
                     <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET} popperData={null}/>
                 ))
         }
     }
     else
     {
-        if(departureAddress)
+        if(departureAddress?.latLng)
         {
             const label = "Dep"
             addressMarkers.unshift(
                 createMarker(
                     label, 
                     map, 
-                    departureAddress.geometry.location, 
+                    departureAddress.latLng, 
                     <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET} popperData={null}/>
                 ))
         }
-        if(returnAddress)
+        if(returnAddress?.latLng)
         {
             const label = "Ret"
             addressMarkers.push(
                 createMarker(
                     label, 
                     map, 
-                    returnAddress.geometry.location, 
+                    returnAddress.latLng, 
                     <AddressMarker label={label} markerType={EAddressMarkerType.DEP_RET} popperData={null}/>
                 ))
         }
@@ -162,26 +158,9 @@ export function createCustomMapMarkers(
 export function isValidAddress(row: IRow, columnIndex: number): boolean
 {
     const cell = row.cells[columnIndex]
-    if(cell)
+    if(cell?.displayData && cell.address.solveStatus === EAddressSolveStatus.OK && cell.address.latLng && cell.address.isAddressAccepted)
     {
-        if(cell.displayData && cell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK && cell.geocodedDataAndStatus?.results && cell.isAddressAccepted)
-        {
-
-            const location = cell.geocodedDataAndStatus?.results[cell.selectedGeocodedAddressIndex]?.formatted_address
-            if(location)
-            {
-                return true
-            }
-            else
-            {
-                return false
-            }
-
-        }
-        else
-        {   
-            return false
-        }
+        return true
     }
     else
     {
@@ -191,7 +170,7 @@ export function isValidAddress(row: IRow, columnIndex: number): boolean
 
 function createWaypoint(row: IRow, columnIndex: number) : google.maps.DirectionsWaypoint
 {
-    return {location: row.cells[columnIndex]!.displayData, stopover: true}
+    return {location: {placeId: row.cells[columnIndex]!.address.placeId}, stopover: true,}
 }
 
 function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null
@@ -270,7 +249,8 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
             {
                 if(Z_linkAddressColumnIndex < 0) //no link addresses
                 {
-                    const pointToPointDirections = await createSimplePointToPointDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints, optimize )
+                    const pointToPointDirections = await createSimplePointToPointDirections(Z_departureAddress, Z_returnAddress, waypoints, optimize )
+                    console.log(pointToPointDirections)
                     if(pointToPointDirections.result?.routes[0])
                     {
                         //reorder row as per optimized route
@@ -279,13 +259,14 @@ async function calculateDirectionsFromWaypoints(optimize: boolean): Promise<ITri
                     }
                     else
                     {
+                        console.error("No route could be generated")
                         return null
                     }  
                 }
                 else //there are link addresses
                 {
                     //TODO modify function to use dijikstras algorithm to calulate shortest path for when link addresses are present
-                    return await createLinkedAddressesDirections(Z_departureAddress.formatted_address, Z_returnAddress.formatted_address, waypoints )
+                    return await createLinkedAddressesDirections(Z_departureAddress, Z_returnAddress, waypoints )
                 }
             }
             else
@@ -383,6 +364,7 @@ export async function createTripDirections(optimize: boolean, preserveViewport: 
     const Z_map = useMapsStore.getState().data.map
    
     const directions = await calculateDirectionsFromWaypoints(optimize) //calculate new directions
+    console.log(directions)
     if(directions && directions.status === google.maps.DirectionsStatus.OK && Z_map) //if successfull
     {
         const mouldedDirections = mouldDirectionsAndDisplay(Z_rows, directions, Z_addressColumnIndex, Z_linkAddressColumnIndex, Z_map) //transform directions
@@ -468,7 +450,7 @@ export function mouldDirectionsAndDisplay(
             if(row)
             {
                 const addressCell = row.cells[addressColumnIndex]
-                if(addressCell && addressCell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
+                if(addressCell?.address.latLng)
                 {
                     if(!mouldedDirectionsLegGroups[i]) //if undefined at index, create new empty array at index
                     {
@@ -507,7 +489,7 @@ export function mouldDirectionsAndDisplay(
                 if(linkAddressColumnIndex > -1) //if there are link addresses
                 {
                     const linkAddressCell = row.cells[linkAddressColumnIndex]
-                    if(linkAddressCell && linkAddressCell.geocodedDataAndStatus?.status === google.maps.GeocoderStatus.OK)
+                    if(linkAddressCell?.address.latLng)
                     {
                         const linkLeg = route.legs[routeLegIndex]
                         if(linkLeg)

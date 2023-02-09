@@ -1,5 +1,5 @@
 import produce from "immer"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { TMouldedDirections } from "../../Services/GMap.service"
 
 interface ILegsListControl{
@@ -17,9 +17,9 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
 
     const [visibility, setVisibility ] = useState(new Array<boolean>(mouldedDirections.legGroups.length).fill(true))
 
-    useEffect(() => {
-        setPolylineOpacity()
-    }, [visibility])
+
+    setPolylineOpacity()
+
 
     function setPolylineOpacity()
     {

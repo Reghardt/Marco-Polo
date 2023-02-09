@@ -1,7 +1,7 @@
-import { EColumnDesignations, ICell, IRow } from "../Components/common/CommonInterfacesAndEnums";
+import { EColumnDesignations, IAddress, ICell, IRow } from "../Components/common/CommonInterfacesAndEnums";
 import create from 'zustand';
 import produce from 'immer';
-import { makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Services/Trip.service";
+import { areAllAddressesInColumnValidAndAccepted, makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Services/Trip.service";
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
 import { WritableDraft } from "immer/dist/internal";
 import { TMouldedDirections } from "../Services/GMap.service";
@@ -60,7 +60,7 @@ function updateColumnDesignationHelper(state: WritableDraft<ITripState>, payload
     for(let i = 0; i < state.data.rows.length; i++)
     {
         const cell = state.data.rows[i]?.cells[payload.columnIndex];
-        if(cell?.isAddressAccepted === false)
+        if(cell?.address.isAddressAccepted === false)
         {
             state.data.tabelMode = payload.designation === EColumnDesignations.Address ? ETableMode.AddressSolveMode : ETableMode.LinkAddressSolveMode;
             break;
@@ -68,11 +68,27 @@ function updateColumnDesignationHelper(state: WritableDraft<ITripState>, payload
     }
 }
 
+function makeFormattedAddressDisplayData(rows: WritableDraft<IRow>[], columnIndex: number)
+{
+    for(let i = 0; i < rows.length; i++)
+    {
+        const row = rows[i]
+        if(row)
+        {
+            const cell = row.cells[columnIndex]
+            if(cell)
+            {
+                cell.displayData = cell.address.formatted_address
+            }
+        }
+    }
+}
+
 
 
 interface ITrip{
-    departureAddress: google.maps.GeocoderResult | null;
-    returnAddress: google.maps.GeocoderResult | null;
+    departureAddress: IAddress | null;
+    returnAddress: IAddress | null;
     departureReturnState: EDepartReturn;
 
     columnDesignations: EColumnDesignations[];
@@ -92,8 +108,8 @@ interface ITrip{
 interface ITripState {
     data: ITrip
     actions: {
-        setDepartureAddress: (departureAddress: google.maps.GeocoderResult) => void;
-        setReturnAddress: (returnAddress: google.maps.GeocoderResult) => void;
+        setDepartureAddress: (departureAddress: IAddress) => void;
+        setReturnAddress: (returnAddress:IAddress) => void;
         setDepartureReturnState: (departureReturnState: EDepartReturn) => void;
 
         setRowsAsNewTrip: (rows: IRow[]) => void;
@@ -197,6 +213,34 @@ export const useTripStore = create<ITripState>()(((set) => ({
                                 if(state.data.rows[i]?.cells[j])
                                 {
                                     state.data.rows[i]!.cells[j] = cell
+
+                                    if(state.data.tabelMode === ETableMode.AddressSolveMode && state.data.addressColumnIndex === j)
+                                    {
+                                        if(areAllAddressesInColumnValidAndAccepted(j, state.data.rows, state.data.tabelMode)) 
+                                        {
+                                            if(state.data.linkAddressColumnIndex > -1 && !areAllAddressesInColumnValidAndAccepted(state.data.linkAddressColumnIndex, state.data.rows, state.data.tabelMode))
+                                            {
+                                                makeFormattedAddressDisplayData(state.data.rows, state.data.addressColumnIndex) //address column was just confirmed, execute function on that column
+                                                state.data.tabelMode = ETableMode.LinkAddressSolveMode //then set mode to link address solve mode
+                                                
+                                            }
+                                            else
+                                            {
+                                                makeFormattedAddressDisplayData(state.data.rows, state.data.addressColumnIndex)
+                                                state.data.tabelMode = ETableMode.EditMode
+                                                
+                                            }
+                                            
+                                        }
+                                    }
+                                    else if(state.data.tabelMode === ETableMode.LinkAddressSolveMode && state.data.linkAddressColumnIndex === j)
+                                    {
+                                        if(areAllAddressesInColumnValidAndAccepted(j, state.data.rows, state.data.tabelMode)) 
+                                        {
+                                            makeFormattedAddressDisplayData(state.data.rows, state.data.linkAddressColumnIndex)
+                                            state.data.tabelMode = ETableMode.EditMode
+                                        }
+                                    }
                                 }
                                 
                                 return;
@@ -260,6 +304,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
             set(produce<ITripState>((state) => {
                 const parentChildRowsToAdd = makeRowParentChildRelations(rows, state.data.addressColumnIndex)
                 state.data.rows = [...state.data.rows, ...parentChildRowsToAdd]
+                state.data.tabelMode = ETableMode.AddressSolveMode
             }))
         },
         reverseRows() {
