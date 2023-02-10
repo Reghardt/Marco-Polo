@@ -21,9 +21,9 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
   async function applyAddressBookSelection(address: string)
   {
     console.log("address book selection fired", address)
-    
-    addressSetter(await getFirstPlacePrediction(address))
     setIsModalOpen(!isModalOpen);
+    addressSetter(await getFirstPlacePrediction(address))
+    
   }
 
   return(

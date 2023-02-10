@@ -1,4 +1,3 @@
-import { PanToolOutlined } from "@mui/icons-material"
 import { Button } from "@mui/material"
 import React from "react"
 import { ETableMode, useTripStore } from "../../../Zustand/tripStore"
@@ -9,6 +8,7 @@ import GridContainer from "../../DragAndDrop/GridContainer"
 import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
 import { createTripDirections } from "../../../Services/GMap.service"
+import CreateAddress from "./CreateAddress/CreateAddress.component"
 
 
 const TripTable: React.FC = () => {
@@ -26,41 +26,27 @@ const TripTable: React.FC = () => {
   const ZF_reverseRows = useTripStore(store => store.actions.reverseRows)
 
 
+  function retrieveUserSelectionFromSpreadsheetAndSet()
+  {
+    const ZF_setRowsAsNewTrip = useTripStore.getState().actions.setRowsAsNewTrip
+    const ZF_clearAndSetTripDirections = useTripStore.getState().actions.clearAndSetTripDirections
 
-  //TODO make solveAddresses event based, only needs to fire on solve modes
-  // useEffect(() => {
-  //   if(Z_tabelMode === ETableMode.AddressSolveMode)
-  //   {
-  //     if(isAllAddressesInColumnValidAndAccepted(Z_addressColumnIndex, Z_tabelMode))
-  //     {
-  //       if(Z_LinkAddressColumnIndex > -1 && isAllAddressesInColumnValidAndAccepted(Z_LinkAddressColumnIndex, ETableMode.LinkAddressSolveMode) === false) // if data gets appended
-  //       {
-          
-  //         ZF_setTableMode(ETableMode.LinkAddressSolveMode)
-  //       }
-  //       else
-  //       {
-  //         ZF_setTableMode(ETableMode.EditMode)
-  //       }
-  //     }
-  //     else
-  //     {
-  //       solveAddresses(Z_addressColumnIndex)
-  //     }
-  //   }
-  //   else if(Z_tabelMode === ETableMode.LinkAddressSolveMode)
-  //   {
-  //     if(isAllAddressesInColumnValidAndAccepted(Z_LinkAddressColumnIndex, Z_tabelMode))
-  //     {
-  //       ZF_setTableMode(ETableMode.EditMode)
-  //     }
-  //     else
-  //     {
-  //       solveAddresses(Z_LinkAddressColumnIndex)
-  //     }
-  //   }
-
-  // }, [Z_columnDesignations])
+    loadSelection().then((selection) => {
+      console.log(selection)
+      if(selection.length > 0)
+      {
+        const conformRes = doRowsConform(selection)
+        console.log(conformRes)
+        if(conformRes.status === false)
+        {
+          ZF_setRowsAsNewTrip([])
+          return;
+        }
+        ZF_setRowsAsNewTrip(selection)
+        ZF_clearAndSetTripDirections(null)
+      } 
+    })
+  }
 
   function onDragEnd(sequence: number[])
   {
@@ -136,93 +122,103 @@ const TripTable: React.FC = () => {
     return tracks
   }
 
-  if(Z_tripRows.length > 0)
-  {
+  // if(Z_tripRows.length > 0)
+  // {
     return(
       <div className="flex flex-col space-y-4 ">
-        <div>
-          <div>Show/Hide Columns:</div>
-          {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
+        <div className={"mb-2"}>
+          <Button variant="contained"  onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Use Current Selection</Button>
         </div>
 
-        <div>
-          <div className="w-auto pb-1 ">
-            <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
-
-              {CreateTableHeadingElements(Z_tripRows[0]!, Z_columnVisibility)}
-              {createColumnDesignationSelectors(Z_columnVisibility)}
-
-              
-
-              {Z_tripRows.map((row, idx) => {
-                return(
-                  <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
-                    {
-                      createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
-                    }
-                  </GridRow>
-                    
-                )})
-              }                   
-            </GridContainer>
-          </div>
-
-        </div>
-
-
-
-        <ConfirmAllAddresses/>
-
-        {Z_errorMessage && (
+        {Z_tripRows.length > 0 && (
           <div>
-            <div style={{color: "red"}}>{Z_errorMessage}</div>
+            <div>
+              <div>Show/Hide Columns:</div>
+              {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
+            </div>
+
+            <div className="space-y-2 ">
+
+              <GridContainer onDragEnd={onDragEnd} tracks={createGridTracks(Z_columnVisibility)}>
+                {CreateTableHeadingElements(Z_tripRows[0]!, Z_columnVisibility)}
+                {createColumnDesignationSelectors(Z_columnVisibility)}
+
+                {Z_tripRows.map((row, idx) => {
+                  return(
+                    <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
+                      {
+                        createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
+                      }
+                    </GridRow>
+                      
+                  )})
+                }              
+              </GridContainer>
+              <ConfirmAllAddresses/>
+              {Z_errorMessage && (
+                <div>
+                  <div style={{color: "red"}}>{Z_errorMessage}</div>
+                </div>
+              )}
+
+            </div>
           </div>
         )}
-    
 
+        {Z_tripRows.length === 0 && (
+          <div className={"flex flex-col bg-slate-200 h-40 items-center justify-center p-4 text-center "}>
+            <div>No trip sheet selected.</div>
+            <div>Box select rows in Excel to import then click "Use Current Selection" to begin.</div>
+            <div>Or</div>
+            <div>Add a new address below</div>
+          </div>
+        )}
 
-        <div className={"flex space-x-2"}>
+        <CreateAddress/>
+
+        {Z_tripRows.length > 0 && (
           <div>
-            <div className={"text-sm"}>Note: drag and drop rows to change the route sequence </div>
+            <div className={"flex flex-wrap gap-2"}>
+              <div>
+                  <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
+              </div>
+
+              <div>
+                  <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
+              </div>
+
+              <div>
+                  <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
+              </div>
+
+              <div>
+                <Driver/>
+              </div>
+            </div>
           </div>
-          <div>
-            <PanToolOutlined fontSize="small"/>
-          </div>
+        )}
+
+        <div className={"w-full"}>
+          <Button className={"w-full"} disabled={Z_tripRows.length === 0}  variant="contained" onClick={() => createTripDirections(true, false)}>Find Route</Button>
         </div>
-            
-        <div className={"flex flex-wrap gap-2"}>
-          <div>
-              <Button  variant="text" onClick={() => {appendRows()}}>Add Selection</Button>
-          </div>
+ 
 
-          <div>
-              <Button variant="text" onClick={() => {handleReverseOrder()}}>Reverse Order</Button>
-          </div>
-
-          <div>
-              <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
-          </div>
-
-          <div>
-            <Driver/>
-          </div>
-        </div>
 
       </div>
     )
   }
-  else
-  {
-      return(
-        <div className={"flex flex-col bg-slate-200 h-40 items-center justify-center p-4 text-center "}>
+  // else
+  // {
+  //     return(
+  //       <div className={"flex flex-col bg-slate-200 h-40 items-center justify-center p-4 text-center "}>
 
-            <div>No trip sheet selected.</div>
-            <div>Box select rows in Excel to import then click "Use Current Selection" to begin</div>
+  //           <div>No trip sheet selected.</div>
+  //           <div>Box select rows in Excel to import then click "Use Current Selection" to begin</div>
 
-            
-        </div>
-      )
-  }
-}
+  //           <CreateAddress/>
+  //       </div>
+  //     )
+  // }
+// }
 
 export default TripTable
