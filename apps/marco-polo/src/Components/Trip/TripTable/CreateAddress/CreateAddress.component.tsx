@@ -3,6 +3,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import GAutoComplete from "../../../Experiments/GAutoComplete.component";
 import { useState } from "react";
 import { IAddress } from "../../../common/CommonInterfacesAndEnums";
+import { addCustomRow } from "../../../../Services/Trip.service";
 
 const CreateAddress: React.FC = () => {
 
@@ -36,7 +37,13 @@ const CreateAddress: React.FC = () => {
                     </div>
 
                     <div>
-                        <FormControlLabel control={<Switch value={isLinkEnabled} onChange={(change) => setIsLinkEnabled(change.target.checked)} />} label="Has Link Address" />
+                        <FormControlLabel control={<Switch value={isLinkEnabled} onChange={(change) => {
+                            if(change.target.checked === false)
+                            {
+                                setNewLinkAddress(null)
+                            }
+                            setIsLinkEnabled(change.target.checked)
+                            }} />} label="Has Link Address" />
                     </div>
 
                     {isLinkEnabled && (
@@ -51,7 +58,18 @@ const CreateAddress: React.FC = () => {
                     )}
 
                     <div className="mt-2">
-                        <Button variant="contained">Add</Button>
+                        <Button variant="contained" onClick={() => {
+                                if(newAddress)
+                                {
+                                    addCustomRow(newAddress, newLinkAddress)
+                                }
+                                else
+                                {
+                                    
+                                }
+                                
+                            }}
+                        >Add</Button>
                     </div>
 
 

@@ -24,12 +24,13 @@ const TripTable: React.FC = () => {
   const ZF_setTripRows = useTripStore(store => store.actions.setTripRows)
   const ZF_appendRows = useTripStore(store => store.actions.appendRows)
   const ZF_reverseRows = useTripStore(store => store.actions.reverseRows)
+  const ZF_setRowsAsNewTrip = useTripStore.getState().actions.setRowsAsNewTrip
+  const ZF_clearAndSetTripDirections = useTripStore.getState().actions.clearAndSetTripDirections
 
 
   function retrieveUserSelectionFromSpreadsheetAndSet()
   {
-    const ZF_setRowsAsNewTrip = useTripStore.getState().actions.setRowsAsNewTrip
-    const ZF_clearAndSetTripDirections = useTripStore.getState().actions.clearAndSetTripDirections
+
 
     loadSelection().then((selection) => {
       console.log(selection)
@@ -54,13 +55,7 @@ const TripTable: React.FC = () => {
     const rearrangedRows: any[] = []
     for(let i = 0; i < sequence.length; i++)
     {
-      for(let j = 0; j < Z_tripRows.length; j++)
-      {
-        if(Z_tripRows[j]?.cells[0]?.y === sequence[i])
-        {
-          rearrangedRows.push(Z_tripRows[j])
-        }
-      }
+      rearrangedRows.push(Z_tripRows[sequence[i]!])
     }
     console.log(sequence, rearrangedRows)
 
@@ -126,8 +121,12 @@ const TripTable: React.FC = () => {
   // {
     return(
       <div className="flex flex-col space-y-4 ">
-        <div className={"mb-2"}>
+        <div className={"mb-2 flex gap-2"}>
           <Button variant="contained"  onClick={() => retrieveUserSelectionFromSpreadsheetAndSet()}>Use Current Selection</Button>
+          <Button color="error" variant="text"  onClick={() => {
+            ZF_setRowsAsNewTrip([])
+            ZF_clearAndSetTripDirections(null)
+          }}>Clear</Button>
         </div>
 
         {Z_tripRows.length > 0 && (
@@ -144,8 +143,9 @@ const TripTable: React.FC = () => {
                 {createColumnDesignationSelectors(Z_columnVisibility)}
 
                 {Z_tripRows.map((row, idx) => {
+                  console.log(row)
                   return(
-                    <GridRow key={Math.random()} draggableId={row.cells[0]!.y}>
+                    <GridRow key={Math.random()} draggableId={idx}>
                       {
                         createTripTableRow(row, idx, Z_columnDesignations, Z_columnVisibility)
                       }

@@ -33,7 +33,7 @@ export interface IRow //each row contains a bumch of cell objects
 {
     cells: ICell[];
     children: IRow[];
-    paths: google.maps.LatLng[][]; //save the polylines for the row. They can later be used to see if a path intersects a toll gate
+    //paths: google.maps.LatLng[][]; //save the polylines for the row. They can later be used to see if a path intersects a toll gate
 }
 
 export interface ICellAndRange

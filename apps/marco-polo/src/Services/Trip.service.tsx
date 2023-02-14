@@ -105,7 +105,7 @@ export function createTripTableRow(row: Readonly<IRow>, nr: number, columnDesign
 
   const SequenceIndicatorComponent: React.FC<{sequenceNumber: number}> = ({sequenceNumber}) => <div draggable="true" style={{height: "100%", width: "100%", backgroundColor:"#1d85da", justifyContent:"center", alignItems: "center", display: "flex"}}><Typography sx={{color: "white", paddingLeft: "2px", paddingRight: "2px"}} variant="body1">{sequenceNumber + 1}</Typography></div>
 
-  if(row.cells[0] && row.cells[0].y >= 0)
+  if(row.cells[0]) // && row.cells[0].y >= 0
   {
     if(Z_tableMode === ETableMode.EditMode)
     {
@@ -821,5 +821,92 @@ export function handleColumnDesignationAndSolveAddresses(columnIndex: number, co
   if(useTripStore.getState().data.tabelMode !== ETableMode.EditMode)
   {
     solveAddresses(columnIndex)
+  }
+}
+
+export function addCustomRow(address: IAddress, linkAddress: IAddress | null)
+{
+  const Z_rows = useTripStore.getState().data.rows
+  const Z_addressColumnIndex = useTripStore.getState().data.addressColumnIndex
+  const Z_linkAddressColumnIndex = useTripStore.getState().data.linkAddressColumnIndex
+
+  const ZF_appendRows = useTripStore.getState().actions.appendRows
+  const ZF_setRowsAsNewTrip = useTripStore.getState().actions.setRowsAsNewTrip
+  const ZF_setErrorMessage = useTripStore.getState().actions.setErrorMessage
+
+  const ZF_updateColumnDesignation = useTripStore.getState().actions.updateColumnDesignation
+
+  console.log(Z_rows)
+  if(Z_rows.length > 0)
+  {
+    const firstRowLength = Z_rows[0]?.cells.length
+    if(firstRowLength && firstRowLength > 0)
+    {
+      const cells: ICell[] = []
+      for(let i = 0; i < firstRowLength; i++)
+      {
+        const blankAddress: IAddress = {
+          formatted_address: "",
+          latLng: null,
+          solveStatus: EAddressSolveStatus.AWAITING_SOLVE,
+          isAddressAccepted: false,
+          placeId: ""
+        }
+        cells.push({x: -1, y: -1, displayData: "", formula: "", address: blankAddress})
+      }
+  
+      if(Z_addressColumnIndex > -1)
+      {
+        
+        const addressCell = cells[Z_addressColumnIndex]
+        if(addressCell)
+        {
+          addressCell.address = address
+          addressCell.displayData = address.formatted_address
+  
+          if(Z_linkAddressColumnIndex > -1 && linkAddress)
+          {
+            const linkAddressCell = cells[Z_linkAddressColumnIndex]
+            if(linkAddressCell)
+            {
+              linkAddressCell.address = linkAddress
+              linkAddressCell.displayData = linkAddress.formatted_address
+            }
+          }
+          else if(Z_linkAddressColumnIndex < 0 && linkAddress)
+          {
+            ZF_setErrorMessage("ERROR: No link address column set to add the link address to")
+            return
+          }
+  
+          ZF_appendRows([{cells: cells, children: []}])
+          ZF_setErrorMessage("")
+        }
+      }
+      else
+      {
+        ZF_setErrorMessage("No address column selected")
+      }
+    }
+  }
+  else
+  {
+    const cells: ICell[] = []
+    const addressCell: ICell = {x: 1, y: 1, displayData: address.formatted_address, formula: "", address: address}
+    cells.push(addressCell)
+    if(linkAddress)
+    {
+      const linkAddressCell: ICell = {x: 2, y: 1, displayData: linkAddress.formatted_address, formula: "", address: address}
+      cells.push(linkAddressCell)
+    }
+
+    
+    ZF_setRowsAsNewTrip([{cells: cells, children: []}])
+    ZF_updateColumnDesignation({columnIndex: 0, designation: EColumnDesignations.Address})
+    if(linkAddress)
+    {
+      ZF_updateColumnDesignation({columnIndex: 1, designation: EColumnDesignations.LinkAddress})
+    }
+    ZF_setErrorMessage("")
   }
 }

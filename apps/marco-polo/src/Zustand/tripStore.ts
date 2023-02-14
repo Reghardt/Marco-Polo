@@ -187,6 +187,16 @@ export const useTripStore = create<ITripState>()(((set) => ({
                     // state.data.tripDirections = null;
                     state.data.tabelMode = ETableMode.EditMode
                 }
+                else
+                {
+                    state.data.columnDesignations = []
+                    state.data.columnVisibility = []
+                    state.data.rows = [];
+                    state.data.addressColumnIndex = -1;
+                    state.data.linkAddressColumnIndex = -1;
+                    // state.data.tripDirections = null;
+                    state.data.tabelMode = ETableMode.EditMode
+                }
 
             }))
         },
@@ -302,9 +312,11 @@ export const useTripStore = create<ITripState>()(((set) => ({
         },
         appendRows(rows) {
             set(produce<ITripState>((state) => {
+                console.log("append fired")
                 const parentChildRowsToAdd = makeRowParentChildRelations(rows, state.data.addressColumnIndex)
+                console.log(parentChildRowsToAdd)
                 state.data.rows = [...state.data.rows, ...parentChildRowsToAdd]
-                state.data.tabelMode = ETableMode.AddressSolveMode
+                //state.data.tabelMode = ETableMode.AddressSolveMode
             }))
         },
         reverseRows() {
