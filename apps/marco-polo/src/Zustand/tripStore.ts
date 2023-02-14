@@ -1,10 +1,12 @@
 import { EColumnDesignations, IAddress, ICell, IRow } from "../Components/common/CommonInterfacesAndEnums";
 import create from 'zustand';
 import produce from 'immer';
-import { areAllAddressesInColumnValidAndAccepted, makeRowParentChildRelations, preSyncRowDataForDeletion, removeRowParentChildRelations } from "../Services/Trip.service";
+import { areAllAddressesInColumnValidAndAccepted, makeRowParentChildRelations, removeRowParentChildRelations } from "../Services/Trip.service";
 import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
 import { WritableDraft } from "immer/dist/internal";
 import { TMouldedDirections } from "../Services/GMap.service";
+import { preSyncRowDataForDeletion } from "../Components/Trip/TripTable/WriteBack/WriteBack.service";
+
 
 export enum EDepartReturn{
     return,
@@ -29,7 +31,7 @@ function getAddressColumn(columnDesignations: EColumnDesignations[])
     return -1;
 }
 
-function getToAddressColumn(columnDesignations: EColumnDesignations[])
+function getLinkAddressColumn(columnDesignations: EColumnDesignations[])
 {
     for(let i = 0; i < columnDesignations.length; i++)
     {
@@ -118,7 +120,7 @@ interface ITripState {
         updateColumnDesignation: (payload: {columnIndex: number, designation: EColumnDesignations}) => void;
         updateColumnVisibility: (columnIndex: number) => void;
         deleteRow: (rowYCoord: number) => void;
-        appendRows: (rows: IRow[]) => void;
+        appendRows: (rows: IRow[], enterSolveMode: boolean) => void;
         reverseRows: () => void;
 
         setRowOrderPerWaypoints: (waypoints: number[]) => void;
@@ -228,7 +230,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                                     {
                                         if(areAllAddressesInColumnValidAndAccepted(j, state.data.rows, state.data.tabelMode)) 
                                         {
-                                            if(state.data.linkAddressColumnIndex > -1 && !areAllAddressesInColumnValidAndAccepted(state.data.linkAddressColumnIndex, state.data.rows, state.data.tabelMode))
+                                            if(state.data.linkAddressColumnIndex > -1 && !areAllAddressesInColumnValidAndAccepted(state.data.linkAddressColumnIndex, state.data.rows, ETableMode.LinkAddressSolveMode))
                                             {
                                                 makeFormattedAddressDisplayData(state.data.rows, state.data.addressColumnIndex) //address column was just confirmed, execute function on that column
                                                 state.data.tabelMode = ETableMode.LinkAddressSolveMode //then set mode to link address solve mode
@@ -277,7 +279,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                     
                     //get both the address column and goToAddress column as one might have been set to the other and have thus been over written
                     state.data.addressColumnIndex = getAddressColumn(state.data.columnDesignations); //save the new address columns index
-                    state.data.linkAddressColumnIndex = getToAddressColumn(state.data.columnDesignations); //save the new to address columns index
+                    state.data.linkAddressColumnIndex = getLinkAddressColumn(state.data.columnDesignations); //save the new to address columns index
                     state.data.rows = makeRowParentChildRelations(removeRowParentChildRelations(state.data.rows), state.data.addressColumnIndex) //new parent child relations may be needed, recalculate them
                 }
             }))
@@ -310,13 +312,17 @@ export const useTripStore = create<ITripState>()(((set) => ({
                 }
             }))
         },
-        appendRows(rows) {
+        appendRows(rows, enterSolveMode) {
             set(produce<ITripState>((state) => {
                 console.log("append fired")
                 const parentChildRowsToAdd = makeRowParentChildRelations(rows, state.data.addressColumnIndex)
                 console.log(parentChildRowsToAdd)
                 state.data.rows = [...state.data.rows, ...parentChildRowsToAdd]
-                //state.data.tabelMode = ETableMode.AddressSolveMode
+                if(enterSolveMode)
+                {
+                    state.data.tabelMode = ETableMode.AddressSolveMode
+                }
+                
             }))
         },
         reverseRows() {

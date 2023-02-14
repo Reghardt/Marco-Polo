@@ -12,9 +12,6 @@ const CreateAddress: React.FC = () => {
 
     const [isLinkEnabled, setIsLinkEnabled] = useState(false)
 
-    console.log(newAddress)
-    console.log(newLinkAddress)
-
     return(
         <div>
             <Accordion>
@@ -32,7 +29,7 @@ const CreateAddress: React.FC = () => {
                             Address:
                         </div>
                         <div>
-                            <GAutoComplete setAddress={setNewAddress} currentAddress=""/>
+                            <GAutoComplete setAddress={setNewAddress} currentAddress={newAddress?.formatted_address ? newAddress.formatted_address : ""}/>
                         </div>
                     </div>
 
@@ -52,7 +49,7 @@ const CreateAddress: React.FC = () => {
                                 Link Address:
                             </div>
                             <div>
-                                <GAutoComplete setAddress={setNewLinkAddress} currentAddress=""/>
+                                <GAutoComplete setAddress={setNewLinkAddress} currentAddress={newLinkAddress?.formatted_address ? newLinkAddress.formatted_address : ""}/>
                             </div>
                         </div>
                     )}
@@ -61,7 +58,10 @@ const CreateAddress: React.FC = () => {
                         <Button variant="contained" onClick={() => {
                                 if(newAddress)
                                 {
+                                    console.log(newAddress, newLinkAddress)
                                     addCustomRow(newAddress, newLinkAddress)
+                                    setNewAddress(null)
+                                    setNewLinkAddress(null)
                                 }
                                 else
                                 {

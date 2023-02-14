@@ -72,8 +72,7 @@ export function areAllAddressesInColumnValidAndAccepted(column: number, tripRows
     {
       continue;
     }
-
-    if(cell?.address.latLng === null || cell?.address.isAddressAccepted === false)
+    else if(cell?.address.latLng === null || cell?.address.isAddressAccepted === false)
     {
       return false
     }
@@ -448,174 +447,15 @@ export function makeRowParentChildRelations(rows: IRow[], addressColumnIndex: nu
     return parentWithChildrenRows
 }
 
-function getTopRowYValue(rows: IRow[]): number | undefined
-{
-    let topRowNr = rows[0]?.cells[0]?.y
-    for(let i = 0; i<  rows.length; i++)
-    {
-      const y = rows[i]?.cells[0]?.y
-      if(y && topRowNr && y < topRowNr)
-      {
-          topRowNr = y
-      }
-    }
-    return topRowNr
-}
 
-function getXValuesOfRowCellsInBody(rows: IRow[]) : number[]
-{
-    const row = rows[0]
-    const cellXVals: number[] = []
-    if(row?.cells)
-    {
-      for(let i = 0; i < row.cells.length; i++)
-      {
-        const cell = row.cells[i]
-        if(cell?.x)
-        {
-          cellXVals.push(cell.x)
-        }
-      }
-    }
-    return cellXVals
-}
 
-export function preSyncRowDataForDeletion(row: IRow, sheet: Excel.Worksheet): void
-{
-    for(let j = 0; j < row.cells.length; j++)
-    {
-      const cell = row.cells[j]//TODO what to do on deletion when a cell has a formula
-      if(cell)
-      {
-        const range = sheet.getCell(cell.y - 1, cell.x - 1)
-        range.values = [[""]]
-      }
-    }
 
-    for(let i = 0; i < row.children.length; i++)
-    {
-      const child = row.children[i]
-      if(child)
-      {
-        preSyncRowDataForDeletion(child, sheet)
-      }
-      
-    }
-}
 
-function preSyncRowDataForWriteBack(row: IRow, sheet: Excel.Worksheet): void
-{
-    for(let j = 0; j < row.cells.length; j++)
-    {
-        const cell = row.cells[j]
-        if(cell && cell.formula !== "") //if cell is formula
-        {
-            //write formula
-            const range = sheet.getCell(cell.y - 1, cell.x - 1)
-            range.formulas = [[cell.formula]]
-            //range.format.autofitColumns();
-        }
-        else //cell only has data
-        {
-            //write data
-            if(cell)
-            {
-              const range = sheet.getCell(cell.y - 1, cell.x - 1)
-              range.values = [[cell.displayData]]
-          }
-        }
-    }
 
-    for(let i = 0; i < row.children.length; i++)
-    {
-      const child = row.children[i]
-      if(child)
-      {
-        preSyncRowDataForWriteBack(child, sheet)
-      }
-    }
-}
 
-export async function writeBackToSpreadsheet(rows: IRow[], addressColumnIndex: number)
-{
-  const writeBackRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
-      
-  const topYVal = getTopRowYValue(writeBackRows)
-  const xCoords = getXValuesOfRowCellsInBody(writeBackRows)
 
-  //assign new coords for write back
-  for(let i = 0; i < writeBackRows.length; i++)
-  {
-    const row = writeBackRows[i]
-    if(row)
-    {
-      for(let j = 0; j < row.cells.length; j++)
-      {
-        const cell = row.cells[j];
-        const xCoord = xCoords[j]
-        if(cell && xCoord && topYVal)
-        {
-          cell.x = xCoord
-          cell.y = topYVal + i
-        }
-          
-      }
-    }
 
-  }
 
-  //writeBackRows = makeRowParentChildRelations(writeBackRows, addressColumnIndex)
-  const childlessRows = removeRowParentChildRelations(JSON.parse(JSON.stringify(rows)) as IRow[])
-
-  const rowsToDelete: IRow[] = [] 
-  for(let i = 0; i < childlessRows.length; i++)
-  {
-    const row = childlessRows[i];
-    let shouldDelete = true;
-    for(let j = 0; j < writeBackRows.length; j++)
-    {
-      if(row?.cells[0] && row.cells[0].y === writeBackRows[j]?.cells[0]?.y)
-      {
-        shouldDelete = false;
-        break;
-      }
-    }
-
-    if(shouldDelete === true && row)
-    {
-      rowsToDelete.push(row)
-    }
-  }
-
-  console.log(rowsToDelete)
-
-  return await new Promise<IRow[]>((accept) => {
-    Excel.run(async (context) => {
-      const sheet = context.workbook.worksheets.getActiveWorksheet()
-      for(let i = 0; i < writeBackRows.length; i++)
-      {
-        const singleWriteBackRow = writeBackRows[i]
-        if(singleWriteBackRow)
-        {
-          preSyncRowDataForWriteBack(singleWriteBackRow, sheet)
-        }
-        
-      }
-      for(let j = 0; j < rowsToDelete.length; j++)
-      {
-        const singleRowToDelete = rowsToDelete[j]
-        if(singleRowToDelete)
-        preSyncRowDataForDeletion(singleRowToDelete, sheet)
-      }
-      await context.sync()
-      
-      accept(makeRowParentChildRelations(writeBackRows, addressColumnIndex))
-    })
-
-  }).then((res) => { return res})
-
-  
-}
 
 export function createSimplePointToPointDirections(departureAddress: IAddress, returnAddress: IAddress, waypoints: google.maps.DirectionsWaypoint[], shouldOptimize: boolean) {
 
@@ -879,7 +719,7 @@ export function addCustomRow(address: IAddress, linkAddress: IAddress | null)
             return
           }
   
-          ZF_appendRows([{cells: cells, children: []}])
+          ZF_appendRows([{cells: cells, children: []}], false)
           ZF_setErrorMessage("")
         }
       }
@@ -892,11 +732,11 @@ export function addCustomRow(address: IAddress, linkAddress: IAddress | null)
   else
   {
     const cells: ICell[] = []
-    const addressCell: ICell = {x: 1, y: 1, displayData: address.formatted_address, formula: "", address: address}
+    const addressCell: ICell = {x: 1, y: -1, displayData: address.formatted_address, formula: "", address: address}
     cells.push(addressCell)
     if(linkAddress)
     {
-      const linkAddressCell: ICell = {x: 2, y: 1, displayData: linkAddress.formatted_address, formula: "", address: address}
+      const linkAddressCell: ICell = {x: 2, y: -1, displayData: linkAddress.formatted_address, formula: "", address: linkAddress}
       cells.push(linkAddressCell)
     }
 

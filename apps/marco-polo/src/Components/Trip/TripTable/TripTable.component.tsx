@@ -1,7 +1,7 @@
 import { Button } from "@mui/material"
 import React from "react"
 import { ETableMode, useTripStore } from "../../../Zustand/tripStore"
-import { createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, solveAddresses, writeBackToSpreadsheet } from "../../../Services/Trip.service"
+import { createColumnDesignationSelectors, createColumnVisibilityCheckboxes, CreateTableHeadingElements, createTripTableRow, doRowsConform, solveAddresses } from "../../../Services/Trip.service"
 import { loadSelection } from "../Worksheet/worksheet.service"
 import { Driver } from "./Driver/Driver.component"
 import GridContainer from "../../DragAndDrop/GridContainer"
@@ -9,6 +9,7 @@ import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
 import { createTripDirections } from "../../../Services/GMap.service"
 import CreateAddress from "./CreateAddress/CreateAddress.component"
+import WriteBack from "./WriteBack/WriteBack.component"
 
 
 const TripTable: React.FC = () => {
@@ -24,9 +25,11 @@ const TripTable: React.FC = () => {
   const ZF_setTripRows = useTripStore(store => store.actions.setTripRows)
   const ZF_appendRows = useTripStore(store => store.actions.appendRows)
   const ZF_reverseRows = useTripStore(store => store.actions.reverseRows)
-  const ZF_setRowsAsNewTrip = useTripStore.getState().actions.setRowsAsNewTrip
-  const ZF_clearAndSetTripDirections = useTripStore.getState().actions.clearAndSetTripDirections
+  const ZF_setRowsAsNewTrip = useTripStore(store => store.actions.setRowsAsNewTrip)
+  const ZF_clearAndSetTripDirections = useTripStore(store => store.actions.clearAndSetTripDirections)
 
+
+  console.log(Z_tripRows)
 
   function retrieveUserSelectionFromSpreadsheetAndSet()
   {
@@ -79,20 +82,15 @@ const TripTable: React.FC = () => {
       }
       else
       {
-        ZF_appendRows(selection)
-        //solve address column then solve link address column
+        ZF_appendRows(selection, true)
+        //solve address column then solve link address column       
         solveAddresses(Z_addressColumnIndex)
         solveAddresses(Z_linkAddressColumnIndex)
       }
     })
   }
 
-  async function handleWriteBackToSpreadsheet()
-  {
-    const newRows = await writeBackToSpreadsheet(Z_tripRows, Z_addressColumnIndex)
-    console.log(newRows)
-    ZF_setTripRows(newRows)
-  }
+
 
   function createGridTracks(columnVisibility: boolean[])
   {
@@ -188,7 +186,7 @@ const TripTable: React.FC = () => {
               </div>
 
               <div>
-                  <Button variant='text' onClick={() => {handleWriteBackToSpreadsheet()}}>Write back</Button>
+                <WriteBack tripRows={Z_tripRows} addressColumnIndex={Z_addressColumnIndex}/>
               </div>
 
               <div>
