@@ -9,7 +9,7 @@ import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
 import { createTripDirections } from "../../../Services/GMap.service"
 import WriteBack from "./WriteBack/WriteBack.component"
-import CreateAddressAccordion from "./CreateAddress/CreateAddressAccordion.component"
+
 
 
 const TripTable: React.FC = () => {
@@ -168,13 +168,13 @@ const TripTable: React.FC = () => {
             <div>No trip sheet selected.</div>
             <div>Box select rows in Excel to import then click "Use Current Selection" to begin.</div>
             <div>Or</div>
-            <div>Add a new address below</div>
+            <div>Add a new address with Google Maps below</div>
           </div>
         )}
 
-        <div>
+        {/* <div>
           <CreateAddressAccordion/>
-        </div>
+        </div> */}
 
         
 

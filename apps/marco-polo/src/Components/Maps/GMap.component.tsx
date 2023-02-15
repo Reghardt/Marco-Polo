@@ -8,7 +8,7 @@ import { createPortal } from "react-dom";
 import LegsListControl from "./LegsListControl.component";
 import { useMapsStore } from "../../Zustand/mapsStore";
 import TollVisibilityControl from "./TollVisibilityControl.component";
-import CreateAddress from "../Trip/TripTable/CreateAddress/CreateAddress.component";
+import CreateAddressAccordion from "../Trip/TripTable/CreateAddress/CreateAddressAccordion.component";
 
 export enum ETollVisibility{
     ALL = 1,
@@ -36,8 +36,18 @@ const GMap: React.FC = () => {
 
     //Creates map on mount and sets it in the maps store
     useEffect(() => {
+
         const center: google.maps.LatLngLiteral = {lat: -25.74, lng: 28.22};
-        const map = new google.maps.Map(document.getElementById("map") as HTMLElement, {center, zoom: 8, disableDoubleClickZoom: true, scrollwheel: false, zoomControl: true});
+        const map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
+            center, 
+            zoom: 8, 
+            disableDoubleClickZoom: true, 
+            scrollwheel: false, 
+            zoomControl: true, 
+            mapTypeControlOptions: {
+                position: google.maps.ControlPosition.LEFT_BOTTOM,
+                
+            }});
         
         legsControlContainer.current = document.createElement("div");
         legsControlContainer.current.style.marginRight = '60px';
@@ -50,8 +60,10 @@ const GMap: React.FC = () => {
 
         addAddressControlContainer.current = document.createElement("div");
         addAddressControlContainer.current.style.marginLeft = '12px';
-        addAddressControlContainer.current.style.marginTop = '30px';
-        map.controls[google.maps.ControlPosition.LEFT_TOP]?.push(addAddressControlContainer.current)
+        addAddressControlContainer.current.style.marginTop = '10px';
+        map.controls[google.maps.ControlPosition.TOP_LEFT]?.push(addAddressControlContainer.current)
+
+   
 
 
         ZF_setMap(map)
@@ -126,8 +138,8 @@ const GMap: React.FC = () => {
                 {legsControlContainer.current && Z_tripDirections && Z_tripDirections.legGroups.length > 0 && createPortal(<><LegsListControl mouldedDirections={Z_tripDirections}/></>, legsControlContainer.current)}
                 {tollVisibilityControlContainer.current && createPortal(<><TollVisibilityControl tollVisibility={tollVisibility} setTolVisibility={setTolVisibility}/></>, tollVisibilityControlContainer.current)}
                 {addAddressControlContainer.current && createPortal(
-                <div className="p-2 bg-white rounded-sm shadow-md w-80">
-                    <CreateAddress/>
+                <div className=" w-72">
+                    <CreateAddressAccordion/>
                 </div>, addAddressControlContainer.current)}
 
             </div>
