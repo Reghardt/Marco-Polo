@@ -1,6 +1,11 @@
+import { Accordion, AccordionDetails, AccordionSummary} from "@mui/material"
 import produce from "immer"
 import { useState } from "react"
 import { TMouldedDirections } from "../../Services/GMap.service"
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+
+
 
 interface ILegsListControl{
     mouldedDirections: TMouldedDirections,
@@ -8,6 +13,8 @@ interface ILegsListControl{
 }
 
 const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
+
+
 
     console.log("Legs list control rerendered", mouldedDirections)
 
@@ -124,9 +131,22 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
     }
 
     return (
-        <div className={"bg-white p-1 text-base mt-8"}>
-            <div>Leg Visibility</div>
-            {createLegControlElements()}
+        <div className="shadow-md " >
+            <Accordion elevation={0}>
+                <AccordionSummary
+                
+                sx={{ marginBottom: "-7px"}}
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="Leg visibility accordion"
+                id="leg-visibility-accordion"
+                >
+                    <div className="text-base ">Leg Visibility</div>
+                </AccordionSummary>
+                <AccordionDetails>
+                    {createLegControlElements()}
+                </AccordionDetails>
+            </Accordion>
+            
 
         </div>
         

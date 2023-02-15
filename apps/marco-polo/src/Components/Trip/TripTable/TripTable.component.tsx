@@ -8,8 +8,8 @@ import GridContainer from "../../DragAndDrop/GridContainer"
 import GridRow from "../../DragAndDrop/GridRow"
 import ConfirmAllAddresses from "./ConfirmAllAddresses/ConfirmAllAddresses"
 import { createTripDirections } from "../../../Services/GMap.service"
-import CreateAddress from "./CreateAddress/CreateAddress.component"
 import WriteBack from "./WriteBack/WriteBack.component"
+import CreateAddressAccordion from "./CreateAddress/CreateAddressAccordion.component"
 
 
 const TripTable: React.FC = () => {
@@ -172,7 +172,11 @@ const TripTable: React.FC = () => {
           </div>
         )}
 
-        <CreateAddress/>
+        <div>
+          <CreateAddressAccordion/>
+        </div>
+
+        
 
         {Z_tripRows.length > 0 && (
           <div>

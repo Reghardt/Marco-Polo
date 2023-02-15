@@ -10,7 +10,7 @@ const options: google.maps.places.AutocompleteOptions = {
 }
 
 interface IGAutoComplete{
-    setAddress: (address: IAddress) => void,
+    setAddress: (address: IAddress | null) => void,
     currentAddress: string
 }
 
@@ -51,9 +51,17 @@ const GAutoComplete: React.FC<IGAutoComplete> = ({setAddress, currentAddress}) =
     return(
         <div>
             <input ref={autoCompleteRef} type="text" 
+
+            onKeyDown={key => { //if backspace is pressed, clear address. This is to remove the marker on the map when the user starts to press backspace as to not get confused
+                console.log(key.code)
+                if(key.code === "Backspace")
+                {
+                    setAddress(null)
+                }
+            }}
             defaultValue={currentAddress}
-            placeholder="Please enter an address, name or location"
-            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Search Google Maps"
+            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 focus:outline-none "
             ></input>
         </div>
     )

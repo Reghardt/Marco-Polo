@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import LegsListControl from "./LegsListControl.component";
 import { useMapsStore } from "../../Zustand/mapsStore";
 import TollVisibilityControl from "./TollVisibilityControl.component";
+import CreateAddress from "../Trip/TripTable/CreateAddress/CreateAddress.component";
 
 export enum ETollVisibility{
     ALL = 1,
@@ -29,6 +30,7 @@ const GMap: React.FC = () => {
 
     const legsControlContainer = useRef<HTMLDivElement | null>(null)
     const tollVisibilityControlContainer = useRef<HTMLDivElement | null>(null)
+    const addAddressControlContainer = useRef<HTMLDivElement | null>(null)
 
     const [tollVisibility, setTolVisibility] = useState<ETollVisibility>(ETollVisibility.PASSTHROUGH)
 
@@ -38,12 +40,19 @@ const GMap: React.FC = () => {
         const map = new google.maps.Map(document.getElementById("map") as HTMLElement, {center, zoom: 8, disableDoubleClickZoom: true, scrollwheel: false, zoomControl: true});
         
         legsControlContainer.current = document.createElement("div");
-        legsControlContainer.current.style.marginLeft = '10px';
-        map.controls[google.maps.ControlPosition.LEFT_TOP]?.push(legsControlContainer.current)
+        legsControlContainer.current.style.marginRight = '60px';
+        legsControlContainer.current.style.marginTop = '-50px';
+        map.controls[google.maps.ControlPosition.RIGHT_TOP]?.push(legsControlContainer.current)
 
         tollVisibilityControlContainer.current = document.createElement("div");
         tollVisibilityControlContainer.current.style.marginBottom = '18px';
         map.controls[google.maps.ControlPosition.BOTTOM_CENTER]?.push(tollVisibilityControlContainer.current)
+
+        addAddressControlContainer.current = document.createElement("div");
+        addAddressControlContainer.current.style.marginLeft = '12px';
+        addAddressControlContainer.current.style.marginTop = '30px';
+        map.controls[google.maps.ControlPosition.LEFT_TOP]?.push(addAddressControlContainer.current)
+
 
         ZF_setMap(map)
     }, [])
@@ -116,6 +125,10 @@ const GMap: React.FC = () => {
                 {createCustomMapMarkers(Z_tripRows, Z_map, Z_addresColumIndex, Z_linkAddressColumnIndex, Z_departureAddress, Z_returnAddress)}
                 {legsControlContainer.current && Z_tripDirections && Z_tripDirections.legGroups.length > 0 && createPortal(<><LegsListControl mouldedDirections={Z_tripDirections}/></>, legsControlContainer.current)}
                 {tollVisibilityControlContainer.current && createPortal(<><TollVisibilityControl tollVisibility={tollVisibility} setTolVisibility={setTolVisibility}/></>, tollVisibilityControlContainer.current)}
+                {addAddressControlContainer.current && createPortal(
+                <div className="p-2 bg-white rounded-sm shadow-md w-80">
+                    <CreateAddress/>
+                </div>, addAddressControlContainer.current)}
 
             </div>
         </>

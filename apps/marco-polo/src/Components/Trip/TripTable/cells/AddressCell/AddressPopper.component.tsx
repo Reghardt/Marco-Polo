@@ -25,11 +25,15 @@ const AddressPopper: React.FC<IAddressCellPopperProps> = (
     const ZF_updateBodyCell = useTripStore(store => store.actions.updateBodyCell)
     const ZF_deleteRow = useTripStore((state) => state.actions.deleteRow)
 
-    function handleUpdateBodyCell(address: IAddress)
+    function handleUpdateBodyCell(address: IAddress | null)
     {
         //
-        ZF_updateBodyCell({...cell, displayData: address.formatted_address ? address.formatted_address : cell.displayData, address: address})
-        closePopper()
+        if(address)
+        {
+            ZF_updateBodyCell({...cell, displayData: address.formatted_address ? address.formatted_address : cell.displayData, address: address})
+            closePopper()
+        }
+
     }
 
     async function handleDeleteRow(rowYCoord: number)

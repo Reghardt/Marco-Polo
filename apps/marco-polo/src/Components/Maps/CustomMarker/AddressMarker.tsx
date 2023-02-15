@@ -10,7 +10,7 @@ import { ICell, IRow } from "../../common/CommonInterfacesAndEnums";
 export enum EAddressMarkerType{
     DEP_RET,
     ADDRESS,
-    TOLL
+    CUSTOM
 }
 
 interface IAddressMarker{
@@ -78,6 +78,10 @@ const AddressMarker: React.FC<IAddressMarker> = ({label, markerType, popperData}
         else if(markerType === EAddressMarkerType.ADDRESS)
         {
             return "#1976d2"
+        }
+        else if(markerType === EAddressMarkerType.CUSTOM)
+        {
+            return "#cf6e00"
         }
         else
         {

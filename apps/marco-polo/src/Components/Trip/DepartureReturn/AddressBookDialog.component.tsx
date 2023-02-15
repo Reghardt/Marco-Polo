@@ -51,9 +51,13 @@ const AddressBookDialog: React.FC<IAddressBookDialogProps> = ({setIsModalOpen, a
 
     }})
 
-    function handleSetPhysicalAddress(address: IAddress)
+    function handleSetPhysicalAddress(address: IAddress | null)
     {
-        setPhysicalAddress(address)
+        if(address)
+        {
+            setPhysicalAddress(address)
+        }
+        
     }
 
     const deleteAddressBookEntry = useDeleteAddressBookEntryMutation({

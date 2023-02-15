@@ -16,6 +16,14 @@ interface IAddressSelectorProps{
 const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSetter, title}) =>
 {
 
+  function handleAddressSetter(address: IAddress | null)
+  {
+    if(address)
+    {
+      addressSetter(address)
+    }
+  }
+
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   async function applyAddressBookSelection(address: string)
@@ -33,7 +41,7 @@ const AddressSelector: React.FC<IAddressSelectorProps> = ({address, addressSette
           <div className={" text-base text-[#1976d2]"}>{title}:</div>
 
           <div>
-            <GAutoComplete setAddress={addressSetter} currentAddress={address?.formatted_address ?? ""}/>
+            <GAutoComplete setAddress={handleAddressSetter} currentAddress={address?.formatted_address ?? ""}/>
           </div>
 
           <div className="">
