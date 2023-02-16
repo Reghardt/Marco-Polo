@@ -121,7 +121,7 @@ export default function Login()
               </div>
 
               <div className={"flex justify-center text-sm"}>
-                <div>Version - 0.22.0</div>
+                <div>Version - 0.22.1</div>
               </div>
             </div>
 
