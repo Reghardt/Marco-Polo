@@ -8,7 +8,7 @@ import { createPortal } from "react-dom";
 import LegsListControl from "./LegsListControl.component";
 import { useMapsStore } from "../../Zustand/mapsStore";
 import TollVisibilityControl from "./TollVisibilityControl.component";
-import CreateAddressAccordion from "../Trip/TripTable/CreateAddress/CreateAddressAccordion.component";
+import SearchAndAddAddressAccordion from "./SearchAndAddAddress/SearchAndAddAddressAccordion.component";
 
 export enum ETollVisibility{
     ALL = 1,
@@ -139,7 +139,7 @@ const GMap: React.FC = () => {
                 {tollVisibilityControlContainer.current && createPortal(<><TollVisibilityControl tollVisibility={tollVisibility} setTolVisibility={setTolVisibility}/></>, tollVisibilityControlContainer.current)}
                 {addAddressControlContainer.current && createPortal(
                 <div className=" w-72">
-                    <CreateAddressAccordion/>
+                    <SearchAndAddAddressAccordion/>
                 </div>, addAddressControlContainer.current)}
 
             </div>

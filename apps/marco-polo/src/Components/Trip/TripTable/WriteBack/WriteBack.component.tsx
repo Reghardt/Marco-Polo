@@ -34,7 +34,6 @@ const WriteBack: React.FC<IWriteBack> = ({tripRows, addressColumnIndex}) => {
       }
       else
       {
-        ZF_setErrorMessage("TEMP ERR: custom addresses only")
         setIsDialogOpen(true)
       }
     }

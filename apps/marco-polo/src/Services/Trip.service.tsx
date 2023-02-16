@@ -1,4 +1,4 @@
-import { Grid, Typography, FormControlLabel, Checkbox, Button } from "@mui/material";
+import { Typography, FormControlLabel, Checkbox, Button } from "@mui/material";
 import React from "react";
 import { TLeg } from "trpc-server/trpc/models/Workspace";
 import { IRow, EColumnDesignations, ITripDirections, ICell, IAddress, EAddressSolveStatus } from "../Components/common/CommonInterfacesAndEnums";
@@ -225,16 +225,16 @@ function createChildRow(childRowIndex: number, row: Readonly<IRow>, columnVisibi
 export function createColumnVisibilityCheckboxes(columnNames: IRow, columnVisibility: boolean[])
 {
   return (
-    <Grid container sx={{paddingTop: "0.3em"}}>
+    <div className="flex flex-wrap">
       {columnNames.cells.map((elem, idx) => {
-        return  (<Grid item xs="auto" sx={{margin: 0, padding: 0}}>
+        return  (<div key={`vis-checkbox-${idx}`}>
                   <FormControlLabel  control={<Checkbox sx={{paddingTop: 0, paddingBottom: 0}} checked={columnVisibility[idx]} 
                     onChange={() => {
                       useTripStore.getState().actions.updateColumnVisibility(idx)
                     }}/>} label={String.fromCharCode(elem.x - 1 + 'A'.charCodeAt(0))} />
-                </Grid>)
+                </div>)
       })}
-    </Grid>
+    </div>
   )
 }
 
@@ -672,8 +672,6 @@ export function addCustomRow(address: IAddress, linkAddress: IAddress | null)
 
   const ZF_appendRows = useTripStore.getState().actions.appendRows
   const ZF_setRowsAsNewTrip = useTripStore.getState().actions.setRowsAsNewTrip
-  const ZF_setErrorMessage = useTripStore.getState().actions.setErrorMessage
-
   const ZF_updateColumnDesignation = useTripStore.getState().actions.updateColumnDesignation
 
   console.log(Z_rows)
@@ -697,7 +695,6 @@ export function addCustomRow(address: IAddress, linkAddress: IAddress | null)
   
       if(Z_addressColumnIndex > -1)
       {
-        
         const addressCell = cells[Z_addressColumnIndex]
         if(addressCell)
         {
@@ -715,17 +712,17 @@ export function addCustomRow(address: IAddress, linkAddress: IAddress | null)
           }
           else if(Z_linkAddressColumnIndex < 0 && linkAddress)
           {
-            ZF_setErrorMessage("ERROR: No link address column set to add the link address to")
-            return
+            return "Please assign a link address column and retry";
           }
   
           ZF_appendRows([{cells: cells, children: []}], false)
-          ZF_setErrorMessage("")
+          return ""
         }
+        return "INTERNAL ERROR: No address cell"
       }
       else
       {
-        ZF_setErrorMessage("No address column selected")
+        return "Please select an address column and retry"
       }
     }
   }
@@ -747,6 +744,8 @@ export function addCustomRow(address: IAddress, linkAddress: IAddress | null)
     {
       ZF_updateColumnDesignation({columnIndex: 1, designation: EColumnDesignations.LinkAddress})
     }
-    ZF_setErrorMessage("")
+    return ""
   }
+
+  return "INTERNAL ERROR: could not add"
 }

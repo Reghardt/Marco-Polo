@@ -33,8 +33,6 @@ const TripTable: React.FC = () => {
 
   function retrieveUserSelectionFromSpreadsheetAndSet()
   {
-
-
     loadSelection().then((selection) => {
       console.log(selection)
       if(selection.length > 0)
@@ -124,12 +122,12 @@ const TripTable: React.FC = () => {
           <Button color="error" variant="text"  onClick={() => {
             ZF_setRowsAsNewTrip([])
             ZF_clearAndSetTripDirections(null)
-          }}>Clear</Button>
+          }}>Clear All</Button>
         </div>
 
         {Z_tripRows.length > 0 && (
           <div>
-            <div>
+            <div className="mb-2">
               <div>Show/Hide Columns:</div>
               {createColumnVisibilityCheckboxes(Z_tripRows[0]!, Z_columnVisibility)}
             </div>

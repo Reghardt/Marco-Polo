@@ -170,11 +170,12 @@ const AddressMarker: React.FC<IAddressMarker> = ({label, markerType, popperData}
                                 >
                                     {
                                         (() => {
+                                            //dropdown options, choose 1st, 2nd, 3rd...
                                             const visitSequenceOptionItems: React.ReactElement[] =[]
                                             const nrOfRows = Z_tripRows.length
                                             for(let i = 0; i < nrOfRows; i++)
                                             {
-                                                visitSequenceOptionItems.push(<MenuItem value={i + 1}>{createNumericNameFromNumber(i + 1)}</MenuItem>)
+                                                visitSequenceOptionItems.push(<MenuItem key={`menu-item-${i}`} value={i + 1}>{createNumericNameFromNumber(i + 1)}</MenuItem>)
                                             }
                                             return visitSequenceOptionItems
                                         })()

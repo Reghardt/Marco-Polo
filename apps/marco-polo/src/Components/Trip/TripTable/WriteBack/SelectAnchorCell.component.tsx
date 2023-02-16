@@ -50,7 +50,8 @@ const SelectAnchorCell: React.FC<ISelectAnchorCell> = ({setIsDialogOpen, writeBa
                     if(topLeftCoords)
                     {
                         setIsDialogOpen(false)
-                        writeBackFrom(topLeftCoords.y, topLeftCoords.x - 1) // -1 for because excel is zero indexed 
+                        console.log(topLeftCoords)
+                        writeBackFrom(topLeftCoords.y, topLeftCoords.x - 1) // -1 due to excel's very confusing coordinate system. TODO: make sure its not an upstream bug
                     }
                     
                 }}>Confirm</Button>

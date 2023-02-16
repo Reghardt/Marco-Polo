@@ -1,8 +1,9 @@
 import { Accordion, AccordionSummary, Typography, AccordionDetails } from "@mui/material"
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import CreateAddress from "./CreateAddress.component";
+import SearchAndAddAddress from "./SearchAndAddAddress.component";
 
-const CreateAddressAccordion: React.FC = () => {
+
+const SearchAndAddAddressAccordion: React.FC = () => {
     return(
         <Accordion>
             <AccordionSummary
@@ -10,13 +11,13 @@ const CreateAddressAccordion: React.FC = () => {
             aria-controls="panel1a-content"
             id="panel1a-header"
             >
-                <Typography>Add New Address</Typography>
+                <Typography>Search Address</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <CreateAddress/>
+                <SearchAndAddAddress/>
             </AccordionDetails>
         </Accordion>
     )
 }
 
-export default CreateAddressAccordion
+export default SearchAndAddAddressAccordion

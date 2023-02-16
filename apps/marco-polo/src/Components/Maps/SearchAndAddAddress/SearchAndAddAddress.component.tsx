@@ -1,18 +1,20 @@
 import { Button, FormControlLabel, Switch, } from "@mui/material"
-import GAutoComplete from "../../../Experiments/GAutoComplete.component";
+import GAutoComplete from "../../Experiments/GAutoComplete.component";
 import { useState } from "react";
-import { IAddress } from "../../../common/CommonInterfacesAndEnums";
-import { addCustomRow } from "../../../../Services/Trip.service";
-import { useMapsStore } from "../../../../Zustand/mapsStore";
-import { createMarker } from "../../../../Services/GMap.service";
-import AddressMarker, { EAddressMarkerType } from "../../../Maps/CustomMarker/AddressMarker";
+import { IAddress } from "../../common/CommonInterfacesAndEnums";
+import { addCustomRow } from "../../../Services/Trip.service";
+import { useMapsStore } from "../../../Zustand/mapsStore";
+import { createMarker } from "../../../Services/GMap.service";
+import AddressMarker, { EAddressMarkerType } from "../CustomMarker/AddressMarker";
 
-const CreateAddress: React.FC = () => {
+const SearchAndAddAddress: React.FC = () => {
 
     const ZOOM_LEVEL = 11
 
     const [newAddress, setNewAddress] = useState<{address: IAddress, marker: JSX.Element} | null>(null)
     const [newLinkAddress, setNewLinkAddress] = useState<{address: IAddress, marker: JSX.Element} | null>(null)
+
+    const [errorMsg, setErrorMsg] = useState("")
 
     const [isLinkEnabled, setIsLinkEnabled] = useState(false)
     const Z_map = useMapsStore(state => state.data.map)
@@ -31,7 +33,7 @@ const CreateAddress: React.FC = () => {
                     Z_map,
                     address.latLng, 
                     <AddressMarker label="A" markerType={EAddressMarkerType.CUSTOM} popperData={null}/>,
-                    true
+                    
                 )
                 
             }
@@ -69,7 +71,7 @@ const CreateAddress: React.FC = () => {
                     Z_map,
                     address.latLng, 
                     <AddressMarker label="LA" markerType={EAddressMarkerType.CUSTOM} popperData={null}/>,
-                    true
+                    
                 )
                 
             }
@@ -93,7 +95,7 @@ const CreateAddress: React.FC = () => {
 
 
     return(
-        <>
+        <div className="space-y-2 ">
             <div>
                 <div className="text-sm">
                     Address:
@@ -124,22 +126,50 @@ const CreateAddress: React.FC = () => {
                 </div>
             )}
 
-            <div className="mt-2">
-                <Button variant="contained" onClick={() => {
-                        if(newAddress)
-                        {
-                            console.log(newAddress, newLinkAddress)
-                            addCustomRow(newAddress.address, newLinkAddress ? newLinkAddress.address : null)
+            {errorMsg && (
+                <div className="text-red-700 ">
+                    {errorMsg}
+                </div>
+            )}
+
+            <div className="flex gap-4 mt-2">
+                <div>
+                    <Button variant="contained" onClick={() => {
+                            if(newAddress)
+                            {
+                                console.log(newAddress, newLinkAddress)
+                                const rowAddRes = addCustomRow(newAddress.address, newLinkAddress ? newLinkAddress.address : null)
+                                if(rowAddRes === "")
+                                {
+                                    setNewAddress(null)
+                                    setNewLinkAddress(null)
+                                    setErrorMsg("")
+                                }
+                                else
+                                {
+                                    setErrorMsg(rowAddRes)
+                                }
+                                
+                            }
+                            else
+                            {
+                                
+                            }
+                            
+                        }}
+                    >Use</Button>
+                </div>
+
+                
+
+                <div>
+                    <Button variant="text" color="error" onClick={() => {
                             setNewAddress(null)
                             setNewLinkAddress(null)
-                        }
-                        else
-                        {
-                            
-                        }
-                        
-                    }}
-                >Add</Button>
+                        }}
+                    >Clear</Button>
+                </div>
+
             </div>
 
             {newAddress?.marker && (
@@ -149,8 +179,8 @@ const CreateAddress: React.FC = () => {
             {newLinkAddress?.marker && (
                 <>{newLinkAddress.marker}</>
             )}
-        </>
+        </div>
     )
 }
 
-export default  CreateAddress
+export default  SearchAndAddAddress
