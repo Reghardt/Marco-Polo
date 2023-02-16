@@ -170,7 +170,7 @@ export function isValidAddress(row: IRow, columnIndex: number): boolean
 
 function createWaypoint(row: IRow, columnIndex: number) : google.maps.DirectionsWaypoint
 {
-    return {location: {placeId: row.cells[columnIndex]!.address.placeId}, stopover: true,}
+    return {location: row.cells[columnIndex]!.address.latLng!, stopover: true,}
 }
 
 function createWaypointsListFromRows(): google.maps.DirectionsWaypoint[] | null

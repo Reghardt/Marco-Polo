@@ -24,6 +24,11 @@ const LegsListControl: React.FC<ILegsListControl> = ({mouldedDirections}) => {
 
     const [visibility, setVisibility ] = useState(new Array<boolean>(mouldedDirections.legGroups.length).fill(true))
 
+    if(visibility.length !== mouldedDirections.legGroups.length)
+    {
+        setVisibility(new Array<boolean>(mouldedDirections.legGroups.length).fill(true))
+    }
+
 
     setPolylineOpacity()
 

@@ -113,8 +113,6 @@ const TripTable: React.FC = () => {
     return tracks
   }
 
-  // if(Z_tripRows.length > 0)
-  // {
     return(
       <div className="flex flex-col space-y-4 ">
         <div className={"mb-2 flex gap-2"}>
