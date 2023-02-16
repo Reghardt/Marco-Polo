@@ -36,7 +36,7 @@ const SelectAnchorCell: React.FC<ISelectAnchorCell> = ({setIsDialogOpen, writeBa
             </div>
 
             <div>
-                Current top left cell: {topLeftCoords ? <span>{topLeftCoords.x} {topLeftCoords.y}</span> : <CircularProgress size={"18px"} />}
+                Current top left cell: {topLeftCoords ? <span>{String.fromCharCode(topLeftCoords.x+64)}{topLeftCoords.y}</span> : <CircularProgress size={"18px"} />}
             </div>
 
             <div>
