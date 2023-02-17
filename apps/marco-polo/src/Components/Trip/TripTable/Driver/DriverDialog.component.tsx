@@ -63,7 +63,7 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
                 
                 <div>
                     <Tabs value={tabValue} onChange={(_e, v) => {setTabValue(v)}} aria-label="basic tabs example">
-                        <Tab label={"Drivers"} {...a11yProps(0)}/>
+                        <Tab label={"Send Trip"} {...a11yProps(0)}/>
                         <Tab label={"Invite Driver"} {...a11yProps(1)}/>
                         <Tab label={"QR Code"} {...a11yProps(2)}/>
                     </Tabs>

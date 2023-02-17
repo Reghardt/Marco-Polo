@@ -4,6 +4,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSetLastUsedWorkspace } from "../../../trpc-hooks/trpcHooks";
 import { useAuthStore } from "../../../Zustand/authStore";
+import { useTripStore } from "../../../Zustand/tripStore";
 import { IWorkspace } from "../../common/CommonInterfacesAndEnums";
 
 
@@ -13,10 +14,14 @@ export const WorkSpaceCard: React.FC<IWorkspace> = ({_id, workspaceName, descrip
 {
     const navigate = useNavigate();
     const ZF_setToken = useAuthStore(store => store.actions.setToken)
+    const ZF_setRowsAsNewTrip = useTripStore(store => store.actions.setRowsAsNewTrip)
+    const ZF_clearAndSetTripDirections = useTripStore(store => store.actions.clearAndSetTripDirections)
 
     const setLastUsedWorkspace = useSetLastUsedWorkspace({
         doOnSuccess: (res) => {
             ZF_setToken(res)
+            ZF_setRowsAsNewTrip([])
+            ZF_clearAndSetTripDirections(null)
             navigate("/trip", {replace: true})
         }
     })
