@@ -1,6 +1,5 @@
 import { Help } from "@mui/icons-material"
 import Tooltip from "@mui/material/Tooltip"
-import React from "react"
 
 interface IHelpTooltipProps {
     title: NonNullable<React.ReactNode>

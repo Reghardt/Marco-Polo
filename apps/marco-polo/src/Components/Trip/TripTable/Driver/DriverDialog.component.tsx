@@ -1,4 +1,4 @@
-import { Box, Button, DialogActions, DialogContent, DialogTitle, Paper, Stack, Tab, Tabs, TextField, Typography } from "@mui/material"
+import { Button, FormControl, InputLabel, MenuItem, Select, Tab, Tabs, TextField} from "@mui/material"
 import { useState } from "react";
 import TabPanel, { a11yProps } from "../../../Tabs/TabPanel.component";
 import { createDriverTrip } from "../../../../Services/Trip.service";
@@ -15,7 +15,7 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
     const [tabValue, setTabValue] = useState(0)
     const [tripName, setTripName] = useState("")
     const [error, setError] = useState("")
-    const [assignedDriver, setAssignedDriver] = useState<IDriver | null>(null)
+    const [assignedDriver, setAssignedDriver ] = useState<IDriver | null>(null)
     const [sentStatus, setSentStatus] = useState("")
 
  
@@ -57,101 +57,120 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
     }
 
     return(
-        <Box>
-            <DialogTitle color={"primary"} variant="h5">Drivers</DialogTitle>
-            <DialogContent>
-                <Tabs value={tabValue} onChange={(_e, v) => {setTabValue(v)}} aria-label="basic tabs example">
-                    <Tab label={"Drivers"} {...a11yProps(0)}/>
-                    <Tab label={"Invite Driver"} {...a11yProps(1)}/>
-                    <Tab label={"QR Code"} {...a11yProps(2)}/>
-                </Tabs>
-
-                <TabPanel value={tabValue} index={0}>
-
-                        <Stack spacing={"1em"}>
-                            <Box>
-                                <TextField value={tripName} onChange={(e) => {setTripName(e.target.value)}} label={"Trip Name"}></TextField>
-                            </Box>
-                            <Box>
-                                <Typography>Assigned driver: {assignedDriver !== null ? `${assignedDriver.firstName} ${assignedDriver.lastName}` : "none"}</Typography>
-                            </Box>
-
-                            {error ?
-                            <Box>
-                                
-                                <Typography color={"error"}>{error}</Typography>
-                            </Box>
-                            :
-                            <>
-                            </>}
-                            
-                            
-                            <Box>
-                                <Button onClick={() => assignTripToDriver()}>Send Trip To Driver</Button>
-                            </Box>
-
-                            <Box sx={{color:"green"}}>
-                                {sentStatus}
-                            </Box>
-                            <Box>
-                                <Typography sx={{color:"#1976d2"}} variant="h6">Available Drivers:</Typography>
-                            </Box>
-                        </Stack>
-                        
-                        {getDrivers.data?.map((elem, index) => {
-                            return(
-                                <Box key={`driver-${index}`}>
-                                    
-                                    <Paper sx={{width: "100%"}} elevation={0} > 
-                                        <Stack direction={"row"} alignItems="center">
-                                            
-                                            <Box sx={{width: "90%"}}>
-                                                <Button onClick={() => setAssignedDriver(elem)} sx={{width: "100%", textTransform: "none", justifyContent: "flex-start", textAlign:"left", p: "0.2em", ":hover": {backgroundColor: "#8d8d8d11"}}}>
-                                                    <Paper sx={{background: "transparent", width: "100%", height: "100%"}} elevation={0}>
-                                                        <Stack>
-                                                            <Typography variant="subtitle1" sx={{color:"#1976d2"}}>{elem.firstName} {elem.lastName}</Typography>
-                                                            <Typography variant="body2">{elem.username}</Typography>
-                                                        </Stack>
-                                                    </Paper>
-                                                </Button>
-                                            </Box>
-                                        </Stack>
-                                    </Paper>
-                                </Box>
-                            )
-                        })}
-
-                    
-                </TabPanel>
-
-                <TabPanel value={tabValue} index={1}>
-                    <InviteDriver/>
-                </TabPanel>
-
-                <TabPanel value={tabValue} index={2}>
-                    <Box>
-                        
-                        <img src="/mpt-qr.svg" alt="MP travels qr code"/>
-                        <Typography sx={{mb:"1em"}}>https://marco-polo-travels.vercel.app</Typography>
-                        <Typography variant="h6">Instructions</Typography>
-                        <Typography>
-                            Scan the above QR code or use the link on a Android phone to download Marco Polo Travels, the mobile companion app. 
-                            <br/><br/>
-                            Once the page has loaded wait a few seconds for the download prompt to appear. 
-                            The app will be installed and appear as an icon that can be opened on your phone after a short period of time. 
-                            <br/><br/>
-                            Next, create a driver account by providing the neccesarry details in the app.
-                            The provided username can be used to link MP Travels with the workspace in the "Invite Drivers" tab above, after which drivers can be assigned trips from the "Drivers" tab.
-                        </Typography>
-                    </Box>
-                    
-                </TabPanel>
-
+        <div>
+            <div className={"bg-[#1976d2] w-full h-1"}></div>
+            <div className="p-4">
                 
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => setIsModalOpen(current => !current)}>Close</Button>
-            </DialogActions>
-        </Box>
+                <div>
+                    <Tabs value={tabValue} onChange={(_e, v) => {setTabValue(v)}} aria-label="basic tabs example">
+                        <Tab label={"Drivers"} {...a11yProps(0)}/>
+                        <Tab label={"Invite Driver"} {...a11yProps(1)}/>
+                        <Tab label={"QR Code"} {...a11yProps(2)}/>
+                    </Tabs>
+
+                    <TabPanel value={tabValue} index={0}>
+                        <div className="flex flex-col gap-4 mt-4 ">
+
+                            <div>
+                                <TextField size="small" value={tripName} onChange={(e) => {setTripName(e.target.value)}} label={"Trip Name"}></TextField>
+                            </div>
+
+                            {error && (
+                                <div>
+                                    <div className="text-red-700 ">{error}</div>
+                                </div>
+                            )}
+                                
+                                
+                            {sentStatus && (
+                                <div>
+                                    {sentStatus}
+                                </div>
+                            )}
+                            
+
+
+
+                            <div>
+                                <FormControl variant="standard">
+                                    <InputLabel  id="demo-simple-select-standard-label">Drivers</InputLabel>
+                                    <Select
+                                        sx={{minWidth: "400px", marginTop: "10px"}}
+                                        onChange={(change) => {
+                                            console.log(change.target.value)
+                                            getDrivers.data?.forEach(driver => {
+                                                if(driver._id.toString() === change.target.value)
+                                                {
+                                                    setAssignedDriver(driver)
+                                                    return
+                                                }
+                                            })
+                                        }}
+                                        
+                                        value={assignedDriver ? assignedDriver._id.toString() : ""}
+                                    >
+
+                                        {getDrivers.data?.map((elem, index) => {
+                                            return(
+                                                <MenuItem key={`driver-${index}`} value={elem._id.toString()}>{elem.firstName} {elem.lastName}</MenuItem>
+                                            )
+                                    })}
+                                        
+                                    </Select>
+                                </FormControl>
+                            </div>  
+
+                            <div>
+                                <Button variant="contained" onClick={() => assignTripToDriver()}>Send Trip To Driver</Button>
+                            </div>
+                        </div>
+                        
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={1}>
+                        <InviteDriver/>
+                    </TabPanel>
+
+                    <TabPanel value={tabValue} index={2}>
+                        <div>
+                            <div className="flex justify-center">
+                                <img src="/mpt-qr.svg" alt="MP travels qr code"/>
+                            </div>
+                            
+                            
+                            <div className='flex flex-col items-center mx-8 text-sm' style={{marginBottom: "-10px"}}>
+                                <div className='w-full h-2' ><hr/></div>
+                                
+                                <div style={{transform: "translate(0, -20px)"}}><div className={" bg-slate-200 rounded-full p-1 text-xs"}>OR</div> </div>
+                            </div>
+                            <div className="flex justify-center">
+                                <div>https://marco-polo-travels.vercel.app</div>
+                            </div>
+                            
+                            <div className=" text-[#1976d2] text-lg">Instructions</div>
+                            <div>
+                                Scan the above QR code or use the link to download Marco Polo Travels; the driver's mobile companion app. 
+                                <br/><br/>
+                                Once the page has loaded wait a few seconds for the download prompt to appear. 
+                                The app will be installed and act like any other app.
+                                <br/><br/>
+                                The driver can create an account by providing the necessary details on the app. 
+                                After creating an account, the driver's username and tag will appear, which can be used in the 'Invite Driver' tab to enable trip sending.
+                            </div>
+                        </div>
+                        
+                    </TabPanel>
+
+                    
+                </div>
+                <div className="flex justify-end">
+                    <div>
+                        <Button color="error" onClick={() => setIsModalOpen(current => !current)}>Close</Button>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
     )
 }
