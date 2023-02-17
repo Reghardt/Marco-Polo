@@ -318,7 +318,7 @@ export const useTripStore = create<ITripState>()(((set) => ({
                 const parentChildRowsToAdd = makeRowParentChildRelations(rows, state.data.addressColumnIndex)
                 console.log(parentChildRowsToAdd)
                 state.data.rows = [...state.data.rows, ...parentChildRowsToAdd]
-                if(enterSolveMode)
+                if(enterSolveMode && state.data.addressColumnIndex > -1)
                 {
                     state.data.tabelMode = ETableMode.AddressSolveMode
                 }

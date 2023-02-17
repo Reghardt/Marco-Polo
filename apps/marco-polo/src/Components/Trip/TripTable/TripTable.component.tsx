@@ -23,6 +23,7 @@ const TripTable: React.FC = () => {
   const Z_errorMessage = useTripStore(store => store.data.errorMessage)
 
   const ZF_setTripRows = useTripStore(store => store.actions.setTripRows)
+  const ZF_setErrorMessage = useTripStore(store => store.actions.setErrorMessage)
   const ZF_appendRows = useTripStore(store => store.actions.appendRows)
   const ZF_reverseRows = useTripStore(store => store.actions.reverseRows)
   const ZF_setRowsAsNewTrip = useTripStore(store => store.actions.setRowsAsNewTrip)
@@ -41,11 +42,13 @@ const TripTable: React.FC = () => {
         console.log(conformRes)
         if(conformRes.status === false)
         {
+          ZF_setErrorMessage(conformRes.reason)
           ZF_setRowsAsNewTrip([])
           return;
         }
         ZF_setRowsAsNewTrip(selection)
         ZF_clearAndSetTripDirections(null)
+        ZF_setErrorMessage("")
       } 
     })
   }
@@ -77,9 +80,11 @@ const TripTable: React.FC = () => {
       if(conformRes.status === false)
       {
         console.error(conformRes.reason)
+        ZF_setErrorMessage(conformRes.reason)
       }
       else
       {
+        ZF_setErrorMessage("")
         ZF_appendRows(selection, true)
         //solve address column then solve link address column       
         solveAddresses(Z_addressColumnIndex)

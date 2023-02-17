@@ -14,30 +14,61 @@ const BlankColumnComponent: React.FC = () => <div style={{height: "100%", width:
 //this function checks if a number of rows are of equal length and if their columns align.
 export function doRowsConform(rows: IRow[], referenceRow: IRow | null = null) : {status: boolean, reason: string}
 {
-  if(referenceRow === null && rows[0]) //reference row to test against, otherwise use the first row of the rows
+  const rowLength = rows[0]?.cells.length
+  if(rowLength !== undefined)
   {
-    referenceRow = rows[0]
     for(let i = 0; i < rows.length; i++)
     {
-      const row = rows[i]
-      if(row && row.cells.length === referenceRow.cells.length) //are lengths equal
+      const row = rows[0]
+      if(row && row.cells.length === rowLength)
       {
-        for(let j = 0; j < row.cells.length; j++)
-        {
-          if(row.cells[j]?.x !== referenceRow.cells[j]?.x) //do all x coord of this row allign with the referece row's x coords
-          {
-            return {status: false, reason: "Columns don't align"}
-          }
-        }
+        continue
       }
       else
       {
         return {status: false, reason: "Rows not of equal length"}
       }
     }
+
+    if(referenceRow)
+    {
+      if(referenceRow.cells.length !== rowLength)
+      {
+        return {status: false, reason: `Selection should be ${referenceRow.cells.length} row${referenceRow.cells.length > 1 ? "s" : ""} wide`}
+      }
+    }
+
+    return {status: true, reason: ""}
+  }
+  else
+  {
+    return {status: false, reason: "No selection"}
   }
 
-  return {status: true, reason: ""}
+  // if(referenceRow === null && rows[0]) //reference row to test against, otherwise use the first row of the rows
+  // {
+  //   referenceRow = rows[0]
+  //   for(let i = 0; i < rows.length; i++)
+  //   {
+  //     const row = rows[i]
+  //     if(row && row.cells.length === referenceRow.cells.length) //are lengths equal
+  //     {
+  //       for(let j = 0; j < row.cells.length; j++)
+  //       {
+  //         if(row.cells[j]?.x !== referenceRow.cells[j]?.x) //do all x coord of this row allign with the referece row's x coords
+  //         {
+  //           return {status: false, reason: "Columns don't align"}
+  //         }
+  //       }
+  //     }
+  //     else
+  //     {
+  //       return {status: false, reason: "Rows not of equal length"}
+  //     }
+  //   }
+  // }
+
+  // return {status: true, reason: ""}
   
 }
 
