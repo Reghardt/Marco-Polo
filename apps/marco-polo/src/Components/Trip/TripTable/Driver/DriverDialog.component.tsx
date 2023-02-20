@@ -33,11 +33,11 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
     {
         if(assignedDriver === null)
         {
-            setError("No driver assigned")
+            setError("Please assign a driver")
         }
         else if(tripName === "")
         {
-            setError("No trip name")
+            setError("Please give the trip a name")
         }
         else
         {
@@ -75,25 +75,14 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
                                 <TextField size="small" value={tripName} onChange={(e) => {setTripName(e.target.value)}} label={"Trip Name"}></TextField>
                             </div>
 
-                            {error && (
-                                <div>
-                                    <div className="text-red-700 ">{error}</div>
-                                </div>
-                            )}
-                                
-                                
-                            {sentStatus && (
-                                <div>
-                                    {sentStatus}
-                                </div>
-                            )}
+ 
                             
 
 
 
                             <div>
                                 <FormControl variant="standard">
-                                    <InputLabel  id="demo-simple-select-standard-label">Drivers</InputLabel>
+                                    <InputLabel  id="demo-simple-select-standard-label">Send to driver</InputLabel>
                                     <Select
                                         sx={{minWidth: "400px", marginTop: "10px"}}
                                         onChange={(change) => {
@@ -119,6 +108,19 @@ export const DriverDialog: React.FC<IDriverDialogProps> = ({setIsModalOpen}) => 
                                     </Select>
                                 </FormControl>
                             </div>  
+
+                            {error && (
+                                <div>
+                                    <div className="text-red-700 ">{error}</div>
+                                </div>
+                            )}
+                                
+                                
+                            {sentStatus && (
+                                <div>
+                                    {sentStatus}
+                                </div>
+                            )}
 
                             <div>
                                 <Button variant="contained" onClick={() => assignTripToDriver()}>Send Trip To Driver</Button>
