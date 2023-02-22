@@ -2,14 +2,15 @@
 import { z } from "zod";
 import mongoose from "mongoose";
 import { protectedProcedure, router } from "../trpc";
-import Workspace, { IVehicleListEntry } from "../models/Workspace";
+import { IVehicleListEntry, WorkspaceModel } from "dbmodels";
+
 
 export const vehicleRouter = router({
 
   vehicleList: protectedProcedure
   .query(async ({ctx}) => {
     console.log("FIRED: vehicleList")
-      const workspace = await Workspace.findOne(
+      const workspace = await WorkspaceModel.findOne(
           {
               _id: new mongoose.Types.ObjectId(ctx.workspaceId)
           }, 
@@ -33,7 +34,7 @@ export const vehicleRouter = router({
   }))
   .mutation(async ({input, ctx}) => {
     console.log("FIRED: createVehicle")
-    const newVehicle = await Workspace.updateOne({
+    const newVehicle = await WorkspaceModel.updateOne({
         _id: new mongoose.Types.ObjectId(ctx.workspaceId)
     },
     {
@@ -56,7 +57,7 @@ export const vehicleRouter = router({
   }))
   .mutation(async ({input, ctx}) => {
     console.log("FIRED: deleteVehicle")
-    const deletedVehicle = await Workspace.updateOne({
+    const deletedVehicle = await WorkspaceModel.updateOne({
         _id: new mongoose.Types.ObjectId(ctx.workspaceId)
     },
     {
@@ -73,7 +74,7 @@ export const vehicleRouter = router({
   .mutation(async ({input,ctx}) => {
     console.log("FIRED: setLastUsedVehicle")
 
-    const updated = await Workspace.updateOne({
+    const updated = await WorkspaceModel.updateOne({
         _id: new mongoose.Types.ObjectId(ctx.workspaceId),
         "members.userId":  new mongoose.Types.ObjectId(ctx.userId)
     },
@@ -92,7 +93,7 @@ export const vehicleRouter = router({
   }))
   .query(async ({input, ctx}) => {
     console.log("FIRED: getVehicleById")
-    const vehicle = await Workspace.aggregate<{_id: mongoose.Types.ObjectId, vehicle: IVehicleListEntry}>([
+    const vehicle = await WorkspaceModel.aggregate<{_id: mongoose.Types.ObjectId, vehicle: IVehicleListEntry}>([
       {$match: {"_id": new mongoose.Types.ObjectId(ctx.workspaceId), "vehicleList._id": new mongoose.Types.ObjectId(input.vehicleId)}},
     
       {$project : {"_id": 0, "vehicle": "$vehicleList"}},
@@ -112,7 +113,7 @@ export const vehicleRouter = router({
   }))
   .mutation(async ({input, ctx}) => {
     console.log("FIRED: setFuelPrice")
-    await Workspace.updateOne(
+    await WorkspaceModel.updateOne(
       {
       _id: new mongoose.Types.ObjectId(ctx.workspaceId),
       "members.userId":  new mongoose.Types.ObjectId(ctx.userId)

@@ -1,8 +1,10 @@
 import { DeleteOutline } from "@mui/icons-material";
 import { Button, DialogActions, DialogContent, DialogTitle, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Paper, Select, Stack, Tab, Tabs, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import { IVehicleListEntry } from "dbmodels";
+
 import React, { useState } from "react"
-import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
+
 import { useCreateVehicleMutation, useGetVehicleListQuery, useDeletetVehicleMutation, useSetLastUsedVehicleMutation } from "../../trpc-hooks/trpcHooks";
 import { trpc } from "../../utils/trpc";
 import { useTripStore } from "../../Zustand/tripStore";

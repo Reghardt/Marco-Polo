@@ -1,10 +1,10 @@
 /* eslint-disable prettier/prettier */
 
+import { WorkspaceModel } from "dbmodels";
 import mongoose from "mongoose";
 
 import { z } from "zod";
-import { TTestInterface } from "../models/test";
-import WorkspaceModel, { IAddressBookEntry } from "../models/Workspace";
+
 import { protectedProcedure, router } from "../trpc";
 
 export const addressBookRouter = router({

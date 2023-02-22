@@ -4,7 +4,8 @@ import TabPanel, { a11yProps } from "../../../Tabs/TabPanel.component";
 import { createDriverTrip } from "../../../../Services/Trip.service";
 import { InviteDriver } from "./InviteDriver.component";
 import { useSendTripToDriver, useGetDriversQuery } from "../../../../trpc-hooks/trpcHooks";
-import { IDriver } from "trpc-server/trpc/models/Driver.model";
+import { IDriver } from "dbmodels";
+
 
 interface IDriverDialogProps{
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;

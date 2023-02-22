@@ -15,7 +15,9 @@ export const msalConfig: Configuration = {
         clientId: "1f2c4a95-1637-4582-bbab-c933d6161117", //Enter_the_Application_Id_Here
         authority: "https://login.microsoftonline.com/common", //instance of azure cloud
         redirectUri: process.env.REACT_APP_MSAL_REDIRECT_URI, // what are redirect URIs, how do they work?
-        navigateToLoginRequestUrl: false
+        navigateToLoginRequestUrl: false,
+        
+        
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored

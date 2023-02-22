@@ -4,11 +4,8 @@ import mongoose from "mongoose";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../trpc";
 
-import WorkspaceModel from "../models/Workspace"
-
 import { createAndSignAccessToken } from "./authRouter";
-import UserModel from "../models/User.model";
-
+import { WorkspaceModel, UserModel } from "dbmodels";
 
 
 export const workspaceRouter = router({

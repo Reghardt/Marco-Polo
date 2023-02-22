@@ -10,6 +10,7 @@ export interface IDriver extends mongoose.Document{
     lastUsedWorkspaceId: string;
 }
 
+
 const DriverSchema = new mongoose.Schema<IDriver>({
     _id: mongoose.Types.ObjectId,
     firstName: String,

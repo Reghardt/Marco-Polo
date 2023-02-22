@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 import { publicProcedure, router } from "../trpc";
 import { decode, JwtPayload, sign } from "jsonwebtoken";
 import { TRPCError } from "@trpc/server";
-import UserModel from "../models/User.model";
+import {UserModel} from "dbmodels"
 
 // TODO create better JWT
 export function createAndSignAccessToken(workspaceId: string, userId: string)

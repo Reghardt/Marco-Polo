@@ -1,6 +1,7 @@
 import { Typography, FormControlLabel, Checkbox, Button } from "@mui/material";
+import { TLeg } from "dbmodels";
 import React from "react";
-import { TLeg } from "trpc-server/trpc/models/Workspace";
+
 import { IRow, EColumnDesignations, ITripDirections, ICell, IAddress, EAddressSolveStatus } from "../Components/common/CommonInterfacesAndEnums";
 import AddressCell from "../Components/Trip/TripTable/cells/AddressCell/AddressCell.component";
 import ColumnDesignationSelector from "../Components/Trip/TripTable/cells/ColumnDesignationSelector.component";

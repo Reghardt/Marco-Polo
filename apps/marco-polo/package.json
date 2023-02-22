@@ -24,7 +24,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.4.3",
     "react-scripts": "5.0.1",
-    "trpc-server": "*",
+    "mp_trpc": "*",
+    "dbmodels": "*",
     "typescript": "^4.8.4",
     "web-vitals": "^2.1.4",
     "zustand": "^4.1.4"

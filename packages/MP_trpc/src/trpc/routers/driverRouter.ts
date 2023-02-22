@@ -1,9 +1,9 @@
 import { protectedProcedure, router } from "../trpc"
 import { z } from "zod";
-import DriverModel from "../models/Driver.model";
-import Workspace, { Leg_ZodSchema } from "../models/Workspace";
+
 import mongoose from "mongoose";
 import { TRPCError } from "@trpc/server";
+import { DriverModel, Leg_ZodSchema, WorkspaceModel } from "dbmodels";
 
 export const driverRouter = router({
     addDriver: protectedProcedure
@@ -16,7 +16,7 @@ export const driverRouter = router({
 
         if(driver)
         {
-            const addedDriver = await Workspace.updateOne({_id: new mongoose.Types.ObjectId(ctx.workspaceId)}, {"$push": {drivers: {_id : new mongoose.Types.ObjectId(), driverId: driver._id, accepted: false}}})
+            const addedDriver = await WorkspaceModel.updateOne({_id: new mongoose.Types.ObjectId(ctx.workspaceId)}, {"$push": {drivers: {_id : new mongoose.Types.ObjectId(), driverId: driver._id, accepted: false}}})
             return
         }
         else
@@ -28,7 +28,7 @@ export const driverRouter = router({
     getDrivers: protectedProcedure
     .query(async ({ctx}) => {
         console.log("FIRED: getDrivers")
-            const driversInWorkspace = (await Workspace.findOne({_id: ctx.workspaceId}, {drivers: 1}))?.drivers
+            const driversInWorkspace = (await WorkspaceModel.findOne({_id: ctx.workspaceId}, {drivers: 1}))?.drivers
         if(driversInWorkspace !== undefined)
         {
             console.log("found at least one driver", driversInWorkspace)
@@ -60,7 +60,7 @@ export const driverRouter = router({
     .mutation(async ({input, ctx}) => {
         console.log("FIRED: sendTripToDriver")
 
-        const updateRes = await Workspace.updateOne({_id: ctx.workspaceId}, {
+        const updateRes = await WorkspaceModel.updateOne({_id: ctx.workspaceId}, {
             $push: { 
                 drivableTrips: { 
                     _id: new mongoose.Types.ObjectId(), 

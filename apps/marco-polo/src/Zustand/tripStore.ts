@@ -2,10 +2,11 @@ import { EColumnDesignations, IAddress, ICell, IRow } from "../Components/common
 import create from 'zustand';
 import produce from 'immer';
 import { areAllAddressesInColumnValidAndAccepted, makeRowParentChildRelations, removeRowParentChildRelations } from "../Services/Trip.service";
-import { IVehicleListEntry } from "trpc-server/trpc/models/Workspace";
+
 import { WritableDraft } from "immer/dist/internal";
 import { TMouldedDirections } from "../Services/GMap.service";
 import { preSyncRowDataForDeletion } from "../Components/Trip/TripTable/WriteBack/WriteBack.service";
+import { IVehicleListEntry } from "dbmodels";
 
 
 export enum EDepartReturn{

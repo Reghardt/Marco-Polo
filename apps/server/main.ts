@@ -1,11 +1,11 @@
 import cors from "cors";
 import express from "express";
 import * as trpcExpress from '@trpc/server/adapters/express';
-import { createContext } from "./trpc/createContext";
-import { appRouter } from "./trpc/routers/appRouter";
+
 import mongoose from "mongoose";
 import compression from "compression";
 import * as dotenv from 'dotenv'
+import { appRouter, createContext } from "mp_trpc";
 // import helmet from "helmet";
 
 dotenv.config()
