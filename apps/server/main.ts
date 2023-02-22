@@ -1,23 +1,29 @@
 import cors from "cors";
 import express from "express";
 import * as trpcExpress from '@trpc/server/adapters/express';
-
 import mongoose from "mongoose";
 import compression from "compression";
 import * as dotenv from 'dotenv'
 import { appRouter, createContext } from "mp_trpc";
-// import helmet from "helmet";
+import msal from "@azure/msal-node"
 
 dotenv.config()
 
+
+const cca = new msal.ConfidentialClientApplication({
+    auth: {
+        clientId: "",
+        authority: "https://login.microsoftonline.com/common",
+        clientSecret: "",
+    }
+})
+
 const app = express();
 export = Express
+
+app.set("view engine", "ejs");
+
 app.use(cors());
-
-app.get("/", (req, res) => {
-    res.send("...");
-  });
-
 app.use(
     '/trpc',
     trpcExpress.createExpressMiddleware({
@@ -25,14 +31,20 @@ app.use(
         createContext
     })
 )
-
 app.use(compression())
-// app.use(helmet())
-
-
 app.use(express.static('MP'));
 
-app.set("view engine", "ejs");
+app.get("/", (req, res) => {
+    res.send("...");
+  });
+
+app.get("/api/auth/msLoginPopup", (req, res) => {
+    res.render("login.ejs",{redirectUri: process.env.NODE_ENV === "development" ? process.env.REACT_APP_MSAL_REDIRECT_URI_DEV : process.env.REACT_APP_MSAL_REDIRECT_URI_PROD })
+})
+
+
+
+
 
 // if(process.env.NODE_ENV === "production")
 // {
@@ -41,9 +53,7 @@ app.set("view engine", "ejs");
 // }
 
 
-app.get("/api/auth/msLoginPopup", (req, res) => {
-    res.render("login.ejs",{redirectUri: process.env.NODE_ENV === "development" ? process.env.REACT_APP_MSAL_REDIRECT_URI_DEV : process.env.REACT_APP_MSAL_REDIRECT_URI_PROD })
-})
+
 
 
 if(!process.env.SERVER_PORT)

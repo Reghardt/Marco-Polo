@@ -8,19 +8,20 @@
     "build": "tsc -b && (robocopy .\\views .\\build\\views) ^& IF %ERRORLEVEL% LEQ 1 exit 0"
   },
   "dependencies": {
+    "@azure/msal-node": "^1.15.0",
     "@trpc/server": "^10.7.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "dbmodels": "*",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "helmet": "^6.0.1",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.8.2",
+    "mp_trpc": "*",
     "superjson": "^1.12.1",
-    "zod": "^3.20.2",
-    "dbmodels": "*",
-    "mp_trpc": "*"
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
