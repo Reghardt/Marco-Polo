@@ -60,7 +60,7 @@ if(!process.env.MONGO_CONNECTION)
 }
 
 app.listen(process.env.SERVER_PORT, () => {
-    mongoose.connect('mongodb+srv://ReghardtM:cC1lQ5Cav7LfiDCv@cluster0.xgqnokb.mongodb.net/MarcoPolo?retryWrites=true&w=majority')
+    mongoose.connect('')
     .then(()=> {console.log("Mongo connected")})
     .catch(err => console.log(err))
     
